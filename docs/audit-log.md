@@ -62,6 +62,10 @@ operations per tenant.
 School-admin onboarding mechanics (invite + password-reset attempts). Useful to
 spot stuck onboarding (an invite issued but never accepted).
 
+`admin_invites` (verified live): `tenant_id`, `email`, `invited_by`,
+`token_hash`, `expires_at`, `accepted_at`, `accepted_user_id`. An invite with a
+past `expires_at` and no `accepted_at` is a stuck/welcome follow-up signal.
+
 ## Console patterns
 
 - All reads **read-only**, **platform scope**, service-role server-only.
