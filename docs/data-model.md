@@ -36,6 +36,12 @@ Columns (from the live schema):
 
 ## People & users per tenant
 
+**`profiles` are school users, not Weeon Ops staff.** A `profiles.role = 'admin'`
+row is a **school administrator for that `tenant_id`**. The Settings
+administrators list in this console does **not** read `profiles` — see
+`docs/auth.md`. The same person (e.g. Eduardo) may exist as a demo-tenant
+school admin for testing `weeon-admin` and, separately, as the ops owner.
+
 **The primary "users per tenant" number comes from `profiles`.**
 
 `profiles` (one row per app user):
@@ -128,7 +134,8 @@ in `lib/domain.ts`.
 Cross-checked with the shared Supabase project (service-role, read-only):
 - Live rows today: **1 tenant** — `WEEON DEMO SCHOOL` (saber `999999-00`,
   `status=trial`, `plan=pro`) + its `trial_requests` row (verified+consumed).
-- `profiles`: **2** (both role `admin`, `account_status=active`, provisioned).
+- `profiles`: **2** (both role `admin` on the demo tenant — school admins for
+  testing `weeon-admin`, **not** the Weeon Ops Settings list).
 - Roster (`students/teachers/classes/…`), `grades`, `subjects` seeding:
   roster empty; `subjects` **12** rows (seeded MEP catalog); setup milestones
   recorded in `settings`.

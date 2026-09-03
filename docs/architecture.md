@@ -20,11 +20,16 @@ unsure, check `node_modules/next/dist/docs/`.
 
 | Route | Type | Purpose |
 | ----- | ---- | ------- |
-| `/` | RSC (static) | Public hub / architecture map |
-| `/login` | Client | Platform staff sign-in (auth wiring is a build task) |
+| `/` | RSC | Weeon Ops sign-in (`LoginShell`) |
+| `/login` | RSC | Redirects to `/` |
+| `/forgot-password` | Client | Branded ops password-reset request |
+| `/reset-password` | Client | Complete branded reset |
+| `/accept-invite` | Client | Accept branded ops-staff invite |
+| `/auth/callback` | Route | Supabase auth code exchange |
 | `/dashboard` | RSC | Overview: totals, trials, at-risk tenants |
-| `/dashboard/tenants` | RSC | All tenants + users-per-tenant table |
-| `/dashboard/tenants/[id]` | RSC (dynamic) | Single tenant detail |
+| `/dashboard/tenants` | RSC | All tenants (status / seats) |
+| `/dashboard/tenants/[id]` | RSC (dynamic) | Single tenant + **school** admins |
+| `/dashboard/settings` | RSC | Appearance + **Weeon Ops** administrators |
 | `/api/health` | Route handler | Liveness probe |
 | `/_not-found` | RSC | 404 |
 
@@ -35,6 +40,7 @@ Two clients exist — keep them separate.
 | Client | File | Scope | Allowed where |
 | ------ | ---- | ----- | ------------- |
 | **Platform client** | `lib/supabase/platform.ts` | Service-role, **bypasses RLS**, reads **across all tenants** | Server-only (RSC / route handlers / server actions with their own platform authorization) |
+| **Session client** | `lib/supabase/session.ts` | Cookie session (anon key + SSR) | Server actions / RSC for **sign-in only**, not cross-tenant reads |
 | **Anon client** | `lib/supabase/client.ts` | Public anon (RLS-bound) | Browser; **not** for cross-tenant reads (RLS is tenant-scoped) |
 
 ### Platform-scope reads (why service-role, but carefully)
@@ -50,18 +56,23 @@ Guardrails (see `security.md`):
 2. `lib/supabase/platform.ts` imports `server-only` so it cannot be pulled into
    client components.
 3. Only *trusted* platform staff reach the operations dashboard. Platform
-   authentication is a dedicated model (staff role / platform claim) — never
-   the single-school `profiles.role = 'admin'` used by `weeon-admin`.
+   authentication is a dedicated model (see `docs/auth.md`) — never the
+   single-school `profiles.role = 'admin'` used by `weeon-admin`.
 4. Do **not** mix the anon/tenant client into management reads.
 
-### Authentication model (build task)
+### Authentication model (live)
 
-The skeleton has a `/login` screen but no live auth yet. The intended model:
+Weeon Ops staff are **not** tenants and are **not** read from `profiles`.
 
-- A dedicated **staff / platform** authorization, separate from school admin
-  roles, enforced at the server for every dashboard read.
-- Because this console is internal and exposes cross-tenant/seat/audit data,
-  treat access like an ops credential, not a public endpoint.
+- Owner / bootstrap directory: `lib/auth/policy.ts` (`eduardo@weeon.school`).
+- Further staff: Settings invite → branded Resend email → `/accept-invite`.
+- Session: `getPlatformSession` on every dashboard render; `proxy.ts` keeps
+  `/dashboard` behind a cookie.
+- School admins of WEEON DEMO SCHOOL (or any tenant) can appear on
+  `/dashboard/tenants/[id]` as **school** administrators. That does not put
+  them on Settings → Administrators.
+
+Full flow, env, and “do not use these tables” list: **`docs/auth.md`**.
 
 ## Data access direction
 

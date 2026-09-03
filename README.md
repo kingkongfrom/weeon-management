@@ -30,23 +30,23 @@ Security). `weeon-management` is the only surface that legitimately reads
 
 ---
 
-## Scaffold status
+## Status
 
-> This is a working **project skeleton**: it builds, lints, and type-checks,
-> and it encodes the intended domain and architecture in code + docs. Live
-> data comes up once Supabase credentials are set and the platform aggregation
-> (a shared SQL view/RPC) is added — see `docs/data-model.md`.
+Working internal console: sign-in, dashboard, tenants, settings, branded
+ops-staff invite/reset. Live tenant rows come from the shared Supabase
+project (service-role). Platform aggregation (a shared SQL view/RPC) is
+still a follow-up — see `docs/data-model.md`.
 
 Implemented now:
 
 - Next.js **16.3.3** · React **19** · TypeScript (strict) · Tailwind **v4**
-  — identical stack and conventions to the sibling Next.js repos.
-- Public hub (`/`) describing the four-repo architecture.
-- `app/login`, dashboard shell with `Overview` + `Tenants` navigation, and a
-  per-tenant page (`/dashboard/tenants/[id]`).
-- Server-only platform Supabase client + typed domain model mirroring the
-  live `tenants` / `profiles` schema owned by `weeon-admin`.
-- `GET /api/health`.
+- Weeon Ops sign-in at `/` (not school-admin login)
+- Dashboard: Overview, Tenants, tenant detail (school admins), Settings
+- **Ops staff** isolated from tenants — `docs/auth.md`
+- Branded Resend invite + password reset (not Supabase generic mail)
+- Server-only platform Supabase client + domain types for `tenants` /
+  `profiles` (owned by `weeon-admin`)
+- `GET /api/health`
 
 ## Tech stack
 
@@ -88,6 +88,9 @@ cp .env.example .env.local
 | `SUPABASE_ANON_KEY` | Yes | Public anon key (browser-safe) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes* | **Server-only** — bypasses RLS so we can read across all tenants. Never expose to the browser. |
 | `SUPABASE_PROJECT_REF` | No | Short project reference id (tooling) |
+| `RESEND_API_KEY` | Yes* | Branded invite + password-reset email |
+| `RESEND_FROM` | No | Defaults toward `Weeon Ops <…>` |
+| `WEEON_OPS_ORIGIN` | Prod | `https://ops.weeon.school` — invite/reset link origin |
 | `CRON_SECRET` | No | Same value as `weeon-admin` autosnapshot CRON secret (health overview) |
 | `ENVIRONMENT` | No | `development` \| `production` (keep consistent with siblings) |
 
@@ -107,11 +110,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Route | Purpose |
 | ----- | ------- |
-| `/` | Public hub / architecture map |
-| `/login` | Platform staff sign-in (auth wiring is a build task) |
-| `/dashboard` | Overview — tenants, users, trials, at-risk tenants |
-| `/dashboard/tenants` | All tenants + users-per-tenant table |
-| `/dashboard/tenants/[id]` | Single tenant detail page |
+| `/` | Weeon Ops sign-in |
+| `/dashboard` | Overview — tenants, trials, at-risk |
+| `/dashboard/tenants` | All tenants (status / seats) |
+| `/dashboard/tenants/[id]` | Tenant detail + school administrators |
+| `/dashboard/settings` | Weeon Ops administrators + appearance |
+| `/accept-invite` | Accept branded ops invite |
 | `/api/health` | Liveness probe |
 
 ---
@@ -132,32 +136,24 @@ npm run typecheck    # tsc --noEmit
 
 ```
 app/
-  layout.tsx              # Root layout
-  icon.svg                # Favicon
-  page.tsx                # Public hub (architecture map)
-  login/                  # Platform staff sign-in (skeleton)
+  page.tsx                # Weeon Ops sign-in
+  accept-invite/          # Branded ops invite accept
   dashboard/
-    layout.tsx            # Ops shell (sidebar nav)
-    page.tsx              # Overview stats
-    tenants/
-      page.tsx            # Tenant list + users-per-tenant
-      [id]/page.tsx       # Tenant detail
-  api/health/route.ts     # Health probe
-  not-found.tsx
-components/
-  ui/                     # Small reusable primitives (Card, StatCard, StatusBadge)
-  DashboardNav.tsx
+    layout.tsx            # Auth-gated ops shell
+    page.tsx              # Overview
+    tenants/              # Tenant list + detail (school admins)
+    settings/             # Weeon Ops administrators
+  auth/callback/          # Auth code exchange
 lib/
-  cn.ts
-  site-copy.ts            # Brand / product copy
-  domain.ts               # Typed models mirroring the live Supabase schema
-  supabase/
-    client.ts             # Browser anon client (public data only)
-    platform.ts           # SERVER-ONLY service-role client (cross-tenant)
-  platform/metrics.ts     # Platform aggregation (skeleton)
-docs/                     # Architecture + operating documentation
-AGENTS.md, CLAUDE.md      # AI-agent onboarding docs (see above)
-SECURITY.md               # Platform security notes
+  auth/                   # Ops staff policy, invite, reset (not tenant profiles)
+  email/                  # Branded Resend templates
+  supabase/platform.ts    # SERVER-ONLY service-role (cross-tenant reads)
+  supabase/session.ts     # Cookie session
+  domain.ts               # Types mirroring the admin-owned schema
+  platform/metrics.ts     # Tenant list / school-admin contacts
+docs/                     # Agent + operating documentation
+data/ops-staff.json       # Invited ops staff + tokens (git-ignored)
+AGENTS.md, CLAUDE.md
 ```
 
 ---
@@ -169,7 +165,9 @@ whole set so agents working in the repo start from the right place.
 
 | Document | Contents |
 | -------- | -------- |
-| [`docs/repositories.md`](docs/repositories.md) | The four GitHub repos, who builds/reads what, and repo boundary rules |
+| [`docs/ecosystem.md`](docs/ecosystem.md) | How marketing, admin, mobile, and this ops console share one product and one database |
+| [`docs/repositories.md`](docs/repositories.md) | The four GitHub repos, who builds/reads what, shared DB vs this repo |
+| [`docs/auth.md`](docs/auth.md) | Weeon Ops staff vs school admins; branded invite/reset |
 | [`docs/architecture.md`](docs/architecture.md) | Stack, routes, Supabase clients, platform vs tenant authorization |
 | [`docs/data-model.md`](docs/data-model.md) | Live shared schema: `tenants`, `profiles`, roster tables, platform audit tables; how users-per-tenant & stats are computed |
 | [`docs/metrics.md`](docs/metrics.md) | The tenant metrics the ops console must expose and how to source them |

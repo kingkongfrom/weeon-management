@@ -1,26 +1,105 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+@custom-variant dark (&:is(.dark *));
 
-  --color-ink: #10141f;
-  --color-ink-2: #1a2030;
-  --color-paper: #f6f7fb;
-  --color-paper-2: #eef0f7;
-  --color-line-soft: rgb(16 20 31 / 0.08);
+:root {
+  color-scheme: light;
+  /* Light palette — Cool mist */
+  --background: #f4f6fa;
+  --foreground: #1b2433;
 
-  --color-brand: #2563eb;
-  --color-brand-strong: #1d4ed8;
-  --color-brand-soft: rgb(37 99 235 / 0.1);
+  /* Brand palette: refined indigo with teal accent */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+  --brand-950: #1e1b4b;
 
-  --color-ok: #15803d;
-  --color-ok-soft: rgb(21 128 61 / 0.12);
-  --color-warn: #b45309;
-  --color-warn-soft: rgb(180 83 9 / 0.14);
-  --color-danger: #b91c1c;
-  --color-danger-soft: rgb(185 28 28 / 0.12);
-  --color-trial: #7c3aed;
-  --color-trial-soft: rgb(124 58 237 / 0.12);
+  --accent: #0891b2;
+  --accent-light: #cffafe;
+
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-muted: #eef1f6;
+  --border: #e4e7ee;
+  --border-strong: #cdd3de;
+  --ring: #6366f1;
+
+  --success: #10b981;
+  --success-subtle: #ecfdf5;
+  --error: #ef4444;
+  --error-subtle: #fef2f2;
+  --warning: #f59e0b;
+  --warning-subtle: #fffbeb;
+  --trial: #6d28d9;
+  --trial-subtle: #ddd6fe;
+}
+
+.dark {
+  color-scheme: dark;
+  /* Dark palette — Dusk slate */
+  --background: #1c2230;
+  --foreground: #e8edf5;
+  --surface: #262d3c;
+  --surface-elevated: #2e3648;
+  --surface-muted: #222838;
+  --border: #3a4356;
+  --border-strong: #505a73;
+  --ring: #8b9cff;
+  --accent: #22d3ee;
+  --accent-light: #164e63;
+  --success: #34d399;
+  --success-subtle: #14532d;
+  --error: #f87171;
+  --error-subtle: #7f1d1d;
+  --warning: #fbbf24;
+  --warning-subtle: #78350f;
+  --trial: #a78bfa;
+  --trial-subtle: #2e1065;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-error: var(--error);
+  --color-error-subtle: var(--error-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-trial: var(--trial);
+  --color-trial-subtle: var(--trial-subtle);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--border);
 }
 
 html {
@@ -28,19 +107,204 @@ html {
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0.75rem;
+  z-index: 80;
+  transform: translateY(-180%);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.5rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.16);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 ::selection {
-  background: var(--color-brand);
+  background: var(--brand-600);
   color: #fff;
 }
 
+/* Brand gradient: primary CTAs — purple → blue */
+.brand-gradient {
+  background-image: linear-gradient(90deg, #5e25cc 0%, #2b59ff 100%);
+}
+
+.brand-text {
+  background-image: linear-gradient(90deg, #5e25cc 0%, #2b59ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .card {
-  border: 1px solid var(--color-line-soft);
-  background: #ffffff;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dashboard-card {
+  box-shadow: none;
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ambient pages (login): deep navy + heavily blurred color blobs */
+.login-bg {
+  isolation: isolate;
+  overflow: hidden;
+  color-scheme: dark;
+  background-color: #0a1840;
+}
+
+.login-bg-blobs {
+  pointer-events: none;
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  filter: blur(140px) saturate(1.2);
+}
+
+.login-blob {
+  position: absolute;
+  border-radius: 9999px;
+}
+
+.login-blob-purple {
+  top: -12%;
+  left: -14%;
+  width: min(62vw, 44rem);
+  height: min(62vw, 44rem);
+  background: #5e25cc;
+  opacity: 0.85;
+}
+
+.login-blob-cyan {
+  right: -12%;
+  bottom: -20%;
+  width: min(54vw, 38rem);
+  height: min(54vw, 38rem);
+  background: #22d3ee;
+  opacity: 0.28;
+}
+
+.login-blob-blue {
+  top: 32%;
+  left: 36%;
+  width: min(50vw, 34rem);
+  height: min(50vw, 34rem);
+  background: #2b59ff;
+  opacity: 0.55;
+}
+
+.login-bg-frost {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(10 24 64 / 0.22);
+  backdrop-filter: blur(56px);
+  -webkit-backdrop-filter: blur(56px);
+}
+
+.login-bg > main {
+  position: relative;
+  z-index: 3;
+}
+
+.login-bg .login-logo {
+  color: #fff;
+  filter: drop-shadow(0 1px 10px rgb(7 20 51 / 0.4));
+}
+
+.login-bg .login-logo span:not(.brand-text) {
+  color: #fff;
+}
+
+.login-card {
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 24px 60px rgb(7 20 51 / 0.28);
+}
+
+.login-card label,
+.login-card h1 {
+  color: #fff;
+}
+
+.login-card p {
+  color: rgb(255 255 255 / 0.62);
+}
+
+.login-field {
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.22);
+  color: #fff;
+}
+
+.login-field::placeholder {
+  color: rgb(255 255 255 / 0.4);
+}
+
+.login-field:focus {
+  border-color: rgb(255 255 255 / 0.55);
+  box-shadow: 0 0 0 3px rgb(43 89 255 / 0.25);
+}
+
+.login-field:-webkit-autofill,
+.login-field:-webkit-autofill:hover,
+.login-field:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  box-shadow: 0 0 0 1000px rgb(11 32 72 / 0.85) inset;
+  transition: background-color 9999s ease-out;
 }

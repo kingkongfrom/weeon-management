@@ -1,19 +1,30 @@
 import type { Metadata } from "next";
-import { DashboardNav } from "@/components/DashboardNav";
+import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
+import { DashboardShell } from "@/components/dashboard/shell";
+import { getPlatformSession } from "@/lib/auth/session";
+import { listStaleBackupAlerts } from "@/lib/platform/backups";
 
 export const metadata: Metadata = {
-  title: "Dashboard · Weeon Management",
+  title: "Dashboard",
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
+  const [{ user, sessionUser }, backupAlerts] = await Promise.all([
+    getPlatformSession(),
+    listStaleBackupAlerts().catch(() => []),
+  ]);
+  if (!user) {
+    redirect("/");
+  }
+
   return (
-    <div className="flex min-h-screen flex-1">
-      <DashboardNav />
-      <div className="flex-1 p-6">{children}</div>
-    </div>
+    <DashboardShell sessionUser={sessionUser} backupAlerts={backupAlerts}>
+      {children}
+    </DashboardShell>
   );
 }

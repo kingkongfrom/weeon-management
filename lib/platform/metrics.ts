@@ -1,10 +1,62 @@
 import "server-only";
 
 import { createPlatformClient } from "@/lib/supabase/platform";
-import type { Profile, Tenant, TenantMetrics } from "@/lib/domain";
+import type { Profile, Tenant, TenantAdminContact, TenantMetrics } from "@/lib/domain";
+import { resolveBillingSeats, resolveProfileEmail } from "@/lib/domain";
 
 const platformConfigured = () =>
   Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+/** Lists every tenant row — no profile/user aggregation. */
+export async function listTenants(): Promise<{
+  tenants: Tenant[];
+  reason?: string;
+}> {
+  if (!platformConfigured()) {
+    return {
+      tenants: [],
+      reason: "Supabase not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local.",
+    };
+  }
+
+  const client = createPlatformClient();
+  const { data: tenants, error } = await client
+    .from("tenants")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw new Error(`Platform read of tenants failed: ${error.message}`);
+  }
+
+  return { tenants: (tenants ?? []) as Tenant[] };
+}
+
+/** School administrators (`profiles.role = admin`) for one tenant. */
+export async function listTenantAdmins(tenantId: string): Promise<TenantAdminContact[]> {
+  const client = createPlatformClient();
+  const { data, error } = await client
+    .from("profiles")
+    .select("tenant_id, name, email, auth_email")
+    .eq("tenant_id", tenantId)
+    .eq("role", "admin")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw new Error(`Platform read of tenant admins failed: ${error.message}`);
+  }
+
+  return (data ?? []).map(toAdminContact);
+}
+
+function toAdminContact(
+  profile: Pick<Profile, "name" | "email" | "auth_email">,
+): TenantAdminContact {
+  return {
+    name: profile.name?.trim() || "—",
+    email: resolveProfileEmail(profile),
+  };
+}
 
 /**
  * Skeleton aggregator the dashboard will call. It is intentionally small:
@@ -53,7 +105,7 @@ function countProfilesByTenant(profiles: Pick<Profile, "tenant_id">[]) {
 }
 
 function toMetrics(tenant: Tenant, profiles: number): TenantMetrics {
-  const seats = typeof tenant.billing_seats === "number" ? tenant.billing_seats : null;
+  const seats = resolveBillingSeats(tenant);
   const status = tenant.status;
   return {
     tenant,
@@ -68,8 +120,7 @@ function toMetrics(tenant: Tenant, profiles: number): TenantMetrics {
     seatUsage: {
       billingSeats: seats,
       seatedProfiles: profiles,
-      utilizationPct:
-        seats && seats > 0 ? Math.round((profiles / seats) * 100) : null,
+      utilizationPct: seats > 0 ? Math.round((profiles / seats) * 100) : null,
     },
     flags: {
       isTrial: status === "trial",

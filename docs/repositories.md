@@ -17,7 +17,9 @@ different scopes.
 | **weeon-management** | https://github.com/kingkongfrom/weeon-management | **Internal ops console** (`https://ops.weeon.school`) | **Weeon / EduNova staff** | **Cross-tenant (platform)** | Next.js 16 |
 
 This `docs/repositories.md` lives in **`weeon-management`**, the platform ops
-console. The sibling repos keep the same four-repo map in their own trees.
+console. Sibling trees may still name this surface **`weeon-platform-admin`
+(planned)** — that is this repo. Full relationship, commercial path, and
+auth/DB boundaries: **`docs/ecosystem.md`**.
 
 ## weeon-management = the platform ops console
 
@@ -31,7 +33,20 @@ This repo is the one the **organization** uses to run itself efficiently. It is
 - Track platform-internal actions via the audit tables already in the DB.
 
 School administrators never log in here — their ERP is `weeon-admin`. Platform
-staff authenticate under their own dedicated model (see `architecture.md`).
+staff authenticate under their own dedicated model (`docs/auth.md`). Being a
+school admin on a tenant (including WEEON DEMO SCHOOL) does **not** make
+someone a Weeon Ops administrator.
+
+## Shared database vs this repo’s own data
+
+All four apps use **one Supabase project**:
+
+| Kind | Owned by | Examples | This repo |
+| --- | --- | --- | --- |
+| Tenant / school data | `weeon-admin` schema | `tenants`, `profiles`, roster, `admin_invites` | **Read** via service-role for ops views. Never treat as ops-staff identity. |
+| Platform audit | `weeon-admin` (additive) | `tenant_backups`, `tenant_restore_log`, `trial_requests` | **Read** for health / audit UI |
+| Weeon Ops staff | **this repo** | `lib/auth/policy.ts`, `data/ops-staff.json` | Write invites/resets here. Do not invent `platform_staff` tables in this repo; additive schema still goes in `weeon-admin`. |
+| Auth users | Shared GoTrue | `auth.users` | Same email can be a school user **and** (only if invited here) ops staff. Metadata `platform_staff` is a hint, not the Settings list. |
 
 ## Reading the shared database
 

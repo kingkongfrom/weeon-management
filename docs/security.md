@@ -20,9 +20,10 @@ repo as an **ops credential surface**.
      should) hide the other schools, but bypassing it with anon+service mix is a
      bug vector. Use the platform client for management reads only.
 3. **Authorization before exposure.**
-   - Dashboard reads are guarded by a dedicated **platform/staff** auth model
-     (build task — see `architecture.md`). Never rely on a single-school
-     `profiles.role` from a browser session to authorize a cross-tenant read.
+   - Dashboard reads are guarded by **Weeon Ops staff** (`docs/auth.md`).
+     Never rely on a single-school `profiles.role` from a browser session to
+     authorize a cross-tenant read.
+   - Settings → Administrators is the ops directory, not tenant `profiles`.
    - Any route that returns platform/audit data must enforce staff auth.
 4. **Minimal data.**
    - Aggregate in SQL; don't dump `tenants.settings` or backup `payload` blobs

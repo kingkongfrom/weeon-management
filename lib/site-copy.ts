@@ -43,9 +43,9 @@ export const architecture = {
 
 export const siteCopy = {
   meta: {
-    title: "Weeon Management — Platform Operations",
+    title: "Weeon Ops",
     description:
-      "Internal cross-tenant dashboard for the Weeon / EduNova organization. Tenants, users per tenant, tenant stats, and subscription health.",
+      "Internal operations console for Weeon. Sign in to review every school, subscription health, and platform access.",
   },
   hero: {
     kicker: "Internal — Weeon staff only",

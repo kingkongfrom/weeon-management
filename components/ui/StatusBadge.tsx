@@ -2,16 +2,15 @@ import { cn } from "@/lib/cn";
 import type { TenantStatus } from "@/lib/domain";
 
 const toneByStatus: Record<TenantStatus, string> = {
-  active: "bg-ok-soft text-ok",
-  trial: "bg-trial-soft text-trial",
-  past_due: "bg-warn-soft text-warn",
-  suspended: "bg-danger-soft text-danger",
+  active: "bg-success-subtle text-success",
+  trial: "bg-trial-subtle text-trial",
+  past_due: "bg-warning-subtle text-warning",
+  suspended: "bg-error-subtle text-error",
 };
 
 export function StatusBadge({ status }: { status: string }) {
   const tone =
-    toneByStatus[status as TenantStatus] ??
-    "bg-paper-2 text-ink-2";
+    toneByStatus[status as TenantStatus] ?? "bg-surface-muted text-foreground/70";
   return (
     <span
       className={cn(

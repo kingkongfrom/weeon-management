@@ -9,20 +9,26 @@ stats/subscription health the org needs to run.
 
 Read these before work (shortest to fastest signal):
 
-1. `docs/repositories.md` — the four repos and who owns what (don't duplicate the
+1. `docs/ecosystem.md` — how this repo relates to marketing, admin, mobile, and
+   the shared database (sibling docs may still say the ops app is “planned”).
+2. `docs/repositories.md` — the four repos and who owns what (don't duplicate the
    marketing site, school ERP, or mobile screens here).
-2. `docs/architecture.md` — routes, Supabase clients, and **platform vs tenant
+3. `docs/auth.md` — **ops staff vs school admin**. Settings administrators and
+   invites are isolated from tenant `profiles`.
+4. `docs/architecture.md` — routes, Supabase clients, and **platform vs tenant
    authorization** (read this before wiring any credential).
-3. `docs/data-model.md` — the **live shared schema** and how users-per-tenant /
+5. `docs/data-model.md` — the **live shared schema** and how users-per-tenant /
    tenant stats are computed.
-4. `docs/security.md` — RLS is tenant-scoped; cross-tenant reads go **server-only
+6. `docs/security.md` — RLS is tenant-scoped; cross-tenant reads go **server-only
    with the service-role client**, never the anon client in the browser.
-5. `AGENTS.md` — full rule set (keep it in sync with the docs it indexes).
+7. `AGENTS.md` — full rule set (keep it in sync with the docs it indexes).
 
 Non-negotiable:
 
 - School-ERP admin UI goes in **`weeon-admin`**; marketing in **`weeon-marketing`**;
   mobile in **`weeon-school`**. Don't recreate them here.
+- Weeon Ops administrators live in **this repo** (`lib/auth/policy.ts` + invited
+  staff). Do **not** load Settings admins from `profiles` or `admin_invites`.
 - The shared Supabase schema is owned by **`weeon-admin`**. Confirm against its
   live `database.types.ts`/`migrations/`; keep changes **additive** and safe for
   the Flutter app. Don't invent columns/tables in this repo.
