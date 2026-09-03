@@ -16,8 +16,8 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" vie
   </defs>
   <text x="12" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="46" letter-spacing="0" fill="url(#g)">Weeon</text>
   <text x="184" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" letter-spacing="0" fill="#161d2b">Ops</text>
-  <!-- "ee" spans ~x=70..115 in the rendered text; short symmetric smile centered at x=90 -->
-  <path d="M 68 74 Q 90 84 112 74" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
+  <!-- Wide gentle smile centered under "Weeon" (x≈40..152) -->
+  <path d="M 40 74 Q 96 86 152 74" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
 </svg>`;
 
 const out = path.join(__dirname, "..", "public", "email", "logo-wordmark.png");
