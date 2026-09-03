@@ -14,10 +14,10 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" vie
       <stop offset="1" stop-color="#2b59ff"/>
     </linearGradient>
   </defs>
-  <text x="12" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="46" letter-spacing="-1" fill="url(#g)">Weeon</text>
-  <text x="182" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" letter-spacing="-1" fill="#161d2b">Ops</text>
-  <!-- "ee" sits around x=57..104; a short arc (width ~44) centered at x=80 -->
-  <path d="M 60 76 Q 80 88 100 76" fill="none" stroke="url(#g)" stroke-width="9" stroke-linecap="round"/>
+  <text x="12" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="46" letter-spacing="0" fill="url(#g)">Weeon</text>
+  <text x="184" y="64" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="46" letter-spacing="0" fill="#161d2b">Ops</text>
+  <!-- "ee" spans ~x=70..115 in the rendered text; short symmetric smile centered at x=90 -->
+  <path d="M 68 74 Q 90 84 112 74" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
 </svg>`;
 
 const out = path.join(__dirname, "..", "public", "email", "logo-wordmark.png");
