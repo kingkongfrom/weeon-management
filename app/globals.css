@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-ink: #10141f;
+  --color-ink-2: #1a2030;
+  --color-paper: #f6f7fb;
+  --color-paper-2: #eef0f7;
+  --color-line-soft: rgb(16 20 31 / 0.08);
+
+  --color-brand: #2563eb;
+  --color-brand-strong: #1d4ed8;
+  --color-brand-soft: rgb(37 99 235 / 0.1);
+
+  --color-ok: #15803d;
+  --color-ok-soft: rgb(21 128 61 / 0.12);
+  --color-warn: #b45309;
+  --color-warn-soft: rgb(180 83 9 / 0.14);
+  --color-danger: #b91c1c;
+  --color-danger-soft: rgb(185 28 28 / 0.12);
+  --color-trial: #7c3aed;
+  --color-trial-soft: rgb(124 58 237 / 0.12);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.card {
+  border: 1px solid var(--color-line-soft);
+  background: #ffffff;
+}
