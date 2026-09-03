@@ -1,123 +1,88 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { InviteAdministrator } from "@/components/dashboard/invite-administrator";
 import { SettingsPageSkeleton } from "@/components/dashboard/skeleton";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { getPlatformSession } from "@/lib/auth/session";
-import { isPlatformStaffInviter } from "@/lib/auth/policy";
 import { getRequestTheme } from "@/lib/theme/request-theme";
-import {
-  listPlatformStaff,
-  type PlatformStaffMember,
-} from "@/lib/auth/platform-staff";
 
 export const metadata: Metadata = {
   title: "Settings",
 };
 
-function AdministratorRow({ member }: { member: PlatformStaffMember }) {
-  return (
-    <li className="flex items-center gap-3 px-4 py-3">
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-full brand-gradient text-xs font-bold text-white"
-        aria-hidden
-      >
-        {member.initials}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold text-foreground">
-            {member.name ?? member.email}
-          </span>
-          {member.isPrimary ? (
-            <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-              Owner
-            </span>
-          ) : null}
-          {member.role ? (
-            <span className="shrink-0 truncate text-xs font-medium text-brand-600 dark:text-brand-300">
-              {member.role}
-            </span>
-          ) : null}
-          {member.pending ? (
-            <span className="shrink-0 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warning">
-              Invite pending
-            </span>
-          ) : null}
-        </div>
-        <p className="truncate text-sm text-foreground/55">{member.email}</p>
-      </div>
-    </li>
-  );
-}
-
-function AdministratorsList({
-  administrators,
+function SettingsCard({
+  number,
+  title,
+  description,
+  children,
 }: {
-  administrators: PlatformStaffMember[];
+  number: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
 }) {
-  if (administrators.length === 0) {
-    return (
-      <p className="rounded-xl border border-border bg-surface px-4 py-5 text-sm font-medium text-foreground/50">
-        No administrators configured yet.
-      </p>
-    );
-  }
-
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-      {administrators.map((member) => (
-        <AdministratorRow key={member.email} member={member} />
-      ))}
-    </ul>
+    <section className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="flex flex-col gap-1 border-b border-border px-5 py-4 sm:px-6">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-600 dark:bg-brand-950/60 dark:text-brand-300">
+            {number}
+          </span>
+          <h2 className="text-base font-bold tracking-tight text-foreground">
+            {title}
+          </h2>
+        </div>
+        <p className="text-sm font-medium text-foreground/55">{description}</p>
+      </div>
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
   );
 }
 
 async function SettingsContent() {
-  const [{ sessionUser }, administrators, theme] = await Promise.all([
-    getPlatformSession(),
-    listPlatformStaff().catch(() => [] as PlatformStaffMember[]),
-    getRequestTheme(),
-  ]);
-  const actorEmail = sessionUser?.email ?? "";
-  const canInvite = isPlatformStaffInviter(actorEmail);
+  const theme = await getRequestTheme();
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xs font-bold uppercase tracking-widest text-foreground/40">
-          Admin
+      <header className="flex flex-col gap-1.5">
+        <p className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+          Settings
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Options
         </h1>
+        <p className="text-sm font-medium text-foreground/55">
+          Customize how this console looks and behaves. Changes apply to this
+          device.
+        </p>
       </header>
 
-      <InviteAdministrator canInvite={canInvite} />
-
-      <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="text-lg font-bold text-foreground">Administrators</h2>
-        <p className="mt-1 text-sm font-medium text-foreground/55">
-          People who can sign in here. School admins on a tenant are listed on
-          that school&apos;s page.
+      <SettingsCard
+        number="1"
+        title="Appearance"
+        description="Switch between a bright light theme and a low-light dark theme. Your choice is remembered on this device."
+      >
+        <div className="max-w-sm">
+          <ThemeToggle initialTheme={theme} />
+        </div>
+        <p className="mt-4 flex items-center gap-1.5 text-xs font-medium text-foreground/45">
+          <InfoIcon />
+          Your preference is saved automatically — no need to confirm.
         </p>
-        <div className="mt-5">
-          <AdministratorsList administrators={administrators} />
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border bg-surface p-5">
-        <div className="flex flex-col gap-5">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">Appearance</h2>
-            <p className="mt-1 text-sm font-medium text-foreground/55">
-              Switch between light and dark mode. Your choice is saved on this
-              device.
-            </p>
-          </div>
-          <div className="max-w-sm">
-            <ThemeToggle initialTheme={theme} />
-          </div>
-        </div>
-      </section>
+      </SettingsCard>
     </div>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M12 16v-5M12 8h.01"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

@@ -56,7 +56,7 @@ tenants, trial/paid status, school-admin contacts, backups, audit.
 
 Shared Auth project: one email is one `auth.users` row. Eduardo can be a
 **demo-tenant school admin** (testing `weeon-admin`) and the **ops owner**
-here. Those are different products. Do not load Settings → Administrators
+here. Those are different products. Do not load Security → Administrators
 from `profiles` or `admin_invites`.
 
 School-admin tables (`admin_invites`, `admin_password_resets`,

@@ -23,7 +23,7 @@ repo as an **ops credential surface**.
    - Dashboard reads are guarded by **Weeon Ops staff** (`docs/auth.md`).
      Never rely on a single-school `profiles.role` from a browser session to
      authorize a cross-tenant read.
-   - Settings → Administrators is the ops directory, not tenant `profiles`.
+   - Security → Administrators is the ops directory, not tenant `profiles`.
    - Any route that returns platform/audit data must enforce staff auth.
 4. **Minimal data.**
    - Aggregate in SQL; don't dump `tenants.settings` or backup `payload` blobs

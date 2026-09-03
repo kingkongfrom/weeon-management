@@ -1,4 +1,9 @@
-export type IconTone = "brand" | "accent" | "success" | "warning";
+export type IconTone =
+  | "brand"
+  | "accent"
+  | "success"
+  | "warning"
+  | "error";
 
 /** Soft square + stroke icon. Use for tiles and stat cards — not for CTAs. */
 export const ICON_TONE_CLASSES: Record<IconTone, string> = {
@@ -10,4 +15,6 @@ export const ICON_TONE_CLASSES: Record<IconTone, string> = {
     "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:group-hover:bg-emerald-900/50",
   warning:
     "bg-amber-50 text-amber-600 group-hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:group-hover:bg-amber-900/50",
+  error:
+    "bg-error-subtle text-error group-hover:bg-error/10 dark:bg-error/15 dark:text-error dark:group-hover:bg-error/25",
 };

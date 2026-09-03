@@ -9,6 +9,7 @@ import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
 const NAV_ITEMS = [
   { id: "overview" as const, href: "/dashboard", icon: OverviewIcon, label: "Overview", section: "primary" as const },
   { id: "tenants" as const, href: "/dashboard/tenants", icon: TenantsIcon, label: "Tenants", section: "primary" as const },
+  { id: "security" as const, href: "/dashboard/security", icon: SecurityIcon, label: "Security", section: "admin" as const },
   { id: "settings" as const, href: "/dashboard/settings", icon: SettingsIcon, label: "Settings", section: "admin" as const },
 ];
 
@@ -187,6 +188,27 @@ function TenantsIcon() {
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function SecurityIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m9 12 2 2 4-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

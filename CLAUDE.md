@@ -13,7 +13,7 @@ Read these before work (shortest to fastest signal):
    the shared database (sibling docs may still say the ops app is “planned”).
 2. `docs/repositories.md` — the four repos and who owns what (don't duplicate the
    marketing site, school ERP, or mobile screens here).
-3. `docs/auth.md` — **ops staff vs school admin**. Settings administrators and
+3. `docs/auth.md` — **ops staff vs school admin**. Security administrators and
    invites are isolated from tenant `profiles`.
 4. `docs/architecture.md` — routes, Supabase clients, and **platform vs tenant
    authorization** (read this before wiring any credential).
@@ -28,7 +28,7 @@ Non-negotiable:
 - School-ERP admin UI goes in **`weeon-admin`**; marketing in **`weeon-marketing`**;
   mobile in **`weeon-school`**. Don't recreate them here.
 - Weeon Ops administrators live in **this repo** (`lib/auth/policy.ts` + invited
-  staff). Do **not** load Settings admins from `profiles` or `admin_invites`.
+  staff). Do **not** load Security admins from `profiles` or `admin_invites`.
 - The shared Supabase schema is owned by **`weeon-admin`**. Confirm against its
   live `database.types.ts`/`migrations/`; keep changes **additive** and safe for
   the Flutter app. Don't invent columns/tables in this repo.

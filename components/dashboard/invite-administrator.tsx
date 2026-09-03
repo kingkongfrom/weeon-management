@@ -19,6 +19,7 @@ export function InviteAdministrator({
   canInvite,
 }: InviteAdministratorProps) {
   const [localError, setLocalError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
   const [state, formAction, pending] = useActionState<
     InviteAdministratorState,
     FormData
@@ -60,7 +61,7 @@ export function InviteAdministrator({
           <h2 className="text-lg font-bold text-foreground">Invite an administrator</h2>
           <p className="text-sm font-medium text-foreground/60">
             {canInvite
-              ? "Send an invite for a new team member to join."
+              ? "Invite a new member to join our team."
               : `Only ${PLATFORM_STAFF_INVITER_EMAIL} can send invitations.`}
           </p>
         </div>
@@ -74,17 +75,21 @@ export function InviteAdministrator({
           id="invite-email"
           name="email"
           type="email"
+          value={email}
           autoComplete="off"
           required={canInvite}
           disabled={disabled || pending}
           placeholder={`email@${ALLOWED_EMAIL_DOMAIN}`}
           aria-label="Invite an administrator"
-          onChange={() => setLocalError(null)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setLocalError(null);
+          }}
           className="h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-500 focus:ring-[3px] focus:ring-brand-500/15 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-0 sm:max-w-md sm:flex-1 sm:text-base"
         />
         <button
           type="submit"
-          disabled={disabled || pending}
+          disabled={disabled || pending || !email.trim()}
           className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-brand-600 bg-brand-600 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <PlusIcon />
@@ -99,9 +104,9 @@ export function InviteAdministrator({
         <p className="mt-3 text-sm font-medium text-success">{state.message}</p>
       ) : null}
 
-      <p className="mt-3 flex items-start gap-2 text-xs font-medium text-foreground/65">
+      <p className="mt-3 flex items-center gap-2 text-xs font-medium text-foreground/65">
         <ShieldCheckIcon />
-        @weeon.school
+        Invites are protected
       </p>
     </section>
   );
@@ -149,7 +154,7 @@ function ShieldCheckIcon() {
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden
-      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-300"
+      className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-300"
     >
       <path
         d="M12 3 20 7v6c0 4-2.5 7.5-8 9-5.5-1.5-8-5-8-9V7l8-4z"

@@ -31,14 +31,16 @@ function Screen({
   );
 }
 
-export function SettingsPageSkeleton() {
+export function SecurityPageSkeleton() {
   return (
     <Screen
-      label="Loading settings"
+      label="Loading security"
       className="mx-auto flex w-full max-w-4xl flex-col gap-6"
     >
-      <header className="flex flex-col gap-1">
-        <Skeleton className="h-3 w-14" />
+      <header className="flex flex-col gap-1.5">
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-7 w-44" />
+        <Skeleton className="h-4 w-80 max-w-full" />
       </header>
 
       <section className="overflow-hidden rounded-2xl border border-border bg-surface p-5 sm:p-6">
@@ -57,11 +59,32 @@ export function SettingsPageSkeleton() {
         <Skeleton className="mt-2 h-4 w-72 max-w-full" />
         <AdministratorListSkeleton className="mt-5" />
       </section>
+    </Screen>
+  );
+}
 
-      <section className="rounded-2xl border border-border bg-surface p-5">
-        <Skeleton className="h-5 w-28" />
-        <Skeleton className="mt-2 h-4 w-64 max-w-full" />
-        <Skeleton className="mt-5 h-11 w-full max-w-sm" />
+export function SettingsPageSkeleton() {
+  return (
+    <Screen
+      label="Loading settings"
+      className="mx-auto flex w-full max-w-4xl flex-col gap-6"
+    >
+      <header className="flex flex-col gap-1.5">
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-7 w-32" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </header>
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="flex flex-col gap-2 border-b border-border px-5 py-5 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <Skeleton className="h-6 w-6 rounded-lg" />
+            <Skeleton className="h-5 w-36" />
+          </div>
+          <Skeleton className="h-4 w-96 max-w-full" />
+        </div>
+        <div className="p-5 sm:p-6">
+          <Skeleton className="h-14 w-full max-w-sm" />
+        </div>
       </section>
     </Screen>
   );
@@ -135,19 +158,24 @@ export function TenantsPageSkeleton() {
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
       </header>
       <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-        <div className="flex gap-4 border-b border-border px-4 py-3">
+        <div className="flex gap-4 border-b border-border px-4 py-3 sm:gap-6">
           <Skeleton className="h-3 w-16" />
-          <Skeleton className="h-3 w-14" />
+          <Skeleton className="hidden h-3 w-28 min-[480px]:block" />
+          <Skeleton className="ml-auto h-3 w-14" />
           <Skeleton className="ml-auto h-3 w-12" />
         </div>
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}
-            className="flex items-center gap-4 border-b border-border px-4 py-3.5 last:border-0"
+            className="flex items-center gap-4 border-b border-border px-4 py-3.5 last:border-0 sm:gap-6"
           >
             <div className="min-w-0 flex-1">
               <Skeleton className="h-4 w-40 max-w-full" />
               <Skeleton className="mt-2 h-3 w-24" />
+            </div>
+            <div className="hidden min-w-0 flex-1 min-[480px]:block">
+              <Skeleton className="h-4 w-24 max-w-full" />
+              <Skeleton className="mt-2 h-3 w-20" />
             </div>
             <Skeleton className="h-5 w-16 rounded-full" />
             <Skeleton className="h-4 w-10" />

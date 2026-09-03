@@ -1,6 +1,6 @@
 # Platform staff authentication (Weeon Ops)
 
-*Read this before changing login, Settings → Administrators, invites, or
+*Read this before changing login, Security → Administrators, invites, or
 password reset.* This console’s administrators are **not** school
 administrators. Mixing the two is a bug.
 
@@ -26,7 +26,7 @@ Current owner (only inviter): `eduardo@weeon.school`
 
 Wrong (this was the old bug):
 
-- Settings administrators from `public.profiles`
+- Security administrators from `public.profiles`
 - “Provisioned” = tenant `account_status`
 - Password reset via `admin_password_resets` / `profiles.id`
 - Supabase `inviteUserByEmail` (generic unbranded mail, and it treats an
@@ -97,5 +97,5 @@ mail, token in `data/ops-staff.json` (`kind: reset`), complete on
 | `lib/auth/ops-staff-store.ts` | Invite/reset tokens + invited members |
 | `lib/auth/auth-user.ts` | Auth user resolve without generic mail |
 | `lib/email/*` | Branded Resend templates |
-| `app/dashboard/settings/page.tsx` | Administrators UI |
+| `app/dashboard/security/page.tsx` | Administrators UI |
 | `app/accept-invite/page.tsx` | Accept branded invite |

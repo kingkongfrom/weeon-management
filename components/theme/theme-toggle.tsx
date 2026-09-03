@@ -63,16 +63,42 @@ export function ThemeToggle({
     );
   }
 
+  const options: Array<{
+    value: ThemePreference;
+    label: string;
+    icon: typeof SunIcon;
+  }> = [
+    { value: "light", label: "Light", icon: SunIcon },
+    { value: "dark", label: "Dark", icon: MoonIcon },
+  ];
+
   return (
-    <button
-      type="button"
-      onClick={handleToggle}
-      className="inline-flex w-full items-center justify-between rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
-      aria-pressed={isDark}
+    <div
+      role="group"
+      aria-label="Appearance theme"
+      className="inline-flex w-full max-w-xs items-center gap-1 rounded-xl border border-border bg-surface-muted/60 p-1"
     >
-      <span>{isDark ? "Dark" : "Light"}</span>
-      <span className="text-foreground/55">{isDark ? <SunIcon /> : <MoonIcon />}</span>
-    </button>
+      {options.map((option) => {
+        const Icon = option.icon;
+        const selected = (option.value === "dark") === isDark;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => applyTheme(option.value)}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+              selected
+                ? "bg-surface text-foreground shadow-sm ring-1 ring-border"
+                : "text-foreground/60 hover:bg-surface/60 hover:text-foreground"
+            }`}
+            aria-pressed={selected}
+          >
+            <Icon />
+            <span>{option.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

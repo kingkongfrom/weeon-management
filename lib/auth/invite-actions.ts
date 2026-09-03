@@ -48,7 +48,7 @@ export async function inviteAdministratorAction(
     return { error: result.error };
   }
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/security");
   return {
     message: result.resent
       ? `Invitation resent to ${email.toLowerCase()}. They can set a password from the branded email.`

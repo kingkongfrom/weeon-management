@@ -29,7 +29,8 @@ unsure, check `node_modules/next/dist/docs/`.
 | `/dashboard` | RSC | Overview: totals, trials, at-risk tenants |
 | `/dashboard/tenants` | RSC | All tenants (status / seats) |
 | `/dashboard/tenants/[id]` | RSC (dynamic) | Single tenant + **school** admins |
-| `/dashboard/settings` | RSC | Appearance + **Weeon Ops** administrators |
+| `/dashboard/security` | RSC | Invite + **Weeon Ops** administrators |
+| `/dashboard/settings` | RSC | Appearance |
 | `/api/health` | Route handler | Liveness probe |
 | `/_not-found` | RSC | 404 |
 
@@ -70,7 +71,7 @@ Weeon Ops staff are **not** tenants and are **not** read from `profiles`.
   `/dashboard` behind a cookie.
 - School admins of WEEON DEMO SCHOOL (or any tenant) can appear on
   `/dashboard/tenants/[id]` as **school** administrators. That does not put
-  them on Settings → Administrators.
+  them on Security → Administrators.
 
 Full flow, env, and “do not use these tables” list: **`docs/auth.md`**.
 

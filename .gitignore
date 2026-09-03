@@ -45,3 +45,6 @@ next-env.d.ts
 
 # --- ops staff invite/reset tokens (this repo, not tenant tables) ------------
 /data/ops-staff.json
+
+.vercel
+.env*

@@ -114,7 +114,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `/dashboard` | Overview — tenants, trials, at-risk |
 | `/dashboard/tenants` | All tenants (status / seats) |
 | `/dashboard/tenants/[id]` | Tenant detail + school administrators |
-| `/dashboard/settings` | Weeon Ops administrators + appearance |
+| `/dashboard/security` | Weeon Ops administrators + invite |
+| `/dashboard/settings` | Appearance |
 | `/accept-invite` | Accept branded ops invite |
 | `/api/health` | Liveness probe |
 
@@ -142,7 +143,8 @@ app/
     layout.tsx            # Auth-gated ops shell
     page.tsx              # Overview
     tenants/              # Tenant list + detail (school admins)
-    settings/             # Weeon Ops administrators
+    security/             # Weeon Ops administrators + invite
+    settings/             # Appearance
   auth/callback/          # Auth code exchange
 lib/
   auth/                   # Ops staff policy, invite, reset (not tenant profiles)
