@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isNavItemActive } from "@/lib/dashboard/nav";
@@ -13,10 +14,12 @@ const NAV_ITEMS = [
 
 export function Sidebar({
   sessionUser,
+  footer,
   collapsed = false,
   onNavigate,
 }: {
   sessionUser: DashboardSessionUser | null;
+  footer?: ReactNode;
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
@@ -64,36 +67,37 @@ export function Sidebar({
         ))}
       </nav>
 
-      {sessionUser ? (
-        <div className={`border-t border-border ${collapsed ? "p-2" : "p-4"}`}>
-          <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full brand-gradient text-xs font-bold text-white"
-              title={
-                collapsed
-                  ? [sessionUser.name, sessionUser.email].filter(Boolean).join(" · ")
-                  : undefined
-              }
-            >
-              {sessionUser.initials}
-            </div>
-            {collapsed ? null : (
-              <div className="min-w-0">
-                {sessionUser.name ? (
-                  <p className="truncate text-sm font-semibold text-foreground">
-                    {sessionUser.name}
-                  </p>
-                ) : null}
-                {sessionUser.email ? (
-                  <p className="truncate text-xs text-foreground/50">
-                    {sessionUser.email}
-                  </p>
-                ) : null}
+      {footer ??
+        (sessionUser ? (
+          <div className={`border-t border-border ${collapsed ? "p-2" : "p-4"}`}>
+            <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full brand-gradient text-xs font-bold text-white"
+                title={
+                  collapsed
+                    ? [sessionUser.name, sessionUser.email].filter(Boolean).join(" · ")
+                    : undefined
+                }
+              >
+                {sessionUser.initials}
               </div>
-            )}
+              {collapsed ? null : (
+                <div className="min-w-0">
+                  {sessionUser.name ? (
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {sessionUser.name}
+                    </p>
+                  ) : null}
+                  {sessionUser.email ? (
+                    <p className="truncate text-xs text-foreground/50">
+                      {sessionUser.email}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null)}
     </div>
   );
 }

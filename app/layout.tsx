@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import { getRequestSidebarCollapsed } from "@/lib/dashboard/request-sidebar";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/theme";
+import { getRequestTheme, themeBackground } from "@/lib/theme/request-theme";
 import { siteCopy } from "@/lib/site-copy";
 import "./globals.css";
 
@@ -47,21 +48,37 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const [theme, sidebarCollapsed] = await Promise.all([
+    getRequestTheme(),
+    getRequestSidebarCollapsed(),
+  ]);
+  const htmlClass = [
+    geistSans.variable,
+    geistMono.variable,
+    "h-full antialiased",
+    theme === "dark" ? "dark" : "",
+    sidebarCollapsed ? "sidebar-collapsed" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={htmlClass}
+      style={{ backgroundColor: themeBackground(theme), colorScheme: theme }}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Script
+      <head>
+        <script
           id="weeon-theme"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
         />
+      </head>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
       </body>
     </html>

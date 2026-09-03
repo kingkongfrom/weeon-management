@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import {redirect} from "next/navigation";
 import type {User} from "@supabase/supabase-js";
 import {createSessionClient} from "@/lib/supabase/session";
@@ -43,7 +44,7 @@ function initialsFor(name: string | null, email: string): string {
  * Load the valid platform staff session for Server Components.
  * Returns null when unauthenticated or the signed-in email is not allowed.
  */
-export async function getPlatformSession() {
+export const getPlatformSession = cache(async function getPlatformSession() {
     const supabase = await createSessionClient();
     const {
         data: {user},
@@ -63,7 +64,7 @@ export async function getPlatformSession() {
     }
 
     return {user, sessionUser: toSessionUser(user)};
-}
+});
 
 /** Server-component guard for the base app (login at `/`). */
 export async function requirePlatformSession() {

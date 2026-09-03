@@ -26,16 +26,22 @@ function emit() {
   for (const listener of listeners) listener();
 }
 
-function useTheme(): ThemePreference {
-  return useSyncExternalStore(subscribe, readThemePreference, () => "light");
+function useTheme(initialTheme: ThemePreference): ThemePreference {
+  return useSyncExternalStore(
+    subscribe,
+    readThemePreference,
+    () => initialTheme,
+  );
 }
 
 export function ThemeToggle({
   compact = false,
+  initialTheme = "light",
 }: {
   compact?: boolean;
+  initialTheme?: ThemePreference;
 }) {
-  const theme = useTheme();
+  const theme = useTheme(initialTheme);
   const isDark = theme === "dark";
 
   function handleToggle() {

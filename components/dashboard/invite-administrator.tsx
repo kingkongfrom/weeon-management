@@ -58,11 +58,11 @@ export function InviteAdministrator({
         </div>
         <div className="flex flex-col">
           <h2 className="text-lg font-bold text-foreground">Invite an administrator</h2>
-          {!canInvite ? (
-            <p className="mt-1 text-sm font-medium text-foreground/45">
-              Only {PLATFORM_STAFF_INVITER_EMAIL} can send invitations.
-            </p>
-          ) : null}
+          <p className="text-sm font-medium text-foreground/60">
+            {canInvite
+              ? "Send an invite for a new team member to join."
+              : `Only ${PLATFORM_STAFF_INVITER_EMAIL} can send invitations.`}
+          </p>
         </div>
       </div>
 
@@ -99,9 +99,9 @@ export function InviteAdministrator({
         <p className="mt-3 text-sm font-medium text-success">{state.message}</p>
       ) : null}
 
-      <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-brand-100 px-2.5 py-1.5 text-xs font-medium text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
+      <p className="mt-3 flex items-start gap-2 text-xs font-medium text-foreground/65">
         <ShieldCheckIcon />
-        secured
+        @weeon.school
       </p>
     </section>
   );
@@ -149,7 +149,7 @@ function ShieldCheckIcon() {
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden
-      className="shrink-0 text-brand-600 dark:text-brand-400"
+      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-300"
     >
       <path
         d="M12 3 20 7v6c0 4-2.5 7.5-8 9-5.5-1.5-8-5-8-9V7l8-4z"

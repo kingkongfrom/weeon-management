@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { OverviewPageSkeleton } from "@/components/dashboard/skeleton";
 import { StatCard } from "@/components/ui/StatCard";
 import { listTenants } from "@/lib/platform/metrics";
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   title: "Overview",
 };
 
-async function OverviewBody() {
+async function OverviewContent() {
   const { tenants, reason } = await listTenants();
 
   const byStatus = tenants.reduce<Record<string, number>>((acc, t) => {
@@ -23,67 +24,6 @@ async function OverviewBody() {
   const suspended = byStatus["suspended"] ?? 0;
   const needsAttention = pastDue + suspended;
 
-  if (tenants.length === 0) {
-    return (
-      <p className="text-sm font-medium text-warning">
-        {reason ?? "No tenants found."}
-      </p>
-    );
-  }
-
-  return (
-    <>
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
-        <StatCard
-          label="Total tenants"
-          value={tenants.length}
-          icon={<BuildingIcon />}
-          tone="brand"
-        />
-        <StatCard
-          label="Active"
-          value={active}
-          icon={<CheckIcon />}
-          tone="success"
-        />
-        <StatCard
-          label="Trial"
-          value={trials}
-          icon={<TrialIcon />}
-          tone="warning"
-        />
-        <StatCard
-          label="Needs attention"
-          value={needsAttention}
-          hint={
-            needsAttention > 0
-              ? [
-                  pastDue > 0 ? `${pastDue} past due` : null,
-                  suspended > 0 ? `${suspended} suspended` : null,
-                ]
-                  .filter(Boolean)
-                  .join(", ")
-              : undefined
-          }
-          icon={<AlertIcon />}
-          tone={needsAttention > 0 ? "warning" : "success"}
-        />
-      </section>
-
-      <p className="text-sm text-foreground/55">
-        <Link
-          href="/dashboard/tenants"
-          className="font-medium text-brand-600 hover:underline dark:text-brand-300"
-        >
-          View all tenants
-        </Link>
-        {" · status and seats per school"}
-      </p>
-    </>
-  );
-}
-
-export default function DashboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <header>
@@ -95,14 +35,69 @@ export default function DashboardPage() {
           accounts.
         </p>
       </header>
-      <Suspense
-        fallback={
-          <p className="text-sm text-foreground/50">Loading overview…</p>
-        }
-      >
-        <OverviewBody />
-      </Suspense>
+      {tenants.length === 0 ? (
+        <p className="text-sm font-medium text-warning">
+          {reason ?? "No tenants found."}
+        </p>
+      ) : (
+        <>
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+            <StatCard
+              label="Total tenants"
+              value={tenants.length}
+              icon={<BuildingIcon />}
+              tone="brand"
+            />
+            <StatCard
+              label="Active"
+              value={active}
+              icon={<CheckIcon />}
+              tone="success"
+            />
+            <StatCard
+              label="Trial"
+              value={trials}
+              icon={<TrialIcon />}
+              tone="warning"
+            />
+            <StatCard
+              label="Needs attention"
+              value={needsAttention}
+              hint={
+                needsAttention > 0
+                  ? [
+                      pastDue > 0 ? `${pastDue} past due` : null,
+                      suspended > 0 ? `${suspended} suspended` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")
+                  : undefined
+              }
+              icon={<AlertIcon />}
+              tone={needsAttention > 0 ? "warning" : "success"}
+            />
+          </section>
+
+          <p className="text-sm text-foreground/55">
+            <Link
+              href="/dashboard/tenants"
+              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+            >
+              View all tenants
+            </Link>
+            {" · status and seats per school"}
+          </p>
+        </>
+      )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<OverviewPageSkeleton />}>
+      <OverviewContent />
+    </Suspense>
   );
 }
 

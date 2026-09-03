@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TenantDetailSkeleton } from "@/components/dashboard/skeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { TenantAdminContact } from "@/lib/domain";
 import type { TenantBackupStatus } from "@/lib/dashboard/backup-alerts";
@@ -44,7 +46,7 @@ export async function generateMetadata({
   return { title: tenant?.name ?? "Tenant" };
 }
 
-export default async function TenantDetailPage({
+async function TenantDetailContent({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -116,12 +118,21 @@ export default async function TenantDetailPage({
       </div>
 
       <section className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/50">
-          Administrators
-        </h2>
         <AdministratorsList admins={admins} />
       </section>
     </div>
+  );
+}
+
+export default function TenantDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<TenantDetailSkeleton />}>
+      <TenantDetailContent params={params} />
+    </Suspense>
   );
 }
 
@@ -147,46 +158,56 @@ function ChevronLeftIcon() {
 }
 
 function AdministratorsList({ admins }: { admins: TenantAdminContact[] }) {
-  if (admins.length === 0) {
-    return (
-      <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-foreground/55">
-        No school administrators found.
-      </p>
-    );
-  }
-
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border text-xs uppercase tracking-wide text-foreground/50">
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {admins.map((admin, index) => (
-            <tr
-              key={`${admin.email}-${index}`}
-              className="border-b border-border last:border-0"
-            >
-              <td className="px-4 py-3 font-medium text-foreground">{admin.name}</td>
-              <td className="px-4 py-3 text-foreground/70">
-                {admin.email ? (
-                  <a
-                    href={`mailto:${admin.email}`}
-                    className="hover:text-brand-600 hover:underline dark:hover:text-brand-300"
-                  >
-                    {admin.email}
-                  </a>
-                ) : (
-                  "—"
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/70">
+            <UsersIcon />
+            Administrators
+          </h2>
+          <p className="mt-1 text-sm font-medium text-foreground/55">
+            School admins for this institution.
+          </p>
+        </div>
+
+        {admins.length === 0 ? (
+          <p className="text-sm font-medium text-foreground/45">
+            No school administrators found.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border/70">
+            {admins.map((admin, index) => (
+              <li
+                key={`${admin.email}-${index}`}
+                className="flex flex-col gap-0.5 py-2.5 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {admin.name}
+                  </p>
+                  {admin.email ? (
+                    <a
+                      href={`mailto:${admin.email}`}
+                      className="truncate text-xs font-medium text-foreground/50 hover:text-brand-600 hover:underline dark:hover:text-brand-300"
+                    >
+                      {admin.email}
+                    </a>
+                  ) : (
+                    <p className="truncate text-xs font-medium text-foreground/50">
+                      —
+                    </p>
+                  )}
+                </div>
+                <span className="mt-1 inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-emerald-700 sm:mt-0 dark:text-emerald-300">
+                  <ShieldCheckIcon className="h-3 w-3" />
+                  Admin
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -239,9 +260,45 @@ function BackupStatusCell({ backup }: { backup: TenantBackupStatus }) {
   );
 }
 
-function ShieldCheckIcon() {
+function UsersIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="h-4 w-4"
+    >
+      <path
+        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className={className}
+    >
       <path
         d="M12 3 20 7v6c0 4-2.5 7.5-8 9-5.5-1.5-8-5-8-9V7l8-4z"
         stroke="currentColor"

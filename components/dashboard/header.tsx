@@ -1,23 +1,19 @@
-"use client";
-
+import type { ReactNode } from "react";
 import { LogoCompact } from "@/components/logo";
-import { AccountMenu } from "@/components/dashboard/account-menu";
-import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import type { BackupAlert } from "@/lib/dashboard/backup-alerts";
-import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
+import type { ThemePreference } from "@/lib/theme/theme";
 
 export function Header({
-  sessionUser,
-  backupAlerts,
+  accountSlot,
+  notificationSlot,
+  initialTheme,
   onMenuToggle,
 }: {
-  sessionUser: DashboardSessionUser | null;
-  backupAlerts: BackupAlert[];
+  accountSlot: ReactNode;
+  notificationSlot: ReactNode;
+  initialTheme: ThemePreference;
   onMenuToggle: () => void;
 }) {
-  const initials = sessionUser?.initials ?? "OP";
-
   return (
     <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-surface/95 px-3 pt-[env(safe-area-inset-top)] backdrop-blur-md sm:gap-3 sm:px-6 lg:px-8 [height:calc(4rem+env(safe-area-inset-top))]">
       <button
@@ -34,13 +30,9 @@ export function Header({
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <NotificationBell alerts={backupAlerts} />
-        <ThemeToggle compact />
-        <AccountMenu
-          className="ml-2 sm:ml-3"
-          initials={initials}
-          sessionUser={sessionUser}
-        />
+        {notificationSlot}
+        <ThemeToggle compact initialTheme={initialTheme} />
+        {accountSlot}
       </div>
     </header>
   );

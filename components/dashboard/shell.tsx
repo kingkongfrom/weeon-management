@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { LogoCompact, LogoMark } from "@/components/logo";
 import { Sidebar } from "./sidebar";
@@ -10,33 +10,39 @@ import {
   useSidebarCollapsed,
   writeSidebarCollapsed,
 } from "@/lib/dashboard/sidebar-state";
-import type { BackupAlert } from "@/lib/dashboard/backup-alerts";
-import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
+import type { ThemePreference } from "@/lib/theme/theme";
 
 type DashboardShellProps = {
   children: ReactNode;
-  sessionUser: DashboardSessionUser | null;
-  backupAlerts: BackupAlert[];
+  accountSlot: ReactNode;
+  notificationSlot: ReactNode;
+  sidebarFooter: ReactNode;
+  initialTheme: ThemePreference;
+  initialSidebarCollapsed?: boolean;
 };
 
 export function DashboardShell({
   children,
-  sessionUser,
-  backupAlerts,
+  accountSlot,
+  notificationSlot,
+  sidebarFooter,
+  initialTheme,
+  initialSidebarCollapsed = false,
 }: DashboardShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const collapsed = useSidebarCollapsed();
+  const collapsed = useSidebarCollapsed(initialSidebarCollapsed);
+
+  useEffect(() => {
+    document.documentElement.classList.add("shell-ready");
+    return () => document.documentElement.classList.remove("shell-ready");
+  }, []);
 
   return (
     <div className="dashboard-shell flex min-h-screen flex-col bg-background lg:flex-row">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-surface transition-[width] duration-200 lg:flex ${
-          collapsed ? "w-[4.5rem]" : "w-72"
-        }`}
-      >
+      <aside className="dashboard-sidebar fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-surface transition-[width] duration-200 lg:flex">
         <div
           className={`flex h-16 items-center border-b border-border ${
             collapsed ? "justify-center px-2" : "px-4"
@@ -52,20 +58,18 @@ export function DashboardShell({
         </div>
         <SidebarToggle collapsed={collapsed} />
         <Sidebar
-          sessionUser={sessionUser}
+          sessionUser={null}
+          footer={sidebarFooter}
           collapsed={collapsed}
           onNavigate={() => setMobileMenuOpen(false)}
         />
       </aside>
 
-      <div
-        className={`flex flex-1 flex-col transition-[padding] duration-200 ${
-          collapsed ? "lg:pl-[4.5rem]" : "lg:pl-72"
-        }`}
-      >
+      <div className="dashboard-content flex flex-1 flex-col transition-[padding] duration-200">
         <Header
-          sessionUser={sessionUser}
-          backupAlerts={backupAlerts}
+          accountSlot={accountSlot}
+          notificationSlot={notificationSlot}
+          initialTheme={initialTheme}
           onMenuToggle={() => setMobileMenuOpen((v) => !v)}
         />
 
@@ -87,7 +91,8 @@ export function DashboardShell({
               <LogoCompact />
             </div>
             <Sidebar
-              sessionUser={sessionUser}
+              sessionUser={null}
+              footer={sidebarFooter}
               onNavigate={() => setMobileMenuOpen(false)}
             />
           </div>
