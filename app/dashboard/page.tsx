@@ -59,7 +59,7 @@ async function OverviewContent() {
               label="Trial"
               value={trials}
               icon={<Hourglass size={20} />}
-              tone="accent"
+              tone="brand"
             />
             <StatCard
               label="Needs attention"
@@ -75,7 +75,7 @@ async function OverviewContent() {
                   : undefined
               }
               icon={<TriangleAlert size={20} />}
-              tone={needsAttention > 0 ? "error" : "success"}
+              tone="accent"
             />
           </section>
 
