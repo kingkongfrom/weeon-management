@@ -65,9 +65,12 @@ export function AccountMenu({
                   {sessionUser.email}
                 </p>
               ) : null}
-              <p className="mt-1 text-[11px] text-foreground/40">
-                Weeon Ops · platform staff
-              </p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="text-[11px] text-foreground/40">Weeon Ops</span>
+                <span className="inline-flex items-center rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-600 dark:bg-brand-950/60 dark:text-brand-300">
+                  Owner
+                </span>
+              </div>
             </div>
           ) : (
             <div className="px-3 py-2.5 text-xs text-foreground/50">

@@ -50,7 +50,7 @@ async function TenantsContent() {
               {tenants.map((tenant) => (
                   <tr
                   key={tenant.id}
-                  className="group relative border-b border-border last:border-0 hover:bg-surface-muted/60"
+                  className="group relative border-b border-border last:border-0 hover:bg-surface-muted/25 sm:cursor-pointer"
                 >
                   <td className="px-4 py-3">
                     <Link

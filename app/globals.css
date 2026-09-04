@@ -4,9 +4,9 @@
 
 :root {
   color-scheme: light;
-  /* Light palette — Cool mist */
-  --background: #f4f6fa;
-  --foreground: #1b2433;
+  /* Light palette — near-white cool panel with white flat cards */
+  --background: #f6f8fc;
+  --foreground: #1a2331;
 
   /* Brand palette: refined indigo with teal accent */
   --brand-50: #eef2ff;
@@ -26,9 +26,9 @@
 
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --surface-muted: #eef1f6;
-  --border: #e4e7ee;
-  --border-strong: #cdd3de;
+  --surface-muted: #eef1fa;
+  --border: #d9e0ee;
+  --border-strong: #b6c3d9;
   --ring: #6366f1;
 
   --success: #10b981;
@@ -129,7 +129,7 @@ button:disabled {
 }
 
 html {
-  background-color: #f4f6fa;
+  background-color: #f6f8fc;
 }
 
 html.dark {
@@ -229,6 +229,12 @@ html:not(.shell-ready) .dashboard-content {
 
 .dashboard-card {
   box-shadow: none;
+}
+
+/* Rounded surface panel shared by dashboard cards/stat tiles — flat. */
+.surface-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .pb-safe {

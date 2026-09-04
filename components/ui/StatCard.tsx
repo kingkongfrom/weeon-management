@@ -45,16 +45,19 @@ export function StatCard({
     </>
   );
 
-  const className =
-    "group flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors sm:p-5 hover:border-brand-200 hover:bg-brand-50/40 dark:hover:border-brand-900 dark:hover:bg-brand-950/20";
+  const base =
+    "flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 sm:p-5";
 
   if (href) {
     return (
-      <Link href={href} className={className}>
+      <Link
+        href={href}
+        className={`${base} cursor-pointer transition-colors duration-150 hover:bg-surface-muted/40 dark:hover:bg-surface-elevated/40`}
+      >
         {content}
       </Link>
     );
   }
 
-  return <div className={className}>{content}</div>;
+  return <div className={base}>{content}</div>;
 }
