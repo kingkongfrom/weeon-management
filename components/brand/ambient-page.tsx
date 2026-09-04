@@ -2,16 +2,7 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
 
 export function AmbientBackdrop() {
-  return (
-    <>
-      <div className="login-bg-blobs" aria-hidden>
-        <span className="login-blob login-blob-purple" />
-        <span className="login-blob login-blob-cyan" />
-        <span className="login-blob login-blob-blue" />
-      </div>
-      <div className="login-bg-frost" aria-hidden />
-    </>
-  );
+  return <div className="login-bg-glow" aria-hidden />;
 }
 
 /** Login chrome: navy field, logo, then the form. */

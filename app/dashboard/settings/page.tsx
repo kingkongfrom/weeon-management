@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Info } from "lucide-react";
 import { SettingsPageSkeleton } from "@/components/dashboard/skeleton";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { getRequestTheme } from "@/lib/theme/request-theme";
@@ -64,25 +65,11 @@ async function SettingsContent() {
           <ThemeToggle initialTheme={theme} />
         </div>
         <p className="mt-4 flex items-center gap-1.5 text-xs font-medium text-foreground/45">
-          <InfoIcon />
+          <Info size={14} />
           Your preference is saved automatically — no need to confirm.
         </p>
       </SettingsCard>
     </div>
-  );
-}
-
-function InfoIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M12 16v-5M12 8h.01"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
 

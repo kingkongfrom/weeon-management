@@ -3,6 +3,7 @@
 import { Suspense, useActionState, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { AmbientPage } from "@/components/brand/ambient-page";
 import { loginAction, type LoginState } from "@/lib/auth/actions";
 import { isAllowedStaffEmailDomain } from "@/lib/auth/policy";
@@ -69,7 +70,7 @@ export function LoginForm() {
             aria-pressed={showPassword}
             className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-white/50 transition-colors hover:text-white"
           >
-            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
       </div>
@@ -129,34 +130,5 @@ export function LoginShell() {
         </p>
       </div>
     </AmbientPage>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M3 3l18 18M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4M9.9 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-3.3 3.9M6.1 6.1C3.5 8 2 12 2 12s3.5 7 10 7c1.6 0 3-.3 4.3-.8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

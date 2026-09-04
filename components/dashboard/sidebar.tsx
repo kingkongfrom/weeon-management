@@ -3,14 +3,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Building2, LayoutDashboard, Settings, ShieldCheck } from "lucide-react";
 import { isNavItemActive } from "@/lib/dashboard/nav";
 import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
 
 const NAV_ITEMS = [
-  { id: "overview" as const, href: "/dashboard", icon: OverviewIcon, label: "Overview", section: "primary" as const },
-  { id: "tenants" as const, href: "/dashboard/tenants", icon: TenantsIcon, label: "Tenants", section: "primary" as const },
-  { id: "security" as const, href: "/dashboard/security", icon: SecurityIcon, label: "Security", section: "admin" as const },
-  { id: "settings" as const, href: "/dashboard/settings", icon: SettingsIcon, label: "Settings", section: "admin" as const },
+  { id: "overview" as const, href: "/dashboard", icon: LayoutDashboard, label: "Overview", section: "primary" as const },
+  { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, label: "Tenants", section: "primary" as const },
+  { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, label: "Security", section: "admin" as const },
+  { id: "settings" as const, href: "/dashboard/settings", icon: Settings, label: "Settings", section: "admin" as const },
 ];
 
 export function Sidebar({
@@ -130,13 +131,13 @@ function NavItem({
       aria-current={active ? "page" : undefined}
     >
       <span
-        className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+        className={`flex h-8 w-8 items-center justify-center rounded-lg border backdrop-blur-sm transition-colors ${
           active
-            ? "bg-brand-100 text-brand-600 dark:bg-brand-900/50 dark:text-brand-300"
-            : "bg-surface-muted text-foreground/50 group-hover:bg-surface-elevated group-hover:text-foreground/70"
+            ? "border-brand-500/30 bg-brand-500/15 text-brand-700 group-hover:border-brand-500/40 dark:border-brand-400/30 dark:bg-brand-400/15 dark:text-brand-300 dark:group-hover:border-brand-400/40"
+            : "border-foreground/10 bg-foreground/5 text-foreground/50 group-hover:border-foreground/15 group-hover:bg-foreground/10 group-hover:text-foreground/70 dark:border-white/10 dark:bg-white/5 dark:group-hover:border-white/15 dark:group-hover:bg-white/10"
         }`}
       >
-        <item.icon />
+        <item.icon size={18} strokeWidth={2} />
       </span>
       {collapsed ? (
         <span className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg border border-border bg-surface px-2 py-1 text-xs font-semibold text-foreground group-hover:block group-focus-within:block">
@@ -149,90 +150,4 @@ function NavItem({
   );
 }
 
-function OverviewIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-      <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-      <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
 
-function TenantsIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M3 21h18"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6 21V7l6-4 6 4v14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 21v-6h4v6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 9h.01M14 9h.01M10 13h.01M14 13h.01"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function SecurityIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9 12 2 2 4-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle
-        cx="12"
-        cy="12"
-        r="3"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}

@@ -41,12 +41,36 @@ Implemented now:
 
 - Next.js **16.3.3** · React **19** · TypeScript (strict) · Tailwind **v4**
 - Weeon Ops sign-in at `/` (not school-admin login)
-- Dashboard: Overview, Tenants, tenant detail (school admins), Settings
+- Dashboard: Overview, Tenants (with live search), tenant detail (school
+  admins), Settings
+- Animated light/dark **Appearance** toggle (sibling-consistent theme system)
+- Branded 404 page (`app/not-found.tsx`)
 - **Ops staff** isolated from tenants — `docs/auth.md`
 - Branded Resend invite + password reset (not Supabase generic mail)
 - Server-only platform Supabase client + domain types for `tenants` /
   `profiles` (owned by `weeon-admin`)
 - `GET /api/health`
+
+## Design system
+
+The console follows the shared Weeon brand used across the sibling repos:
+
+- **Palette** — brand paper `#f7f7f9` (light) / Dusk slate (dark); the 3-stop
+  purple→blue brand gradient (`--brand-start/mid/end = #5e25cc / #4f46e5 /
+  #2b59ff`), `1rem` radius, brand-tinted elevation, soft `.dashboard-shell`
+  wash.
+- **Icons** — [`lucide-react`](https://lucide.dev) (match `weeon-admin`);
+  icons use exactly **two brand hues** (indigo + teal) as duotone icon
+  tiles (`lib/dashboard/icon-tone.ts`).
+- **Theme** — instant swap via `applyTheme` (no custom crossfade, same as the
+  siblings); `motion` drives the animated Light/Dark segmented toggle.
+- **404** — navy `not-found-bg` ambient field with Motion entrance,
+  gradient wordmark, and brand-gradient CTA.
+
+> Note: `globalNotFound` is intentionally **off** — this app has a single root
+> layout, so `app/not-found.tsx` is the correct 404 convention (same as
+> `weeon-admin`). Turning it on would route unmatched URLs to
+> `app/global-not-found.tsx` (a full `<html>` document) and bypass the theme.
 
 ## Tech stack
 

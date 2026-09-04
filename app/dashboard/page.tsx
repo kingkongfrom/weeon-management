@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { Hourglass, School, ShieldCheck, TriangleAlert } from "lucide-react";
 import { OverviewPageSkeleton } from "@/components/dashboard/skeleton";
 import { StatCard } from "@/components/ui/StatCard";
 import { listTenants } from "@/lib/platform/metrics";
@@ -45,19 +46,19 @@ async function OverviewContent() {
             <StatCard
               label="Total tenants"
               value={tenants.length}
-              icon={<SchoolIcon />}
+              icon={<School size={20} />}
               tone="brand"
             />
             <StatCard
               label="Active"
               value={active}
-              icon={<ShieldCheckIcon />}
+              icon={<ShieldCheck size={20} />}
               tone="success"
             />
             <StatCard
               label="Trial"
               value={trials}
-              icon={<TrialIcon />}
+              icon={<Hourglass size={20} />}
               tone="accent"
             />
             <StatCard
@@ -73,7 +74,7 @@ async function OverviewContent() {
                       .join(", ")
                   : undefined
               }
-              icon={<AlertIcon />}
+              icon={<TriangleAlert size={20} />}
               tone={needsAttention > 0 ? "error" : "success"}
             />
           </section>
@@ -98,97 +99,5 @@ export default function DashboardPage() {
     <Suspense fallback={<OverviewPageSkeleton />}>
       <OverviewContent />
     </Suspense>
-  );
-}
-
-function SchoolIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 3 2.5 8h15L12 3z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M5 11v6M9.5 11v6M14.5 11v6M19 11v6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M2.5 20.5h19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function ShieldCheckIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 3 4.5 5.6v5.6c0 4.6 3.2 7.9 7.5 9.4 4.3-1.5 7.5-4.8 7.5-9.4V5.6L12 3z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9 11.5 2 2 4-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function TrialIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 3h12M6 21h12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M7 3c0 4 2 5 3.5 6.6C12 11.2 12 12.8 10.5 14.4 9 16 7 17 7 21"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M17 3c0 4-2 5-3.5 6.6C12 11.2 12 12.8 13.5 14.4 15 16 17 17 17 21"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function AlertIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M10.3 3.7 2 17.5a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 9v4M12 17h.01"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

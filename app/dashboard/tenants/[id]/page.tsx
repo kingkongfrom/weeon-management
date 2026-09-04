@@ -22,6 +22,7 @@ import {
   formatBackupAgeHours,
   getTenantBackupStatus,
 } from "@/lib/platform/backups";
+import { ChevronLeft, ShieldCheck, Users } from "lucide-react";
 import { listTenantAdmins } from "@/lib/platform/metrics";
 import { createPlatformClient } from "@/lib/supabase/platform";
 
@@ -71,7 +72,7 @@ async function TenantDetailContent({
         href="/dashboard/tenants"
         className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-foreground/55 transition-colors hover:text-brand-600 dark:hover:text-brand-300"
       >
-        <ChevronLeftIcon />
+        <ChevronLeft size={16} className="shrink-0" />
         Back to tenants
       </Link>
 
@@ -136,34 +137,13 @@ export default function TenantDetailPage({
   );
 }
 
-function ChevronLeftIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className="shrink-0"
-    >
-      <path
-        d="M15 6l-6 6 6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function AdministratorsList({ admins }: { admins: TenantAdminContact[] }) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/70">
-            <UsersIcon />
+            <Users size={16} className="h-4 w-4" />
             Administrators
           </h2>
           <p className="mt-1 text-sm font-medium text-foreground/55">
@@ -200,7 +180,7 @@ function AdministratorsList({ admins }: { admins: TenantAdminContact[] }) {
                   )}
                 </div>
                 <span className="mt-1 inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-emerald-700 sm:mt-0 dark:text-emerald-300">
-                  <ShieldCheckIcon className="h-3 w-3" />
+                  <ShieldCheck size={12} className="h-3 w-3" />
                   Admin
                 </span>
               </li>
@@ -238,7 +218,7 @@ function BackupStatusCell({ backup }: { backup: TenantBackupStatus }) {
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success-subtle text-success"
             title="Last backup completed successfully"
           >
-            <ShieldCheckIcon />
+            <ShieldCheck size={14} />
           </span>
         ) : null}
         <span className={backup.isStale ? "text-error" : "text-foreground"}>
@@ -257,63 +237,6 @@ function BackupStatusCell({ backup }: { backup: TenantBackupStatus }) {
         </p>
       ) : null}
     </div>
-  );
-}
-
-function UsersIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className="h-4 w-4"
-    >
-      <path
-        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ShieldCheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
-      <path
-        d="M12 3 20 7v6c0 4-2.5 7.5-8 9-5.5-1.5-8-5-8-9V7l8-4z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9 12 2 2 4-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 

@@ -1,7 +1,7 @@
 export const THEME_STORAGE_KEY = "weeon.ops.theme";
 export const THEME_COOKIE_KEY = THEME_STORAGE_KEY;
 
-export const THEME_LIGHT_BG = "#f6f8fc";
+export const THEME_LIGHT_BG = "#f7f7f9";
 export const THEME_DARK_BG = "#1c2230";
 
 export type ThemePreference = "light" | "dark";
@@ -22,6 +22,11 @@ function persistThemeCookie(theme: ThemePreference) {
   document.cookie = `${THEME_COOKIE_KEY}=${theme}; path=/; max-age=31536000; samesite=lax`;
 }
 
+/**
+ * Instantly switch the theme — no custom crossfade/wash. Mirrors the sibling
+ * `weeon-admin` behaviour: only the element-level `transition-colors` classes
+ * respond, so the change stays even and consistent across every repo.
+ */
 export function applyTheme(theme: ThemePreference) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");

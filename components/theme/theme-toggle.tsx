@@ -1,6 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
+import { motion } from "motion/react";
 import {
   applyTheme,
   readThemePreference,
@@ -58,7 +60,7 @@ export function ThemeToggle({
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         title={isDark ? "Light" : "Dark"}
       >
-        {isDark ? <SunIcon /> : <MoonIcon />}
+        {isDark ? <Sun size={16} /> : <Moon size={16} />}
       </button>
     );
   }
@@ -66,18 +68,31 @@ export function ThemeToggle({
   const options: Array<{
     value: ThemePreference;
     label: string;
-    icon: typeof SunIcon;
+    icon: typeof Sun;
   }> = [
-    { value: "light", label: "Light", icon: SunIcon },
-    { value: "dark", label: "Dark", icon: MoonIcon },
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
   ];
 
   return (
     <div
       role="group"
       aria-label="Appearance theme"
-      className="inline-flex w-full max-w-xs items-center gap-1 rounded-xl border border-border bg-surface-muted/60 p-1"
+      className="relative inline-flex w-full max-w-xs items-center rounded-xl border border-border bg-surface-muted/60 p-1"
     >
+      {/* Always-mounted indicator: slides between the two sides in both
+          directions, tinted to match each side's theme. */}
+      <motion.span
+        aria-hidden
+        className="absolute top-1 bottom-1 left-1 rounded-lg ring-1 ring-black/5 dark:ring-white/10"
+        style={{ width: "calc(50% - 4px)", boxShadow: "0 6px 16px rgb(15 23 42 / 0.12)" }}
+        initial={false}
+        animate={{
+          x: isDark ? "100%" : "0%",
+          backgroundColor: isDark ? "#1e2a45" : "#ffffff",
+        }}
+        transition={{ type: "spring", stiffness: 450, damping: 34 }}
+      />
       {options.map((option) => {
         const Icon = option.icon;
         const selected = (option.value === "dark") === isDark;
@@ -85,16 +100,25 @@ export function ThemeToggle({
           <button
             key={option.value}
             type="button"
-            onClick={() => applyTheme(option.value)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
-              selected
-                ? "bg-surface text-foreground shadow-sm ring-1 ring-border"
-                : "text-foreground/60 hover:bg-surface/60 hover:text-foreground"
-            }`}
+            onClick={() => {
+              applyTheme(option.value);
+              emit();
+            }}
             aria-pressed={selected}
+            className="relative z-10 flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold"
           >
-            <Icon />
-            <span>{option.label}</span>
+            <span
+              className={`flex items-center gap-2 transition-colors ${
+                selected
+                  ? option.value === "dark"
+                    ? "text-[#e8edf5]"
+                    : "text-[#1b2433]"
+                  : "text-foreground/60"
+              }`}
+            >
+              <Icon size={16} />
+              <span>{option.label}</span>
+            </span>
           </button>
         );
       })}
@@ -102,30 +126,4 @@ export function ThemeToggle({
   );
 }
 
-function MoonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
-function SunIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M12 3v1.5M12 19.5V21M4.2 4.2l1.1 1.1M18.7 18.7l1.1 1.1M3 12h1.5M19.5 12H21M4.2 19.8l1.1-1.1M18.7 5.3l1.1-1.1"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}

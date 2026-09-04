@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LogoCompact, LogoMark } from "@/components/logo";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
@@ -117,28 +118,7 @@ function SidebarToggle({ collapsed }: { collapsed: boolean }) {
       aria-label={collapsed ? "Expand menu" : "Collapse menu"}
       title={collapsed ? "Expand menu" : "Collapse menu"}
     >
-      <CollapseIcon flipped={collapsed} />
+      {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
     </button>
-  );
-}
-
-function CollapseIcon({ flipped }: { flipped: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={flipped ? "rotate-180" : undefined}
-    >
-      <path
-        d="M15 6l-6 6 6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

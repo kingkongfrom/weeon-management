@@ -81,35 +81,13 @@ export function AccountMenu({
           <form action={signOutAction} className="p-1">
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-foreground/80 transition-colors hover:bg-surface-muted hover:text-error"
+              className="flex w-full items-center justify-center rounded-lg px-3 py-2 text-center text-sm font-medium text-foreground/80 transition-colors hover:bg-surface-muted hover:text-error"
             >
-              <SignOutIcon />
               Sign out
             </button>
           </form>
         </div>
       ) : null}
     </div>
-  );
-}
-
-function SignOutIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 17l5-5-5-5M21 12H9"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

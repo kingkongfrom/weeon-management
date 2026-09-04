@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, type FormEvent } from "react";
+import { Plus, ShieldCheck, UserPlus } from "lucide-react";
 import {
   ALLOWED_EMAIL_DOMAIN,
   isAllowedStaffEmailDomain,
@@ -57,7 +58,7 @@ export function InviteAdministrator({
             canInvite ? "bg-brand-600" : "bg-surface-muted text-foreground/35"
           }`}
         >
-          <UserPlusIcon />
+          <UserPlus size={20} />
         </div>
         <div className="flex flex-col">
           <h2 className="text-lg font-bold text-foreground">Invite an administrator</h2>
@@ -95,7 +96,7 @@ export function InviteAdministrator({
           disabled={disabled || pending || !email.trim()}
           className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-brand-600 bg-brand-600 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <PlusIcon />
+          <Plus size={16} />
           {pending ? "Sending…" : "Send invitation"}
         </button>
       </form>
@@ -108,71 +109,9 @@ export function InviteAdministrator({
       ) : null}
 
       <p className="mt-3 flex items-center gap-2 text-xs font-medium text-foreground/65">
-        <ShieldCheckIcon />
+        <ShieldCheck className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-300" />
         Invites are protected
       </p>
     </section>
-  );
-}
-
-function UserPlusIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M19 8v6M22 11h-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 5v14M5 12h14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function ShieldCheckIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-300"
-    >
-      <path
-        d="M12 3 20 7v6c0 4-2.5 7.5-8 9-5.5-1.5-8-5-8-9V7l8-4z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9 12 2 2 4-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

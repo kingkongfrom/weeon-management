@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
-  experimental: {
-    globalNotFound: true,
-  },
 };
 
 export default nextConfig;
