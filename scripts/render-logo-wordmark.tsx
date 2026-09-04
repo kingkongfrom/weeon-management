@@ -1,4 +1,4 @@
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
@@ -7,9 +7,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import sharp from "sharp";
 import { Logo } from "../components/logo";
 
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const out = join(root, "public", "email", "logo-wordmark.png");
+const tmpHtml = join(root, ".tmp-email-logo.html");
+
 async function main() {
-  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-  const out = join(root, "public", "email", "logo-wordmark.png");
   const geistSans = join(root, "node_modules", "geist", "dist", "fonts", "geist-sans");
   const fontBlack = join(geistSans, "Geist-Black.ttf");
 
@@ -31,7 +33,6 @@ async function main() {
   </body>
 </html>`;
 
-  const tmpHtml = join(root, ".tmp-email-logo.html");
   await writeFile(tmpHtml, html);
 
   const browser = await chromium.launch();
@@ -66,7 +67,16 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
+main().catch(async (error) => {
+  await unlink(tmpHtml).catch(() => undefined);
+  try {
+    await access(out);
+  } catch {
+    console.error(error);
+    process.exit(1);
+  }
+  console.warn(
+    `Skipped rendering logo wordmark (Playwright browser unavailable). ` +
+      `Using existing committed asset: ${out}`,
+  );
 });
