@@ -29,18 +29,20 @@ export function InviteAdministrator({
   const error = localError ?? state?.error ?? null;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (disabled) return;
+    if (disabled) {
+      event.preventDefault();
+      return;
+    }
 
     const data = new FormData(event.currentTarget);
     const email = String(data.get("email") ?? "");
     if (!isAllowedStaffEmailDomain(email)) {
+      event.preventDefault();
       setLocalError(`Only @${ALLOWED_EMAIL_DOMAIN} addresses are accepted.`);
       return;
     }
 
     setLocalError(null);
-    formAction(data);
   }
 
   return (
@@ -68,6 +70,7 @@ export function InviteAdministrator({
       </div>
 
       <form
+        action={formAction}
         onSubmit={handleSubmit}
         className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-3"
       >

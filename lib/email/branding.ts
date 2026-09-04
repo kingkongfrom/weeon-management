@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 /** Inline attachment id for the Weeon wordmark in transactional email HTML. */
-export const WEEON_EMAIL_LOGO_CID = "weeon-wordmark";
+export const WEEON_EMAIL_LOGO_CID = "weeon-ops-logo";
 
 /** Public URL for the wordmark (fallback when clients block inline attachments). */
 export function weeonEmailLogoUrl(): string {
@@ -12,22 +12,20 @@ export function weeonEmailLogoUrl(): string {
   return `${origin.replace(/\/$/, "")}/email/logo-wordmark.png`;
 }
 
-let cachedLogo: Buffer | null = null;
-
-/** Loads the full "Weeon Ops" wordmark as a Resend inline attachment. */
+/** Loads the Weeon Ops wordmark as a Resend inline attachment.
+ *  PNG is a Playwright raster of `Logo` from `components/logo.tsx`.
+ *  Read from disk each send so `npm run render:email-logo` updates apply without restart. */
 export async function loadWeeonEmailLogoAttachment(): Promise<{
   filename: string;
   content: Buffer;
   contentId: string;
 }> {
-  if (!cachedLogo) {
-    const path = join(process.cwd(), "public", "email", "logo-wordmark.png");
-    cachedLogo = await readFile(path);
-  }
+  const path = join(process.cwd(), "public", "email", "logo-wordmark.png");
+  const content = await readFile(path);
 
   return {
-    filename: "weeon-wordmark.png",
-    content: cachedLogo,
+    filename: "weeon-ops-logo.png",
+    content,
     contentId: WEEON_EMAIL_LOGO_CID,
   };
 }

@@ -1,0 +1,125 @@
+/* Tailwind equivalents for `Logo` — used when rasterizing the real component for email. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: #ffffff;
+  font-family: Geist, system-ui, sans-serif;
+}
+
+@font-face {
+  font-family: Geist;
+  src: url("FONT_BLACK") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+.brand-text {
+  background-image: linear-gradient(90deg, #5e25cc 0%, #2b59ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+#capture {
+  font-size: 36px;
+  display: inline-block;
+  color: #1a2331;
+  overflow: visible;
+  /* Smile arc sits below baseline (-0.14em) and the stroke dips past its box. */
+  padding-bottom: 0.6em;
+}
+
+#capture-wrap {
+  display: inline-block;
+  overflow: visible;
+  padding: 6px 4px 12px;
+}
+
+#capture .inline-flex {
+  display: inline-flex;
+}
+
+#capture .select-none {
+  user-select: none;
+}
+
+#capture .flex-col {
+  flex-direction: column;
+}
+
+#capture .items-start {
+  align-items: flex-start;
+}
+
+#capture .relative {
+  position: relative;
+}
+
+#capture .items-baseline {
+  align-items: baseline;
+}
+
+#capture .whitespace-nowrap {
+  white-space: nowrap;
+}
+
+#capture .text-2xl {
+  font-size: 1em;
+  line-height: 1.25;
+}
+
+#capture .sm\:text-3xl {
+  font-size: 1em;
+}
+
+#capture .font-black {
+  font-weight: 900;
+}
+
+#capture .tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+#capture .text-foreground {
+  color: #1a2331;
+}
+
+#capture .ml-1\.5 {
+  margin-left: 0.375rem;
+}
+
+#capture .font-bold {
+  font-weight: 700;
+}
+
+#capture .pointer-events-none {
+  pointer-events: none;
+}
+
+#capture .absolute {
+  position: absolute;
+}
+
+#capture .left-\[27\%\] {
+  left: 27%;
+}
+
+#capture .right-\[35\%\] {
+  right: 35%;
+}
+
+#capture .-bottom-\[0\.14em\] {
+  bottom: -0.14em;
+}
+
+#capture .h-\[0\.24em\] {
+  height: 0.24em;
+}
+
+#capture svg {
+  overflow: visible;
+}

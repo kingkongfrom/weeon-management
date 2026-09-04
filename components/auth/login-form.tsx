@@ -19,19 +19,18 @@ export function LoginForm() {
   const error = localError ?? state?.error ?? null;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
     const data = new FormData(event.currentTarget);
     const email = String(data.get("email") ?? "");
     if (!isAllowedStaffEmailDomain(email)) {
+      event.preventDefault();
       setLocalError("Only @weeon.school staff can access the ops console.");
       return;
     }
     setLocalError(null);
-    formAction(data);
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-5">
       <input type="hidden" name="next" value="/dashboard" />
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-semibold">

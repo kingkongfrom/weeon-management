@@ -32,7 +32,7 @@ export function brandedEmailHtml(input: BrandedEmailInput): string {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;text-align:left;">
             <tr>
               <td align="center" style="padding:28px 28px 12px;">
-                <img src="cid:${WEEON_EMAIL_LOGO_CID}" alt="Weeon Ops" width="180" height="48" style="display:block;width:180px;height:48px;border:0;" />
+                <img src="cid:${WEEON_EMAIL_LOGO_CID}" alt="Weeon Ops" width="180" style="display:block;width:180px;height:auto;border:0;" />
               </td>
             </tr>
             <tr>

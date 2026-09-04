@@ -2,13 +2,15 @@
   "name": "weeon-management",
   "version": "0.1.0",
   "private": true,
-  "description": "Weeon Management — internal platform operations dashboard for the EduNova / Weeon org. Cross-tenant oversight: tenants, users per tenant, tenant stats, subscription health.",
+  "description": "Weeon Ops — internal platform operations dashboard for the Weeon School. Cross-tenant oversight: tenants, users per tenant, tenant stats, subscription health.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "render:email-logo": "tsx scripts/render-logo-wordmark.tsx",
+    "prebuild": "npm run render:email-logo"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
@@ -27,7 +29,11 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "geist": "^1.7.2",
+    "playwright": "^1.58.2",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
