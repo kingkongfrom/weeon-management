@@ -31,7 +31,7 @@ function platformEnv() {
  * DANGER:
  *  - Never expose the service-role key (or results gated on it) to the browser.
  *  - Keep this path separate from the tenant-scoped RLS path used by
- *    `weeon-admin`. Do not mix anon/tenant clients here for management reads.
+ *    `weeon-tenants`. Do not mix anon/tenant clients here for management reads.
  */
 export function createPlatformClient() {
   const { url, key } = platformEnv();

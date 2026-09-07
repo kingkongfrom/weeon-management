@@ -62,7 +62,7 @@ function toAdminContact(
  * Skeleton aggregator the dashboard will call. It is intentionally small:
  * production counting of students/teachers/classes/enrollments per tenant
  * should actually be done as a single SQL view / RPC over the shared schema
- * (owned by `weeon-admin`) rather than N+1 client queries. That work is
+ * (owned by `weeon-tenants`) rather than N+1 client queries. That work is
  * tracked in docs/data-model.md under "Planned platform aggregation".
  */
 export async function listTenantsForDashboard(): Promise<

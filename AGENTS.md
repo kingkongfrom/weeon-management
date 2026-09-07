@@ -11,9 +11,10 @@ manage every institution ("tenant"), see **how many users each tenant has**,
 per-tenant stats, and the subscription/health signals the organization needs to
 run efficiently.
 
-It is **one of four repositories** that make up the product — see
-`docs/repositories.md`. We read the same shared Supabase backend, but at the
-**platform scope** (never tenant-scoped RLS).
+It is **one of five repositories** that make up the product — see
+`docs/repositories.md` and the workspace map `../AGENTS.md`. We read the same
+shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS).
+`weeon-teachers` is the teacher web scaffold; do not build it here.
 
 ## Must-read docs (in order)
 
@@ -31,24 +32,25 @@ It is **one of four repositories** that make up the product — see
 | `README.md` | Status, run/verify commands, project structure |
 
 Cross-reference when a task mentions schema or RLS: always confirm against the
-**live admin-owned schema** in `weeon-admin`
+**live admin-owned schema** in `weeon-tenants`
 (`lib/supabase/database.types.ts`, `supabase/migrations/`) — never invent
 columns or tables.
 
 ## Non-negotiable rules
 
 1. **You are in `weeon-management` — the internal ops console.** Do **not**
-   build school-ERP admin UI here (that belongs in `weeon-admin`), public
-   marketing pages (that belongs in `weeon-marketing`), or mobile screens
-   (that belongs in `weeon-school`). See `docs/repositories.md`.
+   build school-ERP admin UI here (that belongs in `weeon-tenants`), public
+   marketing pages (that belongs in `weeon-marketing`), mobile screens
+   (that belongs in `weeon-mobile-apps`), or teacher-web reports
+   (that belongs in `weeon-teachers`). See `docs/repositories.md`.
    **Weeon Ops staff ≠ tenant school admins.** Security → Administrators is
    the ops directory (`docs/auth.md`), never `public.profiles`.
 2. **Cross-tenant reads use the server-only platform client**
    (`lib/supabase/platform.ts`, service-role) — **never** the tenant-scoped RLS
    path or the anon client, and **never** expose the service-role key or gated
    data to the browser.
-3. **The shared schema is owned by `weeon-admin`.** Any schema/RLS change must
-   be **additive** and made there, and must not break `weeon-school` mobile.
+3. **The shared schema is owned by `weeon-tenants`.** Any schema/RLS change must
+   be **additive** and made there, and must not break `weeon-mobile-apps` mobile.
    Do not create conflicting columns/tables in this repo.
 4. **RLS is tenant-scoped.** A single school is one tenant; schools never mix.
    Uniqueness is `(tenant_id, …)`. `tenants.saber_code` is the one
@@ -73,7 +75,7 @@ columns or tables.
 
 <!-- BEGIN:nextjs-agent-rules -->
 <!-- This repo runs Next.js 16; the appended `nextjs-agent-rules` block (and
-     the note in weeon-admin AGENTS.md) is auto-managed by `next dev`. Verify
+     the note in weeon-tenants AGENTS.md) is auto-managed by `next dev`. Verify
      anything version-specific against node_modules/next/dist/docs/.
 -->
 <!-- END:nextjs-agent-rules -->

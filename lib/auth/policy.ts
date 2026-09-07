@@ -25,7 +25,7 @@ export interface PlatformStaffRecord {
 /**
  * Ops-console staff directory. This is the Security admin list.
  * Isolated from school `profiles` / tenant administrators (including the
- * demo-school accounts used to test weeon-admin).
+ * demo-school accounts used to test weeon-tenants).
  */
 const PLATFORM_STAFF_DIRECTORY: readonly PlatformStaffRecord[] = [
     {

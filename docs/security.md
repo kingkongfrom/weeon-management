@@ -4,7 +4,7 @@
 
 ## Core fact: RLS is tenant-scoped; we are the platform exception
 
-`weeon-admin` and `weeon-school` read one school through RLS. **`weeon-management`
+`weeon-tenants` and `weeon-mobile-apps` read one school through RLS. **`weeon-management`
 reads across all tenants**, so it cannot use tenant-scoped RLS and instead uses
 the **service-role key server-only**. That is powerful and dangerous — treat this
 repo as an **ops credential surface**.
@@ -44,6 +44,6 @@ repo as an **ops credential surface**.
 
 ## Reference
 
-Sibling `weeon-admin` keeps a fuller `SECURITY.md`/`docs/security.md`. When that
+Sibling `weeon-tenants` keeps a fuller `SECURITY.md`/`docs/security.md`. When that
 repo defines platform-private tables or an operator role, align the staff auth
 model here rather than inventing a parallel one.

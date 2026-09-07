@@ -1,7 +1,7 @@
 # Platform-internal audit tables
 
 *Reading the ops/audit tables the console exposes. These already live in the
-shared Supabase project (created additively in `weeon-admin`). The console makes
+shared Supabase project (created additively in `weeon-tenants`). The console makes
 them visible to staff so the org can operate and troubleshoot without touching
 the raw DB.*
 
@@ -16,7 +16,7 @@ doing and whether each tenant is healthy.
 ### `tenant_backups`
 
 Per-tenant snapshot rows written by backup RPCs (scheduled via a cron hitting
-`weeon-admin` → `/api/backup/autosnapshot`, guarded by `CRON_SECRET`).
+`weeon-tenants` → `/api/backup/autosnapshot`, guarded by `CRON_SECRET`).
 
 | Column | Meaning |
 | ------ | ------- |
@@ -53,7 +53,7 @@ The trial-request funnel (marketing asked on a Código SABER).
 
 ### `tenant_restore_log`, `tenant_admin_log`
 
-Operational / admin action logs used by `weeon-admin` for restore and admin
+Operational / admin action logs used by `weeon-tenants` for restore and admin
 actions. Read them read-only to give staff a historical trail of admin/restore
 operations per tenant.
 

@@ -87,7 +87,7 @@ export function LogoCompact({ className = "", ...props }: Omit<LogoProps, "showT
   );
 }
 
-/** Favicon-style mark: white "W" letter on the gradient tile (same path as weeon-admin). */
+/** Favicon-style mark: white "W" letter on the gradient tile (same path as weeon-tenants). */
 export function LogoMark({ className = "", ...props }: Omit<LogoProps, "showTagline">) {
   const gradientId = `weeon-logo-mark-${useId().replace(/:/g, "")}`;
   return (

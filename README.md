@@ -8,18 +8,19 @@ every institution ("tenant"), see **how many users each tenant has**, per-tenant
 stats, and the health/subscription signals the team needs to run efficiently.
 
 > Internal tool for Weeon staff only. School administrators log into a
-> different app (`weeon-admin`). Do **not** put school-ERP admin UI here.
+> different app (`weeon-tenants`). Do **not** put school-ERP admin UI here.
 
 ---
 
-## The product lives in four repositories
+## The product lives in five repositories
 
 | Repo | URL | Role / surface | Stack |
 | ---- | --- | -------------- | ----- |
 | [`weeon-management`](https://github.com/kingkongfrom/weeon-management) | **This repo** | Internal ops console — tenants, users per tenant, tenant stats, subscription health (`ops.weeon.school`) | Next.js |
 | [`weeon-marketing`](https://github.com/kingkongfrom/weeon-marketing) | Public marketing site & trial funnel (`weeon.school`) | Next.js |
-| [`weeon-admin`](https://github.com/kingkongfrom/weeon-admin) | School web admin / ERP for **one tenant** (`app.weeon.school`) | Next.js |
-| [`weeon-school`](https://github.com/kingkongfrom/weeon-school) | Mobile apps for teachers, students, parents (Android + iOS) | Flutter |
+| [`weeon-tenants`](https://github.com/kingkongfrom/weeon-tenants) | School web admin / ERP for **one tenant** (`app.weeon.school`) | Next.js |
+| [`weeon-mobile-apps`](https://github.com/kingkongfrom/weeon-mobile-apps) | Mobile apps for teachers, students, parents (Android + iOS) | Flutter |
+| [`weeon-teachers`](https://github.com/kingkongfrom/weeon-teachers) | Teacher web — reports / desktop | Next.js |
 
 Full repo boundaries and what each app owns: [`docs/repositories.md`](docs/repositories.md).
 
@@ -48,7 +49,7 @@ Implemented now:
 - **Ops staff** isolated from tenants — `docs/auth.md`
 - Branded Resend invite + password reset (not Supabase generic mail)
 - Server-only platform Supabase client + domain types for `tenants` /
-  `profiles` (owned by `weeon-admin`)
+  `profiles` (owned by `weeon-tenants`)
 - `GET /api/health`
 
 ## Design system
@@ -59,7 +60,7 @@ The console follows the shared Weeon brand used across the sibling repos:
   purple→blue brand gradient (`--brand-start/mid/end = #5e25cc / #4f46e5 /
   #2b59ff`), `1rem` radius, brand-tinted elevation, soft `.dashboard-shell`
   wash.
-- **Icons** — [`lucide-react`](https://lucide.dev) (match `weeon-admin`);
+- **Icons** — [`lucide-react`](https://lucide.dev) (match `weeon-tenants`);
   icons use exactly **two brand hues** (indigo + teal) as duotone icon
   tiles (`lib/dashboard/icon-tone.ts`).
 - **Theme** — instant swap via `applyTheme` (no custom crossfade, same as the
@@ -69,7 +70,7 @@ The console follows the shared Weeon brand used across the sibling repos:
 
 > Note: `globalNotFound` is intentionally **off** — this app has a single root
 > layout, so `app/not-found.tsx` is the correct 404 convention (same as
-> `weeon-admin`). Turning it on would route unmatched URLs to
+> `weeon-tenants`). Turning it on would route unmatched URLs to
 > `app/global-not-found.tsx` (a full `<html>` document) and bypass the theme.
 
 ## Tech stack
@@ -115,7 +116,7 @@ cp .env.example .env.local
 | `RESEND_API_KEY` | Yes* | Branded invite + password-reset email |
 | `RESEND_FROM` | No | Defaults toward `Weeon Ops <…>` |
 | `WEEON_OPS_ORIGIN` | Prod | `https://ops.weeon.school` — invite/reset link origin |
-| `CRON_SECRET` | No | Same value as `weeon-admin` autosnapshot CRON secret (health overview) |
+| `CRON_SECRET` | No | Same value as `weeon-tenants` autosnapshot CRON secret (health overview) |
 | `ENVIRONMENT` | No | `development` \| `production` (keep consistent with siblings) |
 
 `*` The skeleton runs without it (shows a "not configured" hint); production
@@ -191,7 +192,7 @@ whole set so agents working in the repo start from the right place.
 
 | Document | Contents |
 | -------- | -------- |
-| [`docs/ecosystem.md`](docs/ecosystem.md) | How marketing, admin, mobile, and this ops console share one product and one database |
+| [`docs/ecosystem.md`](docs/ecosystem.md) | How marketing, admin, mobile, teacher web, and this ops console share one product and one database |
 | [`docs/repositories.md`](docs/repositories.md) | The four GitHub repos, who builds/reads what, shared DB vs this repo |
 | [`docs/auth.md`](docs/auth.md) | Weeon Ops staff vs school admins; branded invite/reset |
 | [`docs/architecture.md`](docs/architecture.md) | Stack, routes, Supabase clients, platform vs tenant authorization |
@@ -206,7 +207,7 @@ whole set so agents working in the repo start from the right place.
 ## Development notes
 
 - **We are a reader at platform scope.** Prefer **additive, backward-compatible**
-  database changes in `weeon-admin`; do not create conflicting columns/tables here.
+  database changes in `weeon-tenants`; do not create conflicting columns/tables here.
 - **RLS is tenant-scoped.** Do *not* rely on the anon client for cross-tenant
   reads. Use `lib/supabase/platform.ts` on the server only.
 - **Next.js 16 differs from training data.** Check `node_modules/next/dist/docs/`

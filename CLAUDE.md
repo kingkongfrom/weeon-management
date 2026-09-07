@@ -25,11 +25,11 @@ Read these before work (shortest to fastest signal):
 
 Non-negotiable:
 
-- School-ERP admin UI goes in **`weeon-admin`**; marketing in **`weeon-marketing`**;
-  mobile in **`weeon-school`**. Don't recreate them here.
+- School-ERP admin UI goes in **`weeon-tenants`**; marketing in **`weeon-marketing`**;
+  mobile in **`weeon-mobile-apps`**. Don't recreate them here.
 - Weeon Ops administrators live in **this repo** (`lib/auth/policy.ts` + invited
   staff). Do **not** load Security admins from `profiles` or `admin_invites`.
-- The shared Supabase schema is owned by **`weeon-admin`**. Confirm against its
+- The shared Supabase schema is owned by **`weeon-tenants`**. Confirm against its
   live `database.types.ts`/`migrations/`; keep changes **additive** and safe for
   the Flutter app. Don't invent columns/tables in this repo.
 - Cross-tenant reads: `lib/supabase/platform.ts` (server-only, service-role).

@@ -1,12 +1,12 @@
 // Domain types for Weeon Management.
 //
-// These mirror the LIVE shared Supabase schema owned by `weeon-admin`
+// These mirror the LIVE shared Supabase schema owned by `weeon-tenants`
 // (see that repo's lib/supabase/database.types.ts and supabase/migrations/).
 //
 // Weeon Management reads these tables from the PLATFORM scope via the
-// service-role client — NOT through the tenant-scoped RLS used by `weeon-admin`.
+// service-role client — NOT through the tenant-scoped RLS used by `weeon-tenants`.
 // Do not add columns here that contradict the admin-owned schema. Schema
-// changes in `weeon-admin` stay additive and are the source of truth.
+// changes in `weeon-tenants` stay additive and are the source of truth.
 
 export type Json =
   | string

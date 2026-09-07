@@ -1,6 +1,6 @@
 # Data model & live shared schema
 
-*The source of truth is the **admin-owned** Supabase schema in the `weeon-admin`
+*The source of truth is the **admin-owned** Supabase schema in the `weeon-tenants`
 repo (`lib/supabase/database.types.ts` + `supabase/migrations/`). This page is a
 management-focused reading of it. Never invent tables or columns.*
 
@@ -40,7 +40,7 @@ Columns (from the live schema):
 row is a **school administrator for that `tenant_id`**. The Settings
 administrators list in this console does **not** read `profiles` — see
 `docs/auth.md`. The same person (e.g. Eduardo) may exist as a demo-tenant
-school admin for testing `weeon-admin` and, separately, as the ops owner.
+school admin for testing `weeon-tenants` and, separately, as the ops owner.
 
 **The primary "users per tenant" number comes from `profiles`.**
 
@@ -103,7 +103,7 @@ flags are read from `settings` for per-tenant stats, while `status` /`plan` /
 
 ## Platform & audit tables (built for console / ops reads)
 
-Already in the DB from `weeon-admin` migrations:
+Already in the DB from `weeon-tenants` migrations:
 
 - `tenant_backups` — per-tenant snapshot (`kind`, `as_of`, `payload` JSON,
   `row_count`, timestamp) + RPCs `capture_tenant_backup`,
@@ -118,16 +118,16 @@ audit views (see `audit-log.md`).
 
 ## Computed metrics
 
-Prefer one SQL aggregation (a view/RPC, additive in `weeon-admin`) over many
+Prefer one SQL aggregation (a view/RPC, additive in `weeon-tenants`) over many
 client queries. Intended shapes — see `metrics.md` and the `TenantMetrics` type
 in `lib/domain.ts`.
 
 ## Rules for this repo
 
-1. Confirm schema against `weeon-admin` before relying on or summing a column.
+1. Confirm schema against `weeon-tenants` before relying on or summing a column.
 2. All console reads are **platform scope** (service-role, server-only).
-3. Do not create or alter schema here; additively extend in `weeon-admin` while
-   keeping `weeon-school` mobile working.
+3. Do not create or alter schema here; additively extend in `weeon-tenants` while
+   keeping `weeon-mobile-apps` mobile working.
 
 ## Verified against the live database — 2026-09-03
 
@@ -135,7 +135,7 @@ Cross-checked with the shared Supabase project (service-role, read-only):
 - Live rows today: **1 tenant** — `WEEON DEMO SCHOOL` (saber `999999-00`,
   `status=trial`, `plan=pro`) + its `trial_requests` row (verified+consumed).
 - `profiles`: **2** (both role `admin` on the demo tenant — school admins for
-  testing `weeon-admin`, **not** the Weeon Ops Settings list).
+  testing `weeon-tenants`, **not** the Weeon Ops Settings list).
 - Roster (`students/teachers/classes/…`), `grades`, `subjects` seeding:
   roster empty; `subjects` **12** rows (seeded MEP catalog); setup milestones
   recorded in `settings`.

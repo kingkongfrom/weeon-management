@@ -51,7 +51,7 @@ suspended`.
 
 ## Data-access guidance
 
-- Prefer a **single aggregate view/RPC** (additive, owned in `weeon-admin`)
+- Prefer a **single aggregate view/RPC** (additive, owned in `weeon-tenants`)
   returning one row per tenant with `counts`, `seats`, `latest backup`. The
   dashboard then does a single platform-scope select. The current skeleton
   only groups `profiles` to keep moving; replace N+1 loops as soon as the SQL

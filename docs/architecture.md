@@ -5,7 +5,7 @@ authorization.* Read before writing code or wiring credentials.
 
 ## Stack
 
-Aligned with the sibling Next.js repos (`weeon-admin`, `weeon-marketing`):
+Aligned with the sibling Next.js repos (`weeon-tenants`, `weeon-marketing`):
 
 - Next.js **16.3.3** (App Router, Turbopack)
 - React **19.2** · TypeScript **strict**
@@ -46,7 +46,7 @@ Two clients exist — keep them separate.
 
 ### Platform-scope reads (why service-role, but carefully)
 
-`weeon-admin` and `weeon-school` read one school each through tenant-scoped RLS.
+`weeon-tenants` and `weeon-mobile-apps` read one school each through tenant-scoped RLS.
 `weeon-management` must see **all** schools, so it cannot use tenant RLS. It uses
 the **server-only service-role client** (`lib/supabase/platform.ts`).
 
@@ -58,7 +58,7 @@ Guardrails (see `security.md`):
    client components.
 3. Only *trusted* platform staff reach the operations dashboard. Platform
    authentication is a dedicated model (see `docs/auth.md`) — never the
-   single-school `profiles.role = 'admin'` used by `weeon-admin`.
+   single-school `profiles.role = 'admin'` used by `weeon-tenants`.
 4. Do **not** mix the anon/tenant client into management reads.
 
 ### Authentication model (live)
@@ -78,7 +78,7 @@ Full flow, env, and “do not use these tables” list: **`docs/auth.md`**.
 ## Data access direction
 
 Aggregation should happen **in the database** (a platform view or `RPC` owned
-additively in `weeon-admin`) rather than N+1 client loops. Until that view
+additively in `weeon-tenants`) rather than N+1 client loops. Until that view
 exists, `lib/platform/metrics.ts` provides a small skeleton that lists tenants
 and counts `profiles` per tenant. See `data-model.md` and `metrics.md`.
 

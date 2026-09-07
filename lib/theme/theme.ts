@@ -24,7 +24,7 @@ function persistThemeCookie(theme: ThemePreference) {
 
 /**
  * Instantly switch the theme — no custom crossfade/wash. Mirrors the sibling
- * `weeon-admin` behaviour: only the element-level `transition-colors` classes
+ * `weeon-tenants` behaviour: only the element-level `transition-colors` classes
  * respond, so the change stays even and consistent across every repo.
  */
 export function applyTheme(theme: ThemePreference) {

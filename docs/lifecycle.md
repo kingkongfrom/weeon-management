@@ -2,8 +2,8 @@
 
 *Business rules that explain `tenants.status`, `tenants.plan`, trial dates,
 billing seats, and how the ops console should read them. Source of truth for
-behavior lives in the sibling repos (`weeon-admin` / `weeon-marketing` /
-`weeon-school` plans and `docs`).*
+behavior lives in the sibling repos (`weeon-tenants` / `weeon-marketing` /
+`weeon-mobile-apps` plans and `docs`).*
 
 ## One line
 
@@ -44,14 +44,14 @@ reflect the billed month and paid seat count.
 ## Commercial path (context)
 
 1. Marketing trial request → approval → activation token.
-2. `weeon-admin` verifies/claims (SABER) and starts a 14-day trial → status
+2. `weeon-tenants` verifies/claims (SABER) and starts a 14-day trial → status
    `trial`, `trial_started_at` set.
 3. Payment (GreenPay/Stripe, post-MVP) converts trial → `active` with seats;
    **roster provisioning + auth users happen after payment**.
 4. Ongoing billing: renewal charges → `past_due` on failure → grace → `suspended`.
 
 The console's role is to **observe** and **alert**, not to change lifecycle
-state (that logic lives in `weeon-admin` / payment service).
+state (that logic lives in `weeon-tenants` / payment service).
 
 ## Seat & user accounting
 
@@ -65,4 +65,4 @@ state (that logic lives in `weeon-admin` / payment service).
 A good health view buckets tenants: **healthy** (`active`), **nurturing**
 (`trial`, expiring N days), **needs attention** (`past_due`), **at risk**
 (`suspended`, or no recent backup). Aggregation (additive view/RPC in
-`weeon-admin`) computing these buckets from one query is preferred.
+`weeon-tenants`) computing these buckets from one query is preferred.
