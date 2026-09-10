@@ -9,7 +9,13 @@ import {
   resolveBillingSeats,
   resolveSchoolCalendarStructure,
   type Tenant,
+  type TenantRosterCounts,
 } from "@/lib/domain";
+
+type TenantTableClientProps = {
+  tenants: Tenant[];
+  counts: Record<string, TenantRosterCounts>;
+};
 
 function matchesQuery(tenant: Tenant, query: string): boolean {
   const q = query.trim().toLowerCase();
@@ -24,7 +30,7 @@ function matchesQuery(tenant: Tenant, query: string): boolean {
   ].some((value) => value.toLowerCase().includes(q));
 }
 
-export function TenantTableClient({ tenants }: { tenants: Tenant[] }) {
+export function TenantTableClient({ tenants, counts }: TenantTableClientProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(
@@ -40,7 +46,8 @@ export function TenantTableClient({ tenants }: { tenants: Tenant[] }) {
             Tenants
           </h1>
           <p className="mt-1 text-sm font-medium text-foreground/55">
-            All schools and institutions on the platform — status and paid seats.
+            All schools and institutions on the platform — roster, status, and
+            paid seats.
           </p>
         </div>
 
@@ -86,6 +93,9 @@ export function TenantTableClient({ tenants }: { tenants: Tenant[] }) {
                 </th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
+                  Students
+                </th>
+                <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
                   Seats
                 </th>
               </tr>
@@ -124,6 +134,9 @@ export function TenantTableClient({ tenants }: { tenants: Tenant[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={tenant.status} />
+                  </td>
+                  <td className="hidden px-4 py-3 text-right tabular-nums text-foreground/80 sm:table-cell">
+                    {counts[tenant.id] ? counts[tenant.id].students : "—"}
                   </td>
                   <td className="hidden px-4 py-3 text-right tabular-nums text-foreground/80 sm:table-cell">
                     {resolveBillingSeats(tenant)}

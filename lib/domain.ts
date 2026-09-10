@@ -306,6 +306,7 @@ export function resolveSecondarySchoolCycles(settings: Json): string {
 
 /** School admin contact shown on tenant detail. */
 export interface TenantAdminContact {
+  id: string;
   name: string;
   email: string;
 }
@@ -334,6 +335,24 @@ export interface Profile {
   first_login_at: string | null;
   provisioned_at: string | null;
   created_at: string;
+}
+
+/**
+ * Per-tenant roster/user roll-up from `public.platform_tenant_metrics`
+ * (owned by `weeon-tenants`). This is the REAL roster size ops needs — distinct
+ * from `tenants.billing_seats`, which stays 0 until a school pays.
+ */
+export interface TenantRosterCounts {
+  tenantId: string;
+  profiles: number;
+  admins: number;
+  teacherUsers: number;
+  studentUsers: number;
+  parentUsers: number;
+  students: number;
+  teachers: number;
+  classes: number;
+  enrollments: number;
 }
 
 /** Aggregated per-tenant view shown in the dashboard. */

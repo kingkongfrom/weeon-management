@@ -2,14 +2,17 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { TenantsPageSkeleton } from "@/components/dashboard/skeleton";
 import { TenantTableClient } from "@/components/dashboard/tenant-table-client";
-import { listTenants } from "@/lib/platform/metrics";
+import { listTenantMetrics, listTenants } from "@/lib/platform/metrics";
 
 export const metadata: Metadata = {
   title: "Tenants",
 };
 
 async function TenantsContent() {
-  const { tenants, reason } = await listTenants();
+  const [{ tenants, reason }, { metrics }] = await Promise.all([
+    listTenants(),
+    listTenantMetrics(),
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col">
@@ -18,7 +21,10 @@ async function TenantsContent() {
           {reason ?? "No tenants found."}
         </p>
       ) : (
-        <TenantTableClient tenants={tenants} />
+        <TenantTableClient
+          tenants={tenants}
+          counts={Object.fromEntries(metrics)}
+        />
       )}
     </div>
   );

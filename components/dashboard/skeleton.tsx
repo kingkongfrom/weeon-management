@@ -193,36 +193,66 @@ export function TenantDetailSkeleton() {
       className="mx-auto flex w-full max-w-6xl flex-col"
     >
       <Skeleton className="mb-4 h-4 w-32" />
-      <Skeleton className="h-8 w-64 max-w-full" />
-      <div className="mt-2 flex items-center gap-2">
-        <Skeleton className="h-5 w-16 rounded-full" />
-        <Skeleton className="h-4 w-40" />
-      </div>
-      <div className="mt-6 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 9 }, (_, index) => (
-          <div key={index} className="bg-surface p-4">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="mt-2 h-4 w-36 max-w-full" />
+      <div className="flex items-start gap-4">
+        <Skeleton className="h-14 w-14 shrink-0 rounded-2xl" />
+        <div className="min-w-0 flex-1">
+          <Skeleton className="h-8 w-64 max-w-full" />
+          <div className="mt-2 flex items-center gap-2">
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-4 w-40" />
           </div>
-        ))}
+          <Skeleton className="mt-3 h-4 w-56" />
+        </div>
       </div>
-      <section className="mt-6 rounded-2xl border border-border bg-surface p-5 sm:p-6">
-        <Skeleton className="h-4 w-40" />
-        <div className="mt-4 flex flex-col gap-3">
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
           {Array.from({ length: 2 }, (_, index) => (
-            <div
+            <section
               key={index}
-              className="flex flex-col gap-2 border-b border-border pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+              className="overflow-hidden rounded-2xl border border-border bg-surface"
             >
-              <div className="min-w-0 flex-1">
-                <Skeleton className="h-4 w-40 max-w-full" />
-                <Skeleton className="mt-2 h-3 w-56 max-w-full" />
+              <div className="border-b border-border px-5 py-3">
+                <Skeleton className="h-3 w-40" />
               </div>
-              <Skeleton className="h-5 w-16 rounded-full" />
-            </div>
+              <div className="divide-y divide-border/70">
+                {Array.from({ length: 4 }, (_, row) => (
+                  <div
+                    key={row}
+                    className="flex items-center justify-between gap-4 px-5 py-3"
+                  >
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
-      </section>
+        <div className="flex flex-col gap-6">
+          {Array.from({ length: 2 }, (_, index) => (
+            <section
+              key={index}
+              className="overflow-hidden rounded-2xl border border-border bg-surface"
+            >
+              <div className="border-b border-border px-5 py-3">
+                <Skeleton className="h-3 w-24" />
+              </div>
+              <div className="divide-y divide-border/70">
+                {Array.from({ length: 3 }, (_, row) => (
+                  <div
+                    key={row}
+                    className="flex items-center justify-between gap-4 px-5 py-3"
+                  >
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
     </Screen>
   );
 }
