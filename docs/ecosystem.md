@@ -1,15 +1,15 @@
 # Weeon ecosystem — how this repo fits
 
 *Canonical map for agents building **weeon-management** (Weeon Ops).*
-Sibling docs still call this surface **`weeon-platform-admin` (planned)**.
-That product **is this repo**, live as `https://ops.weeon.school`.
+Older docs may call this surface **`weeon-platform-admin`**; that product **is
+this repo**, live as `https://ops.weeon.school`.
 
 Read sibling sources when a change crosses a boundary; do not copy their UI.
 
-| Repo (checkout) | Their docs | What they still say |
+| Repo (checkout) | Their docs | What to check |
 | --- | --- | --- |
-| `weeon-tenants` | `docs/repositories.md`, `docs/overview.md` | Should list this repo as live ops (not planned `weeon-platform-admin`) |
-| `weeon-marketing` | `docs/repositories.md`, `docs/trial-request-flow.md` | Should list five repos including ops |
+| `weeon-tenants` | `docs/repositories.md`, `docs/overview.md` | Lists this repo as live ops |
+| `weeon-marketing` | `docs/repositories.md`, `docs/trial-request-flow.md` | Lists five repos including ops |
 | `weeon-mobile-apps` | Flutter app | Same Supabase schema as admin |
 | `weeon-teachers` | Teacher web scaffold | Same schema when wired; not ops |
 

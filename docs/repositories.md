@@ -18,9 +18,8 @@ but at different scopes. Workspace map: `../AGENTS.md`.
 | **weeon-management** | https://github.com/kingkongfrom/weeon-management | **Internal ops console** (`https://ops.weeon.school`) | **Weeon staff** | **Cross-tenant (platform)** | Next.js 16 |
 
 This `docs/repositories.md` lives in **`weeon-management`**, the platform ops
-console. Sibling trees may still name this surface **`weeon-platform-admin`
-(planned)** — that is this repo. Full relationship, commercial path, and
-auth/DB boundaries: **`docs/ecosystem.md`**.
+console (older docs named it `weeon-platform-admin`). Full relationship,
+commercial path, and auth/DB boundaries: **`docs/ecosystem.md`**.
 
 ## weeon-management = the platform ops console
 

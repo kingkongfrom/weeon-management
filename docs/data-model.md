@@ -118,9 +118,18 @@ audit views (see `audit-log.md`).
 
 ## Computed metrics
 
-Prefer one SQL aggregation (a view/RPC, additive in `weeon-tenants`) over many
-client queries. Intended shapes — see `metrics.md` and the `TenantMetrics` type
-in `lib/domain.ts`.
+One SQL aggregation, owned additively in `weeon-tenants`:
+**`public.platform_tenant_metrics`** (`20260910160000_platform_tenant_metrics.sql`).
+One row per tenant — `profiles`, `admins`, `teacher_users`, `student_users`,
+`parent_users`, `students`, `teachers`, `classes`, `enrollments` — with
+soft-deletes respected and access limited to the service role. The console reads
+it via `lib/platform/metrics.ts`; see `metrics.md` and `TenantRosterCounts` in
+`lib/domain.ts`.
+
+Related schema additions from the same period (owned by `weeon-tenants`):
+`tenants.grace_ends_at` / `trial_reminder_stage` (trial lifecycle),
+`students_guardians_required` (every student needs a guardian),
+`tenant_admin_log.provision_kind='removed'` (ops admin offboarding).
 
 ## Rules for this repo
 
@@ -129,17 +138,20 @@ in `lib/domain.ts`.
 3. Do not create or alter schema here; additively extend in `weeon-tenants` while
    keeping `weeon-mobile-apps` mobile working.
 
-## Verified against the live database — 2026-09-03
+## Verified against the live database — 2026-09-10
 
 Cross-checked with the shared Supabase project (service-role, read-only):
-- Live rows today: **1 tenant** — `WEEON DEMO SCHOOL` (saber `999999-00`,
-  `status=trial`, `plan=pro`) + its `trial_requests` row (verified+consumed).
-- `profiles`: **2** (both role `admin` on the demo tenant — school admins for
-  testing `weeon-tenants`, **not** the Weeon Ops Settings list).
-- Roster (`students/teachers/classes/…`), `grades`, `subjects` seeding:
-  roster empty; `subjects` **12** rows (seeded MEP catalog); setup milestones
-  recorded in `settings`.
-- `tenant_backups`: **3** rows (`kind`: auto/pre_restore/auto; ~13–14 rows per
-  snapshot). `activity_events`: **3** (`user_created`). `admin_invites`: **1**
-  (silvia, accepted). So the ops/audit tables the console surfaces are live and
-  have data to render once wired.
+- **1 tenant** — `WEEON DEMO SCHOOL` (saber `999999-00`, `status=trial`,
+  `plan=pro`); `trial_requests` **1**.
+- `profiles`: **4** (2 school `admin`, 2 `teacher`). Both admins are school
+  admins for testing `weeon-tenants` — **not** the Weeon Ops Settings list.
+- `roster_accounts`: **43** login usernames (`pending_first_login`) — 20
+  `student` (`2026001…`), 20 `parent` (`e`+apellido), 3 `teacher`.
+- Roster: **20** active `students` (+10 soft-deleted duplicates removed),
+  **1** `teachers` record, **2** `classes` (1A/1B), **20** active
+  `enrollments`; `subjects` **12** (seeded MEP catalog). Every student carries
+  ≥1 guardian (`students_guardians_required`; placeholders are `Encargado/a`
+  until the school supplies real data).
+- `public.platform_tenant_metrics` returns non-zero counts for the demo tenant.
+- Ops/audit: `tenant_backups` **11**, `activity_events` **55**,
+  `admin_invites` **1** — the tables the console surfaces are live.

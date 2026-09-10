@@ -66,6 +66,25 @@ Settings then shows the owner plus invited rows (`Invite pending` until
 accept). School testers (e.g. Silvia on the demo tenant) do **not** appear
 unless the owner invites them **here**.
 
+## Removing a school administrator (offboarding)
+
+When a school asks us to revoke one of their administrators (security), ops can
+do it from **Tenant detail → Administrators**. Each admin row (only when the
+school has more than one) has a trash action that opens a confirm dialog
+(`<dialog>`) — removal is never a single click.
+
+- Action: `lib/dashboard/tenant-admin-actions.ts`
+  (`removeTenantAdministratorAction`), UI:
+  `components/dashboard/remove-administrator.tsx`.
+- Ops-staff session required; the write uses the service-role platform client.
+- Deletes the tenant `profiles` row (`role='admin'`, matching `tenant_id`) — this
+  is a hard revoke, because the tenant app resolves tenant/role from `profiles`.
+- **Refuses to remove the last remaining administrator** (avoids locking a
+  school out).
+- `auth.users` is **not** touched — the same login may administer another tenant.
+- Every removal is written to `public.tenant_admin_log`
+  (`provision_kind='removed'`); see `../weeon-tenants/docs/account-security-ops.md`.
+
 ## Password reset
 
 Same isolation: only ops staff (directory or accepted invite). Branded Resend
@@ -98,5 +117,7 @@ mail, token in `data/ops-staff.json` (`kind: reset`), complete on
 | `lib/auth/ops-staff-store.ts` | Invite/reset tokens + invited members |
 | `lib/auth/auth-user.ts` | Auth user resolve without generic mail |
 | `lib/email/*` | Branded Resend templates |
-| `app/dashboard/security/page.tsx` | Administrators UI |
+| `lib/dashboard/tenant-admin-actions.ts` | Remove a school administrator (offboarding) |
+| `components/dashboard/remove-administrator.tsx` | Offboarding confirm dialog |
+| `app/dashboard/security/page.tsx` | Administrators UI (ops staff) |
 | `app/accept-invite/page.tsx` | Accept branded invite |

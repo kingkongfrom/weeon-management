@@ -1,8 +1,9 @@
 # Tenant metrics
 
 *The specific numbers the ops console must show and how to source them
-correctly from the shared Supabase schema. Skeleton types: `TenantMetrics` in
-`lib/domain.ts`; skeleton loader in `lib/platform/metrics.ts`.*
+correctly from the shared Supabase schema. Types: `TenantRosterCounts` /
+`TenantMetrics` in `lib/domain.ts`; loader in `lib/platform/metrics.ts`, which
+reads the `public.platform_tenant_metrics` view.*
 
 ## Why per-tenant metrics matter
 
@@ -51,14 +52,21 @@ suspended`.
 
 ## Data-access guidance
 
-- Prefer a **single aggregate view/RPC** (additive, owned in `weeon-tenants`)
-  returning one row per tenant with `counts`, `seats`, `latest backup`. The
-  dashboard then does a single platform-scope select. The current skeleton
-  only groups `profiles` to keep moving; replace N+1 loops as soon as the SQL
-  view exists.
+- **Source of truth:** `public.platform_tenant_metrics` — a single view owned in
+  `weeon-tenants` (`20260910160000_platform_tenant_metrics.sql`). One row per
+  tenant with `profiles`, `admins`, `teacher_users`, `student_users`,
+  `parent_users`, `students`, `teachers`, `classes`, `enrollments`. Counts
+  respect soft-deletes (`students`/`teachers.deleted_at`,
+  `enrollments.dropped_at`, `classes.active`). The view is **service-role only**
+  (revoked from `anon`/`authenticated`).
+- `lib/platform/metrics.ts` reads it once (`listTenantMetrics`) and maps rows to
+  `TenantRosterCounts`; `getTenantRosterCounts(tenantId)` serves the tenant
+  detail page.
 - Do not compute roster roll-ups with repeated per-tenant client selects at
-  platform scale.
-- Keep `TenantMetrics` in `lib/domain.ts` in sync with whichever view you write.
+  platform scale. To add a metric, extend the view and keep `TenantRosterCounts`
+  in sync.
+- `billing_seats` (`tenants`) is the **paid** seat count (0 until payment) —
+  distinct from the roster numbers above; never conflate the two.
 
 ## Presenting
 

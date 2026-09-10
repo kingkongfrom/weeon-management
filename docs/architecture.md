@@ -77,15 +77,17 @@ Full flow, env, and “do not use these tables” list: **`docs/auth.md`**.
 
 ## Data access direction
 
-Aggregation should happen **in the database** (a platform view or `RPC` owned
-additively in `weeon-tenants`) rather than N+1 client loops. Until that view
-exists, `lib/platform/metrics.ts` provides a small skeleton that lists tenants
-and counts `profiles` per tenant. See `data-model.md` and `metrics.md`.
+Aggregation happens **in the database**: `public.platform_tenant_metrics` is a
+platform view owned additively in `weeon-tenants`
+(`20260910160000_platform_tenant_metrics.sql`, service-role only). The console
+reads it once per request via `lib/platform/metrics.ts`
+(`listTenantMetrics` / `getTenantRosterCounts`) — no N+1 loops. See
+`data-model.md` and `metrics.md`.
 
 ## Conventions
 
 - Server Components load data; client components render and interact.
-- Plain CSS + Tailwind utilities; no component library dependency in the
-  skeleton (small `components/ui/*` primitives kept local).
+- Plain CSS + Tailwind utilities; no component library dependency (small
+  `components/ui/*` primitives kept local).
 - Never display service-role-gated raw rows or keys to the browser.
 - Domain types live in `lib/domain.ts`, mirroring the live schema.
