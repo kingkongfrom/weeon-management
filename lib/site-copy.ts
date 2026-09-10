@@ -5,7 +5,7 @@ export const product = {
   shortName: "Weeon Management",
   repo: "weeon-management",
   origin: "https://ops.weeon.school",
-  audience: "Weeon / EduNova staff (internal only)",
+  audience: "Weeon staff (internal only)",
 };
 
 export const architecture = {
@@ -50,6 +50,6 @@ export const siteCopy = {
   hero: {
     kicker: "Internal — Weeon staff only",
     title: "Weeon Management",
-    lead: "The platform operations console. Manage every tenant in the EduNova / Weeon ecosystem, how many users each tenant has, per-tenant stats, and the health signals the organization needs to run efficiently.",
+    lead: "The platform operations console. Manage every tenant in the Weeon ecosystem, how many users each tenant has, per-tenant stats, and the health signals the organization needs to run efficiently.",
   },
 } as const;

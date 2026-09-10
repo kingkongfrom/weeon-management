@@ -1,9 +1,9 @@
 # Weeon Management
 
-**Weeon / EduNova — internal platform operations dashboard.**
+**Weeon — internal platform operations dashboard.**
 
 This repository is the **management console** for the whole Weeon ecosystem. It
-gives the **organization (Kingkongfrom / EduNova)** a single place to operate
+gives the **organization (Kingkongfrom)** a single place to operate
 every institution ("tenant"), see **how many users each tenant has**, per-tenant
 stats, and the health/subscription signals the team needs to run efficiently.
 

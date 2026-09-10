@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Claude/Codex-friendly onboarding for **Weeon Management** — the internal
-**platform operations console** for the Weeon / EduNova organization.
+**platform operations console** for the Weeon organization.
 
 This is **one of four repos** in the product. We are the **cross-tenant**
 dashboard: manage every tenant, see **how many users each tenant has**, and the

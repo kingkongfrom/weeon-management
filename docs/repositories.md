@@ -1,4 +1,4 @@
-# Weeon / EduNova — Repositories & ownership
+# Weeon — Repositories & ownership
 
 *Who builds what, and where the boundaries are. Read before touching
 architecture or deciding where a feature belongs.*
@@ -15,7 +15,7 @@ but at different scopes. Workspace map: `../AGENTS.md`.
 | **weeon-tenants** | https://github.com/kingkongfrom/weeon-tenants | School web admin / ERP (`https://app.weeon.school`) | School administrators (one tenant) | Tenant-scoped RLS | Next.js 16 |
 | **weeon-mobile-apps** | https://github.com/kingkongfrom/weeon-mobile-apps | Mobile apps — teachers, students, parents | End users | Tenant-scoped RLS via end-user auth | Flutter |
 | **weeon-teachers** | https://github.com/kingkongfrom/weeon-teachers | Teacher web — reports / desktop | Teachers | Tenant-scoped RLS (when wired) | Next.js 16 |
-| **weeon-management** | https://github.com/kingkongfrom/weeon-management | **Internal ops console** (`https://ops.weeon.school`) | **Weeon / EduNova staff** | **Cross-tenant (platform)** | Next.js 16 |
+| **weeon-management** | https://github.com/kingkongfrom/weeon-management | **Internal ops console** (`https://ops.weeon.school`) | **Weeon staff** | **Cross-tenant (platform)** | Next.js 16 |
 
 This `docs/repositories.md` lives in **`weeon-management`**, the platform ops
 console. Sibling trees may still name this surface **`weeon-platform-admin`

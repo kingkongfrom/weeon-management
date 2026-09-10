@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: "%s · Weeon Ops",
     },
     description: siteCopy.meta.description,
-    authors: [{ name: "Kingkongfrom / EduNova" }],
+    authors: [{ name: "Kingkongfrom" }],
     robots: { index: false, follow: false },
     icons: {
       icon: [{ url: "/icon.svg", type: "image/svg+xml" }],

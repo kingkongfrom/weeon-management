@@ -33,7 +33,7 @@ If a sibling still says “three repos” or “platform admin is planned”, pr
                                │
                     weeon-management  ← you are here
                     ops.weeon.school
-                    Weeon / EduNova staff
+                    Weeon staff
                     service-role, cross-tenant
 ```
 

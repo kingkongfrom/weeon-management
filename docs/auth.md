@@ -9,7 +9,7 @@ administrators. Mixing the two is a bug.
 | | Weeon Ops staff | School (tenant) admin |
 | --- | --- | --- |
 | App | `https://ops.weeon.school` (this repo) | `https://app.weeon.school` (`weeon-tenants`) |
-| Audience | EduNova / Weeon employees | One school’s ERP admins |
+| Audience | Weeon employees | One school’s ERP admins |
 | Source of truth | `lib/auth/policy.ts` directory + invited rows in `data/ops-staff.json` | `public.profiles` where `role = 'admin'` and `tenant_id` is set |
 | Invite tables | **Never** `admin_invites` | `admin_invites`, `admin_password_resets` |
 | Email | Branded Resend from this app | School-admin onboarding in `weeon-tenants` |

@@ -1,7 +1,7 @@
 # Security
 
-Weeon Management is the **internal platform operations console** for the Weeon /
-EduNova organization. It reads the shared Supabase project **across every
+Weeon Management is the **internal platform operations console** for the Weeon
+organization. It reads the shared Supabase project **across every
 tenant**, so treat it as an ops-credential surface, not a public app.
 
 Read the full rules in `docs/security.md`. Highlights:

@@ -6,7 +6,7 @@ working in this repo. Read the linked docs before feature or data work.*
 ## Repo in one line
 
 **Weeon Management** is the **internal platform operations console** for the
-Weeon / EduNova organization (Kingkongfrom). It is a **cross-tenant** dashboard:
+Weeon organization (Kingkongfrom). It is a **cross-tenant** dashboard:
 manage every institution ("tenant"), see **how many users each tenant has**,
 per-tenant stats, and the subscription/health signals the organization needs to
 run efficiently.
