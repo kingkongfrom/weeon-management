@@ -13,6 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import { TenantDetailSkeleton } from "@/components/dashboard/skeleton";
+import { ParentPaymentsAddonCard } from "@/components/dashboard/parent-payments-addon-card";
 import { RemoveAdministratorButton } from "@/components/dashboard/remove-administrator";
 import { Card } from "@/components/ui/Card";
 import { CopyableValue } from "@/components/ui/CopyableValue";
@@ -40,6 +41,7 @@ import {
   getTenantRosterCounts,
   listTenantAdmins,
 } from "@/lib/platform/metrics";
+import { getParentPaymentsAddonStatus } from "@/lib/platform/parent-payments-addon";
 import { createPlatformClient } from "@/lib/supabase/platform";
 
 async function getTenant(id: string) {
@@ -75,10 +77,11 @@ async function TenantDetailContent({
     notFound();
   }
 
-  const [admins, backup, roster] = await Promise.all([
+  const [admins, backup, roster, parentPayments] = await Promise.all([
     listTenantAdmins(id),
     getTenantBackupStatus(id, tenant.name),
     getTenantRosterCounts(id),
+    getParentPaymentsAddonStatus(id),
   ]);
 
   const isTrial = tenant.status === "trial";
@@ -191,6 +194,7 @@ async function TenantDetailContent({
             </DetailList>
           </SectionCard>
 
+          <ParentPaymentsAddonCard tenantId={tenant.id} status={parentPayments} />
           <AdministratorsCard admins={admins} tenantId={tenant.id} />
         </div>
       </div>

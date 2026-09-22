@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f7f9" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f6f5" },
     { media: "(prefers-color-scheme: dark)", color: "#1c2230" },
   ],
   colorScheme: "light dark",
@@ -58,7 +58,7 @@ export default async function RootLayout({
   const htmlClass = [
     geistSans.variable,
     geistMono.variable,
-    "h-full antialiased",
+    "antialiased",
     theme === "dark" ? "dark" : "",
     sidebarCollapsed ? "sidebar-collapsed" : "",
   ]
@@ -78,7 +78,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-dvh bg-background text-foreground">
         {children}
       </body>
     </html>

@@ -9,6 +9,7 @@ import {
     isAllowedStaffEmailDomain,
     normalizeEmail,
     staffNameFor,
+    staffRoleFor,
 } from "@/lib/auth/policy";
 import {canAccessOpsConsole} from "@/lib/auth/platform-staff";
 
@@ -22,6 +23,7 @@ export function toSessionUser(user: User): DashboardSessionUser | null {
         name,
         email: email || null,
         initials: initialsFor(name, email),
+        role: staffRoleFor(email),
     };
 }
 

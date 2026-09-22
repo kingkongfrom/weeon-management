@@ -4,8 +4,8 @@
 
 :root {
     color-scheme: light;
-    /* Light palette — Brand paper (matches the marketing site) */
-    --background: #f7f7f9;
+    /* Light palette — ops canvas (aligned with school ERP) */
+    --background: #f3f6f5;
     --foreground: #1b2433;
 
     /* Brand palette: refined indigo with teal accent */
@@ -409,7 +409,7 @@ button:disabled {
     isolation: isolate;
     overflow: hidden;
     color-scheme: light;
-    background-color: #f7f8fc;
+    background-color: var(--background);
     background-image:
             radial-gradient(ellipse 75% 55% at 12% -8%, rgb(99 102 241 / 0.16), rgb(99 102 241 / 0) 62%),
             radial-gradient(ellipse 65% 50% at 100% 108%, rgb(34 211 238 / 0.14), rgb(34 211 238 / 0) 58%),
@@ -536,6 +536,11 @@ button:disabled {
 
 .login-bg .login-lockup .login-school {
     color: rgb(255 255 255 / 0.72);
+}
+
+/* Login wordmark: keep the gradient "Weeon" but force "Ops" to white on the navy field. */
+.login-bg .login-logo span:not(.brand-text) {
+    color: #fff;
 }
 
 .login-card {

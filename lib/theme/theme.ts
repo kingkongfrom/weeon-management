@@ -1,7 +1,7 @@
 export const THEME_STORAGE_KEY = "weeon.ops.theme";
 export const THEME_COOKIE_KEY = THEME_STORAGE_KEY;
 
-export const THEME_LIGHT_BG = "#f7f7f9";
+export const THEME_LIGHT_BG = "#f3f6f5";
 export const THEME_DARK_BG = "#1c2230";
 
 export type ThemePreference = "light" | "dark";

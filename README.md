@@ -56,7 +56,7 @@ Implemented now:
 
 The console follows the shared Weeon brand used across the sibling repos:
 
-- **Palette** — brand paper `#f7f7f9` (light) / Dusk slate (dark); the 3-stop
+- **Palette** — light canvas `#f3f6f5` (same as school ERP) / Dusk slate (dark); the 3-stop
   purple→blue brand gradient (`--brand-start/mid/end = #5e25cc / #4f46e5 /
   #2b59ff`), `1rem` radius, brand-tinted elevation, soft `.dashboard-shell`
   wash.
