@@ -60,7 +60,7 @@ export function Logo({ showTagline = false, className = "", ...props }: LogoProp
           <span className="brand-text">Weeon</span>
           <EeSmileArc className="left-[27%] right-[35%] -bottom-[0.14em] h-[0.24em]" />
         </span>
-        <span className="ml-1.5 font-bold tracking-tight text-foreground">Ops</span>
+        <span className="ml-1.5 font-bold tracking-tight logo-school">Ops</span>
       </span>
       {showTagline && (
         <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/50 sm:text-xs">
@@ -82,7 +82,7 @@ export function LogoCompact({ className = "", ...props }: Omit<LogoProps, "showT
         <span className="brand-text">Weeon</span>
         <EeSmileArc className="left-[27%] right-[35%] -bottom-[0.12em] h-[0.22em]" />
       </span>
-      <span className="ml-1 font-bold tracking-tight text-foreground">Ops</span>
+      <span className="ml-1 font-bold tracking-tight logo-school">Ops</span>
     </span>
   );
 }

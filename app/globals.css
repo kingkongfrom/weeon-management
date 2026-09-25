@@ -181,6 +181,14 @@ a {
     color: #2b59ff;
 }
 
+.logo-school {
+    color: #111111;
+}
+
+.dark .logo-school {
+    color: #ffffff;
+}
+
 /* Display type for the brand lockup — Bricolage Grotesque, medium weight. */
 .brand-display {
     font-family: var(--font-bricolage), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -564,7 +572,7 @@ a {
 }
 
 .login-bg .login-lockup .login-school {
-    color: rgb(255 255 255 / 0.72);
+    color: #fff;
 }
 
 /* Login wordmark: keep the gradient "Weeon" but force "Ops" to white on the navy field. */
