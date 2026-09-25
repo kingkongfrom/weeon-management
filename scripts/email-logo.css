@@ -18,10 +18,8 @@ body {
 }
 
 .brand-text {
-  background-image: linear-gradient(90deg, #5e25cc 0%, #2b59ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background-image: none;
+  color: #2b59ff;
 }
 
 #capture {

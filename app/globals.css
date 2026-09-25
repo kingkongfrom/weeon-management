@@ -119,6 +119,38 @@ body {
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+* {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 16%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--foreground) 18%, transparent);
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--foreground) 36%, transparent);
+    background-clip: padding-box;
+}
+
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]),
 .dash-hdr-btn,
@@ -128,6 +160,10 @@ button:not(:disabled),
 
 button:disabled {
     cursor: not-allowed;
+}
+
+a {
+    text-decoration: none;
 }
 
 /* Brand gradient: primary CTAs — purple → blue (marketing identity, 3-stop) */
@@ -141,15 +177,8 @@ button:disabled {
 }
 
 .brand-text {
-    background-image: linear-gradient(
-            90deg,
-            var(--brand-start) 0%,
-            var(--brand-mid) 42%,
-            var(--brand-end) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    background-image: none;
+    color: #2b59ff;
 }
 
 /* Display type for the brand lockup — Bricolage Grotesque, medium weight. */

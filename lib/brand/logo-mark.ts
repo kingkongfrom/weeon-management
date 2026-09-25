@@ -1,6 +1,6 @@
 /** Shared LogoMark geometry — used by `components/logo.tsx` and email rasterization. */
 export const LOGO_MARK_GRADIENT = {
-  from: "#5e25cc",
+  from: "#2b59ff",
   to: "#2b59ff",
 } as const;
 
