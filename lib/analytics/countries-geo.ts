@@ -5,7 +5,12 @@ import type {
   Geometry,
   Point,
 } from "geojson";
-import { LATAM_COUNTRY_CODES, type MapRegionPreset } from "@/lib/analytics/latam";
+import {
+  LATAM_COUNTRY_CODES,
+  MAP_LABEL_EXCLUDED_CODES,
+  MAP_LABEL_EXCLUDED_NAMES,
+  type MapRegionPreset,
+} from "@/lib/analytics/latam";
 
 /**
  * Locally-served, pre-simplified country outlines (LATAM + Americas context,
@@ -143,6 +148,10 @@ function labelPointForFeature(
 /**
  * One point per country (largest polygon part) so the symbol layer never draws
  * duplicate labels for archipelagos and overseas territories.
+ *
+ * Small island states listed in `MAP_LABEL_EXCLUDED_CODES` are skipped: their
+ * labels collide and add noise at this framing. They keep their fill, border and
+ * click behaviour — only the name is suppressed.
  */
 export function buildCountryLabelPoints(
   collection: FeatureCollection,
@@ -151,6 +160,10 @@ export function buildCountryLabelPoints(
   for (const feature of collection.features) {
     const label = String(feature.properties?.label ?? "");
     if (!label) continue;
+    const iso = String(feature.properties?.iso ?? "").toUpperCase();
+    if (iso && MAP_LABEL_EXCLUDED_CODES.has(iso)) continue;
+    // Islands whose dataset rows have a broken ISO code are matched by name.
+    if (MAP_LABEL_EXCLUDED_NAMES.has(label.trim().toLowerCase())) continue;
     const point = labelPointForFeature(feature);
     if (!point) continue;
     features.push({
