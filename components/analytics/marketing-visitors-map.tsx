@@ -45,9 +45,15 @@ type Props = {
   onSelectCountry: (iso: string | null) => void;
 };
 
-/** Portrait frame so the tall LATAM extent fits the viewport. */
+/**
+ * Portrait frame so the tall LATAM extent fits the viewport.
+ *
+ * The frame uses the *regular* border token (not `border-strong`) and a hairline
+ * ring: a lighter colour reads as a thin edge even at 1px, which is the effect
+ * we want — it frames the map without competing with it.
+ */
 const MAP_FRAME_CLASS =
-  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-border-strong";
+  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-border";
 
 /** Costa Rica — Weeon home base. */
 const COSTA_RICA: [number, number] = [-84.1, 9.8];

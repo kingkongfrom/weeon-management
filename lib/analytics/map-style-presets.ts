@@ -205,7 +205,9 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
         { at: 0.5, color: "#7d9cc4" },
         { at: 1, color: "#2c5282" },
       ],
-      border: "rgba(140, 150, 162, 0.5)",
+      // Lighter border colour at a hairline width: a soft edge reads as thin
+      // without disappearing, and stops the outlines fighting the choropleth.
+      border: "rgba(140, 150, 162, 0.28)",
       borderWidth: 0.2,
       selected: "#0f766e",
       selectedWidth: 1.2,
@@ -225,7 +227,8 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
         { at: 0.5, color: "#3f6ba0" },
         { at: 1, color: "#8fbce8" },
       ],
-      border: "rgba(255, 255, 255, 0.1)",
+      // Softer white so the hairlines read as thin on the dark canvas.
+      border: "rgba(255, 255, 255, 0.07)",
       borderWidth: 0.2,
       selected: "#5eead4",
       selectedWidth: 1.2,
