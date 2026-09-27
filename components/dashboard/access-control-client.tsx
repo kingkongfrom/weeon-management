@@ -4,12 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { AdminActions } from "@/components/dashboard/admin-actions";
 import type { AdminAccount } from "@/lib/platform/access-control";
 
 const FILTERS = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
   { id: "pending", label: "Pending first login" },
+  { id: "suspended", label: "Suspended" },
   { id: "inactive", label: "Inactive" },
 ] as const;
 
@@ -28,6 +30,7 @@ function matchesQuery(account: AdminAccount, query: string): boolean {
 }
 
 function accountBucket(account: AdminAccount): Exclude<FilterId, "all"> {
+  if (account.accountStatus === "suspended") return "suspended";
   if (!account.active) return "inactive";
   if (account.accountStatus === "pending_first_login") return "pending";
   return "active";
@@ -35,6 +38,9 @@ function accountBucket(account: AdminAccount): Exclude<FilterId, "all"> {
 
 function accountStateLabel(account: AdminAccount): { label: string; tone: string } {
   const bucket = accountBucket(account);
+  if (bucket === "suspended") {
+    return { label: "Suspended", tone: "bg-warning-subtle text-warning" };
+  }
   if (bucket === "pending") {
     return { label: "Pending first login", tone: "bg-warning-subtle text-warning" };
   }
@@ -71,6 +77,7 @@ export function AccessControlClient({
       all: accounts.length,
       active: 0,
       pending: 0,
+      suspended: 0,
       inactive: 0,
     };
     for (const account of accounts) map[accountBucket(account)] += 1;
@@ -374,20 +381,16 @@ function AdminDetailPopover({
               which is when the credential was created. Labelled "Password set"
               (not "last changed") so it is never overstated.
             */}
-            <PopoverRow
-              label="Password set"
-              value={
-                account.passwordResetAt
-                  ? formatDateTime(account.passwordResetAt)
-                  : formatDateTime(account.createdAt)
-              }
-              hint={
-                account.passwordResetAt
-                  ? "Via password reset"
-                  : "On account creation"
-              }
-            />
+            <PopoverRow label="Password set" value={
+              account.passwordResetAt
+                ? formatDateTime(account.passwordResetAt)
+                : formatDateTime(account.createdAt)
+            } hint={
+              account.passwordResetAt ? "Via password reset" : "On account creation"
+            } />
           </dl>
+
+          <AdminActions account={account} />
         </div>
       </div>
     </div>

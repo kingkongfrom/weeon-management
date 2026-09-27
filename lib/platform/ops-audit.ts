@@ -5,6 +5,9 @@ import { createPlatformClient } from "@/lib/supabase/platform";
 export type TenantOpsAction =
   | "admin.added"
   | "admin.removed"
+  | "admin.suspended"
+  | "admin.reactivated"
+  | "admin.deleted"
   | "module.enabled"
   | "module.disabled"
   | "status.suspend"

@@ -91,6 +91,9 @@ export async function listAdminAccounts(): Promise<{
       "id, tenant_id, role, account_status, active, name, username, email, auth_email, email_sent_at, first_login_at, provisioned_at, created_at, tenants(name, status)",
     )
     .eq("role", "admin")
+    // Soft-deleted admins are retained for 72h then purged; keep them out of the
+    // working directory so Ops only sees live accounts.
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(1000);
 
@@ -176,4 +179,132 @@ export async function listAdminAccounts(): Promise<{
   });
 
   return { accounts };
+}
+
+export type AdminMutationResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Suspend (deactivate) or reactivate a school administrator.
+ *
+ * Suspension sets `account_status = 'suspended'`, which:
+ *   - blocks sign-in (`lib/auth/actions.ts` in `weeon-tenants`), and
+ *   - blocks already-issued sessions (`requireSchoolAdmin`), so it takes effect
+ *     immediately rather than at JWT expiry.
+ *
+ * Reactivation restores `active` and clears the reason, but refuses to touch a
+ * soft-deleted row (that one is on its way to the 72h purge).
+ */
+export async function setAdminSuspended(input: {
+  profileId: string;
+  suspended: boolean;
+  reason?: string | null;
+}): Promise<AdminMutationResult> {
+  const client = createPlatformClient();
+
+  const { data: existing, error: readError } = await client
+    .from("profiles")
+    .select("account_status, deleted_at")
+    .eq("id", input.profileId)
+    .maybeSingle();
+  if (readError) return { ok: false, error: readError.message };
+  if (!existing) return { ok: false, error: "Account not found." };
+  if (existing.deleted_at !== null) {
+    return { ok: false, error: "This account is deleted and cannot be changed." };
+  }
+
+  const { error } = await client
+    .from("profiles")
+    .update({
+      account_status: input.suspended ? "suspended" : "active",
+      status_reason: input.suspended ? (input.reason ?? null) : null,
+      status_changed_at: new Date().toISOString(),
+    })
+    .eq("id", input.profileId);
+  if (error) return { ok: false, error: error.message };
+
+  // Kill live sessions so a suspended admin loses access at once.
+  if (input.suspended) {
+    await revokeAuthSessions(input.profileId);
+  }
+
+  return { ok: true };
+}
+
+/**
+ * Soft-delete a school administrator: stamp `deleted_at`, then **anonymize** the
+ * Auth user so the credential is destroyed but the row survives for audit.
+ *
+ * We never hard-delete the Auth user here — the profile row is retained for 72h
+ * (see `purge_deleted_profiles` in `weeon-tenants`) and the anonymized Auth row
+ * keeps referential history intact. Retention is a schema-side concern; this
+ * only does the reversible part.
+ */
+export async function deleteAdminAccount(input: {
+  profileId: string;
+  actorUserId: string;
+  reason?: string | null;
+}): Promise<AdminMutationResult> {
+  const client = createPlatformClient();
+
+  const { data: existing, error: readError } = await client
+    .from("profiles")
+    .select("id, email, auth_email, deleted_at")
+    .eq("id", input.profileId)
+    .maybeSingle();
+  if (readError) return { ok: false, error: readError.message };
+  if (!existing) return { ok: false, error: "Account not found." };
+  if (existing.deleted_at !== null) {
+    return { ok: false, error: "This account is already deleted." };
+  }
+
+  const now = new Date().toISOString();
+
+  const { error: updateError } = await client
+    .from("profiles")
+    .update({
+      deleted_at: now,
+      deleted_by: input.actorUserId,
+      status_reason: input.reason ?? null,
+      account_status: "suspended",
+      active: false,
+      status_changed_at: now,
+    })
+    .eq("id", input.profileId);
+  if (updateError) return { ok: false, error: updateError.message };
+
+  // Destroy the credential: no usable Auth identity survives the delete. The
+  // row is kept (anonymized) so audit history and FK references stay valid.
+  const anonymizedEmail = `deleted+${input.profileId}@removed.weeon.school`;
+  const { error: authError } = await client.auth.admin.updateUserById(
+    input.profileId,
+    {
+      email: anonymizedEmail,
+      email_confirm: true,
+      password: crypto.randomUUID() + crypto.randomUUID(),
+      user_metadata: { deleted: true, deleted_at: now },
+      ban_duration: "876000h", // ~100 years — effectively banned
+    },
+  );
+  if (authError) {
+    // The soft delete stands; report so Ops can finish manually if needed.
+    return {
+      ok: false,
+      error: `Profile marked deleted, but the Auth user could not be anonymized: ${authError.message}`,
+    };
+  }
+
+  await revokeAuthSessions(input.profileId);
+  return { ok: true };
+}
+
+/** Best-effort session revocation; failure never blocks the state change. */
+async function revokeAuthSessions(userId: string): Promise<void> {
+  try {
+    const client = createPlatformClient();
+    await client.auth.admin.signOut(userId, "global");
+  } catch {
+    // Sessions also die at token expiry; the profile gate blocks use meanwhile.
+  }
 }

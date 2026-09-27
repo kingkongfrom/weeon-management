@@ -70,10 +70,12 @@ synthetic `…@…accounts.weeon.school` auth email) and is therefore **not** sh
 here — admins have no username by design, so a "Not set" row would be
 misleading.
 
-**Login data comes from Supabase Auth, not `profiles`.** `profiles.first_login_at`
-exists in the generated types but is **never written by any app** — it is always
-`NULL`. Real sign-in activity lives in `auth.users.last_sign_in_at`, so
-`listAdminAccounts()` resolves it via the Auth Admin API per user.
+**Login data comes from Supabase Auth, not `profiles`.**
+`profiles.first_login_at` **is** written for roster users (teachers/students — it
+holds their first login), but it is **never populated for admin accounts**, so
+it always reads `NULL` here. Real sign-in activity lives in
+`auth.users.last_sign_in_at`, so `listAdminAccounts()` resolves it via the Auth
+Admin API per user.
 
 > **Use `getUserById`, not `listUsers`.** On this project
 > `auth.admin.listUsers()` returns **HTTP 500 "Database error finding users"**
@@ -95,24 +97,62 @@ so it never overstates. A true change timestamp needs an additive
 `profiles.password_updated_at` in `weeon-tenants` written by both the reset flow
 and the in-app change-password flow (see Phase 2).
 
-## Phase 2 (planned — needs schema)
+## Phase 2 — account actions (implemented, migration pending)
 
-Mutations are **not** built yet. Each needs an additive change in
-`weeon-tenants` (schema owner) and must not break `weeon-mobile` /
-`weeon-teachers`:
+Actions live in the popover (`components/dashboard/admin-actions.tsx`) and call
+`lib/dashboard/admin-account-actions.ts`. Both audit through
+`tenant_ops_audit` (`admin.suspended`, `admin.reactivated`, `admin.deleted`).
 
-- **Reset password** — reuse the ops invite/recovery `generateLink` pattern.
-- **Resend activation** — for `pending_first_login`.
-- **Suspend / activate a user** — needs a per-user status column; today
-  suspension is **tenant-level only** (`tenants.suspend_reason`).
-- **Unlock** — there is **no lockout concept in the schema today**; it must be
-  introduced (e.g. `account_locked_at`) or wired to Supabase Auth lockout.
+| Action | Effect | Reversible |
+| ------ | ------ | ---------- |
+| **Suspend** (deactivate) | `profiles.account_status = 'suspended'`; blocks sign-in and already-issued sessions | Yes — Reactivate |
+| **Delete** | `profiles.deleted_at` stamped; Auth user **anonymized** (email replaced, password randomized, banned) | Only within 72h (schema purge is 72h) |
+
+Notes:
+
+- **Suspend and deactivate are the same state** — one action, not two.
+- **Delete anonymizes, never hard-deletes the Auth row.** The credential is
+  destroyed immediately; the profile row is retained 72h for audit/legal, then
+  purged by `purge_deleted_profiles()`.
+- **Retention is 72h**, reusing `public.soft_delete_retention_age()` — the same
+  window as soft-deleted students/teachers.
+- Soft-deleted admins are **excluded from the directory**; a **Suspended**
+  filter chip surfaces suspended ones.
+- Delete requires typing `DELETE` to confirm.
+
+### Where enforcement lives
+
+Schema + enforcement are in **`weeon-tenants`**
+(`supabase/migrations/20260927140000_admin_access_lifecycle.sql`):
+
+- new columns `profiles.deleted_at`, `deleted_by`, `status_reason`,
+  `status_changed_at`; `account_status` CHECK gains `'suspended'`.
+- `public.profile_is_blocked(uuid)` helper.
+- `purge_deleted_profiles()` folded into the existing hourly
+  `purge_deleted_records()` cron.
+- **Sign-in guard** in `lib/auth/actions.ts` (refuses suspended/deleted admins
+  and tears down the session).
+- **Per-request guard** in `lib/dashboard/require-school-admin.ts`, so an
+  already-issued session stops working immediately rather than at JWT expiry.
+
+Scope: **school administrators only.** They are web-only, so nothing here
+touches `weeon-mobile` or `weeon-teachers`.
+
+> **Deployment:** the migration is **not applied** to the hosted DB. Apply with
+> `npx supabase db push --linked --include-all` (it precedes already-applied
+> migrations, so `--include-all` is required). Until then these actions will
+> error on the missing columns.
+
+## Phase 3 (not built)
+
+- **Unlock** — there is still **no lockout concept** (no failed-attempt counter);
+  it must be introduced or wired to Supabase Auth lockout.
 - **`password_updated_at`** — for a true "last password changed" timestamp
   (today the popover approximates it: last consumed reset, else `created_at`,
   labelled "Password set"). Must be written by both the reset flow and the
   in-app change-password flow (`lib/auth/change-password.ts`).
 - **`profiles.last_sign_in_at`** — to mirror Auth's `last_sign_in_at` so the
-  console can query/sort on sign-in without paging the Auth Admin API.
+  console can query/sort on sign-in without per-user Auth lookups.
 
 Do not invent these columns here — design and land them in `weeon-tenants`
 first, then consume them.
