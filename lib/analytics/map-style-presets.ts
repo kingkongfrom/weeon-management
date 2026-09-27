@@ -197,9 +197,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
     label: "Ink",
     hint: "Dark slate cartography with a soft blue data ramp.",
     light: {
-      // Muted navy so the light theme reads as "navy water" without the contrast
-      // of a saturated navy against white land.
-      ocean: "#c6d2e4",
+      ocean: "#e4e7ec",
       empty: "#ffffff",
       dimmed: "#eef0f3",
       ramp: [
@@ -208,7 +206,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
         { at: 1, color: "#2c5282" },
       ],
       border: "rgba(140, 150, 162, 0.5)",
-      borderWidth: 0.55,
+      borderWidth: 0.4,
       selected: "#0f766e",
       selectedWidth: 1.2,
       selectedFill: "rgba(15, 118, 110, 0.16)",
@@ -219,8 +217,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       labelOpacity: 1,
     },
     dark: {
-      // Deep navy water; keeps the dark theme in the same family as the light one.
-      ocean: "#121a2b",
+      ocean: "#0f1319",
       empty: "#1b212b",
       dimmed: "#161b22",
       ramp: [
@@ -229,7 +226,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
         { at: 1, color: "#8fbce8" },
       ],
       border: "rgba(255, 255, 255, 0.1)",
-      borderWidth: 0.55,
+      borderWidth: 0.4,
       selected: "#5eead4",
       selectedWidth: 1.2,
       selectedFill: "rgba(94, 234, 212, 0.18)",
