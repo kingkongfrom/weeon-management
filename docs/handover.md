@@ -149,7 +149,7 @@ canonical contract.
 
 ### 3.5 TOTP two-factor auth
 
-- **Enroll**: account drawer → *Two-factor authentication* → *Turn on* → QR +
+- **Enroll**: **Security** page → *Two-factor authentication* → *Turn on* → QR +
   secret → confirm 6-digit code.
 - **Sign in**: password → 6-digit challenge → dashboard.
 - **Gate**: `getPlatformSession()` rejects a non-`aal2` session when the user has
@@ -159,8 +159,8 @@ canonical contract.
 - **Opt-in per account** — not enforced by the app.
 
 Files: `lib/auth/mfa.ts`, `lib/auth/mfa-actions.ts`,
-`components/dashboard/mfa-settings.tsx`, `components/auth/login-form.tsx`.
-Docs: `docs/security.md`.
+`components/dashboard/mfa-settings.tsx` (mounted on `/dashboard/security`),
+`components/auth/login-form.tsx`. Docs: `docs/security.md`.
 
 ---
 

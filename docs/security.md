@@ -105,7 +105,7 @@ How it works — Supabase models this as **AAL**:
 
 Flow:
 
-1. **Enroll** (self-service) — account drawer → *Two-factor authentication* →
+1. **Enroll** (self-service) — **Security** page → *Two-factor authentication* →
    *Turn on*. Shows a QR code + manual secret; the factor is **unverified**
    until a 6-digit code is confirmed, so an abandoned attempt cannot lock
    anyone out.
@@ -124,8 +124,8 @@ Flow:
    permanent lockout.
 
 Code files: `lib/auth/mfa.ts` (API helpers), `lib/auth/mfa-actions.ts` (server
-actions), `components/dashboard/mfa-settings.tsx` (enroll/manage),
-`components/auth/login-form.tsx` (challenge step).
+actions), `components/dashboard/mfa-settings.tsx` (enroll/manage panel, mounted
+on `/dashboard/security`), `components/auth/login-form.tsx` (challenge step).
 
 **Rollout advice:** enroll your own account first and confirm the full
 challenge works before making it mandatory for other staff. TOTP is **not

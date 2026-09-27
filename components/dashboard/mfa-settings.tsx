@@ -11,7 +11,8 @@ import {
 } from "@/lib/auth/mfa-actions";
 
 /**
- * Two-factor (TOTP) control for the signed-in ops user.
+ * Two-factor (TOTP) control for the signed-in ops user. Lives on the
+ * **Security** page (not the account drawer).
  *
  * `enrolled` comes from the server (a Server Component reads the factor list),
  * so there is no client-side status fetch. States:

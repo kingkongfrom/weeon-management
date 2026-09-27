@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { InviteAdministrator } from "@/components/dashboard/invite-administrator";
+import { MfaSettings } from "@/components/dashboard/mfa-settings";
 import { SecurityPageSkeleton } from "@/components/dashboard/skeleton";
 import { getPlatformSession } from "@/lib/auth/session";
 import { isPlatformStaffInviter } from "@/lib/auth/policy";
+import { createSessionClient } from "@/lib/supabase/session";
+import { getMfaAssurance, listTotpFactors } from "@/lib/auth/mfa";
 import {
   listPlatformStaff,
   type PlatformStaffMember,
@@ -67,12 +70,32 @@ function AdministratorsList({
 }
 
 async function SecurityContent() {
-  const [{ sessionUser }, administrators] = await Promise.all([
+  const [{ user, sessionUser }, administrators] = await Promise.all([
     getPlatformSession(),
     listPlatformStaff().catch(() => [] as PlatformStaffMember[]),
   ]);
   const actorEmail = sessionUser?.email ?? "";
   const canInvite = isPlatformStaffInviter(actorEmail);
+
+  // Two-factor status for the signed-in user (read server-side so the panel
+  // renders without a client fetch). A factor only counts as "on" once this
+  // session has actually passed it.
+  let mfaEnrolled = false;
+  let mfaFactorId: string | null = null;
+  if (user) {
+    try {
+      const supabase = await createSessionClient();
+      const [status, assurance] = await Promise.all([
+        listTotpFactors(supabase),
+        getMfaAssurance(supabase),
+      ]);
+      mfaEnrolled = status.enrolled && assurance.currentLevel === "aal2";
+      mfaFactorId =
+        status.factors.find((factor) => factor.status === "verified")?.id ?? null;
+    } catch {
+      // Never block the Security page on an MFA read failure.
+    }
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
@@ -87,6 +110,19 @@ async function SecurityContent() {
           Manage who can sign in to this console and invite new platform staff.
         </p>
       </header>
+
+      <section className="rounded-2xl border border-border bg-surface p-5">
+        <h2 className="text-lg font-bold text-foreground">
+          Two-factor authentication
+        </h2>
+        <p className="mt-1 text-sm font-medium text-foreground/55">
+          Protect your own account with an authenticator app. If you lose your
+          phone, another administrator can reset it from Access control.
+        </p>
+        <div className="mt-5">
+          <MfaSettings enrolled={mfaEnrolled} factorId={mfaFactorId} />
+        </div>
+      </section>
 
       <InviteAdministrator canInvite={canInvite} />
 
