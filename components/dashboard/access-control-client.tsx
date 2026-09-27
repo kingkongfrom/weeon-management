@@ -357,6 +357,10 @@ function AdminDetailPopover({
           </Link>
 
           <dl className="mt-4 divide-y divide-border/60">
+            <PopoverRow
+              label="Role"
+              value={<span className="capitalize">{account.role}</span>}
+            />
             <PopoverRow label="Account status" value={account.accountStatus} />
             <PopoverRow
               label="Last sign-in"
