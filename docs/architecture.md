@@ -30,8 +30,7 @@ unsure, check `node_modules/next/dist/docs/`.
 | `/dashboard/tenants` | RSC | All schools — card list with status filter chips, search, calendar + roster summary |
 | `/dashboard/tenants/[id]` | RSC (dynamic) | The **School page**: hero + segmented Modules / People / Overview / Activity |
 | `/dashboard/access` | RSC | **Access control** — cross-tenant administrator directory (search + access state) |
-| `/dashboard/security` | RSC | Invite + **Weeon Ops** administrators |
-| `/dashboard/settings` | RSC | Account & console info (appearance is in the account drawer) |
+| `/dashboard/security` | RSC | Invite + **Weeon Ops** administrators, two-factor setup |
 | `/api/health` | Route handler | Liveness probe |
 | `/_not-found` | RSC | 404 |
 
@@ -67,7 +66,7 @@ Guardrails (see `security.md`):
 Weeon Ops staff are **not** tenants and are **not** read from `profiles`.
 
 - Owner / bootstrap directory: `lib/auth/policy.ts` (`eduardo@weeon.school`).
-- Further staff: Settings invite → branded Resend email → `/accept-invite`.
+- Further staff: Security invite → branded Resend email → `/accept-invite`.
 - Session: `getPlatformSession` on every dashboard render; `proxy.ts` keeps
   `/dashboard` behind a cookie.
 - School admins of WEEON DEMO SCHOOL (or any tenant) can appear on

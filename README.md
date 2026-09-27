@@ -139,8 +139,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `/dashboard` | Overview — tenants, trials, at-risk |
 | `/dashboard/tenants` | All tenants (status / seats) |
 | `/dashboard/tenants/[id]` | Tenant detail + school administrators |
-| `/dashboard/security` | Weeon Ops administrators + invite |
-| `/dashboard/settings` | Appearance |
+| `/dashboard/access` | Access control — cross-tenant school-admin directory |
+| `/dashboard/security` | Weeon Ops administrators, invite, two-factor |
 | `/accept-invite` | Accept branded ops invite |
 | `/api/health` | Liveness probe |
 

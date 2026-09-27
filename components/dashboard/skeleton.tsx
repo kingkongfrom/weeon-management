@@ -63,33 +63,6 @@ export function SecurityPageSkeleton() {
   );
 }
 
-export function SettingsPageSkeleton() {
-  return (
-    <Screen
-      label="Loading settings"
-      className="mx-auto flex w-full max-w-4xl flex-col gap-6"
-    >
-      <header className="flex flex-col gap-1.5">
-        <Skeleton className="h-3 w-16" />
-        <Skeleton className="h-7 w-32" />
-        <Skeleton className="h-4 w-80 max-w-full" />
-      </header>
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface">
-        <div className="flex flex-col gap-2 border-b border-border px-5 py-5 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <Skeleton className="h-6 w-6 rounded-lg" />
-            <Skeleton className="h-5 w-36" />
-          </div>
-          <Skeleton className="h-4 w-96 max-w-full" />
-        </div>
-        <div className="p-5 sm:p-6">
-          <Skeleton className="h-14 w-full max-w-sm" />
-        </div>
-      </section>
-    </Screen>
-  );
-}
-
 export function AdministratorListSkeleton({
   className,
   rows = 2,

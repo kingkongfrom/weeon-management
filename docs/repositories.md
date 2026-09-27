@@ -46,7 +46,7 @@ All school apps use **one Supabase project**:
 | Tenant / school data | `weeon-tenants` schema | `tenants`, `profiles`, roster, `admin_invites` | **Read** via service-role for ops views. Never treat as ops-staff identity. |
 | Platform audit | `weeon-tenants` (additive) | `tenant_backups`, `tenant_restore_log`, `trial_requests` | **Read** for health / audit UI |
 | Weeon Ops staff | **this repo** | `lib/auth/policy.ts`, `data/ops-staff.json` | Write invites/resets here. Do not invent `platform_staff` tables in this repo; additive schema still goes in `weeon-tenants`. |
-| Auth users | Shared GoTrue | `auth.users` | Same email can be a school user **and** (only if invited here) ops staff. Metadata `platform_staff` is a hint, not the Settings list. |
+| Auth users | Shared GoTrue | `auth.users` | Same email can be a school user **and** (only if invited here) ops staff. Metadata `platform_staff` is a hint, not the Security list. |
 
 ## Reading the shared database
 

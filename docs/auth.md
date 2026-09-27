@@ -44,7 +44,7 @@ Correct:
   Ops adds/removes those admins and toggles modules — see
   `docs/data-model.md` § Tenant modules and the School page sections below.
 
-## Invite flow (Settings)
+## Invite flow (Security)
 
 Only the owner can invite. Domain must be `@weeon.school`.
 
@@ -64,8 +64,8 @@ Only the owner can invite. Domain must be `@weeon.school`.
 7. `/accept-invite` sets the password via the service-role Auth admin API,
    marks the member accepted, and signs them into `/dashboard`.
 
-Settings then shows the owner plus invited rows (`Invite pending` until
-accept). School testers (e.g. Silvia on the demo tenant) do **not** appear
+The **Security** page then shows the owner plus invited rows (`Invite pending`
+until accept). School testers (e.g. Silvia on the demo tenant) do **not** appear
 unless the owner invites them **here**.
 
 ## Removing a school administrator (offboarding)

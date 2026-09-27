@@ -27,7 +27,6 @@ const es = {
     access: "Control de acceso",
     accessShort: "Acceso",
     security: "Seguridad",
-    settings: "Ajustes",
   },
   header: {
     ariaBrand: "Weeon Ops",
@@ -92,7 +91,6 @@ const en: Messages = {
     access: "Access control",
     accessShort: "Access",
     security: "Security",
-    settings: "Settings",
   },
   header: {
     ariaBrand: "Weeon Ops",

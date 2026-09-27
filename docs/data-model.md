@@ -38,7 +38,7 @@ Columns (from the live schema):
 ## People & users per tenant
 
 **`profiles` are school users, not Weeon Ops staff.** A `profiles.role = 'admin'`
-row is a **school administrator for that `tenant_id`**. The Settings
+row is a **school administrator for that `tenant_id`**. The Security
 administrators list in this console does **not** read `profiles` — see
 `docs/auth.md`. The same person (e.g. Eduardo) may exist as a demo-tenant
 school admin for testing `weeon-tenants` and, separately, as the ops owner.
@@ -190,7 +190,7 @@ Cross-checked with the shared Supabase project (service-role, read-only):
 - **1 tenant** — `WEEON DEMO SCHOOL` (saber `999999-00`, `status=trial`,
   `plan=pro`); `trial_requests` **1**.
 - `profiles`: **4** (2 school `admin`, 2 `teacher`). Both admins are school
-  admins for testing `weeon-tenants` — **not** the Weeon Ops Settings list.
+  admins for testing `weeon-tenants` — **not** the Weeon Ops Security list.
 - `roster_accounts`: **43** login usernames (`pending_first_login`) — 20
   `student` (`2026001…`), 20 `parent` (`e`+apellido), 3 `teacher`.
 - Roster: **20** active `students` (+10 soft-deleted duplicates removed),
