@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getPlatformSession } from "@/lib/auth/session";
 import { createPlatformClient } from "@/lib/supabase/platform";
+import { writeTenantOpsAudit } from "@/lib/platform/ops-audit";
 
 export type RemoveAdministratorState = { ok?: string; error?: string } | null;
 
@@ -22,7 +23,7 @@ export async function removeTenantAdministratorAction(
   _prev: RemoveAdministratorState,
   formData: FormData,
 ): Promise<RemoveAdministratorState> {
-  const { user } = await getPlatformSession();
+  const { user, sessionUser } = await getPlatformSession();
   if (!user) {
     return { error: "Your session expired. Sign in again." };
   }
@@ -76,6 +77,18 @@ export async function removeTenantAdministratorAction(
     tenant_id: tenantId,
     admin_user_id: profileId,
     provision_kind: "removed",
+  });
+
+  await writeTenantOpsAudit({
+    tenantId,
+    actor: { userId: user.id, email: sessionUser?.email ?? null },
+    action: "admin.removed",
+    target: profileId,
+    beforeValue: {
+      name: profile.name,
+      email: profile.auth_email ?? profile.email,
+    },
+    afterValue: null,
   });
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);

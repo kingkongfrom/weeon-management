@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import { getRequestSidebarCollapsed } from "@/lib/dashboard/request-sidebar";
-import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/theme";
+import {
+  THEME_BOOTSTRAP_SCRIPT,
+  THEME_DARK_BG,
+  THEME_LIGHT_BG,
+} from "@/lib/theme/theme";
 import { getRequestTheme, themeBackground } from "@/lib/theme/request-theme";
 import { siteCopy } from "@/lib/site-copy";
 import "./globals.css";
@@ -14,6 +18,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,8 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f3f6f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#1c2230" },
+    { media: "(prefers-color-scheme: light)", color: THEME_LIGHT_BG },
+    { media: "(prefers-color-scheme: dark)", color: THEME_DARK_BG },
   ],
   colorScheme: "light dark",
   viewportFit: "cover",
@@ -58,6 +68,7 @@ export default async function RootLayout({
   const htmlClass = [
     geistSans.variable,
     geistMono.variable,
+    bricolage.variable,
     "antialiased",
     theme === "dark" ? "dark" : "",
     sidebarCollapsed ? "sidebar-collapsed" : "",

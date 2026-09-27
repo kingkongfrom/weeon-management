@@ -6,21 +6,41 @@ export type IconTone =
   | "error";
 
 /**
- * Soft square + stroke icon. Use for tiles and stat cards — not for CTAs.
- *
- * Brand rule: exactly two hues — indigo (brand) and teal/cyan (accent) — as a
- * duotone (tinted tile + saturated glyph), matching the sibling repos. No
- * emerald/amber/red variety; each tone resolves to one of the two brand hues.
+ * Decorative icon chip colors for dashboard tiles and stat cards.
+ * Wired to `--icon-*` tokens in `app/globals.css` (same as weeon-tenants).
  */
 export const ICON_TONE_CLASSES: Record<IconTone, string> = {
   brand:
-    "bg-brand-50 text-brand-600 group-hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:group-hover:bg-brand-900/50",
+    "bg-icon-brand-bg text-icon-brand-fg group-hover:bg-[var(--icon-brand-bg-hover)]",
   accent:
-    "bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100 dark:bg-cyan-950/40 dark:text-cyan-300 dark:group-hover:bg-cyan-900/50",
+    "bg-icon-accent-bg text-icon-accent-fg group-hover:bg-[var(--icon-accent-bg-hover)]",
   success:
-    "bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100 dark:bg-cyan-950/40 dark:text-cyan-300 dark:group-hover:bg-cyan-900/50",
+    "bg-icon-accent-bg text-icon-accent-fg group-hover:bg-[var(--icon-accent-bg-hover)]",
   warning:
-    "bg-brand-50 text-brand-600 group-hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:group-hover:bg-brand-900/50",
+    "bg-icon-brand-bg text-icon-brand-fg group-hover:bg-[var(--icon-brand-bg-hover)]",
   error:
-    "bg-brand-50 text-brand-600 group-hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:group-hover:bg-brand-900/50",
+    "bg-icon-brand-bg text-icon-brand-fg group-hover:bg-[var(--icon-brand-bg-hover)]",
+};
+
+/** Solid icon well on stat cards — matches ERP KPI visibility. */
+export const STAT_CARD_AVATAR: Record<IconTone, string> = {
+  brand: "bg-brand-600 text-white dark:bg-brand-500",
+  accent: "bg-accent text-white dark:bg-accent",
+  success: "bg-accent text-white dark:bg-accent",
+  warning: "bg-brand-600 text-white dark:bg-brand-500",
+  error: "bg-brand-600 text-white dark:bg-brand-500",
+};
+
+/** Soft ring on stat card shells — indigo vs teal duotone. */
+export const STAT_CARD_SURFACE: Record<IconTone, string> = {
+  brand:
+    "ring-1 ring-brand-200/80 dark:ring-brand-800/55",
+  accent:
+    "ring-1 ring-cyan-200/80 dark:ring-cyan-900/45",
+  success:
+    "ring-1 ring-cyan-200/80 dark:ring-cyan-900/45",
+  warning:
+    "ring-1 ring-brand-200/80 dark:ring-brand-800/55",
+  error:
+    "ring-1 ring-brand-200/80 dark:ring-brand-800/55",
 };

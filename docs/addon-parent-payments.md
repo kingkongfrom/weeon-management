@@ -42,7 +42,7 @@ When **off**: no parent payment UI; no new charges (paid history may remain visi
 **Built (2026-09):**
 
 - Schema + RPCs: `weeon-tenants` migration `20260915180000_parent_payments.sql`
-- Ops toggle: tenant detail → **Parent payments add-on** card
+- Ops toggle: School page → **Modules** pane (the `parent_payments` add-on switch)
 - School wizard: `app.weeon.school` → **Configuración → Cobros en línea (GreenPay)**
 - Parent app: `weeon-mobile` → **Pagos** (add-on gated)
 

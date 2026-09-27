@@ -2,17 +2,16 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { DashboardShell } from "@/components/dashboard/shell";
-import {
-  AuthedAccountMenu,
-  AuthedSidebarUser,
-  RequireOpsSession,
-} from "@/components/dashboard/session-slots";
+import { AuthedAccountMenu, RequireOpsSession } from "@/components/dashboard/session-slots";
 import { Skeleton } from "@/components/dashboard/skeleton";
+import { LocaleProvider } from "@/lib/i18n/client";
+import { getLocale, getT } from "@/lib/i18n/server";
 import { getRequestSidebarCollapsed } from "@/lib/dashboard/request-sidebar";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t.meta.dashboardTitle };
+}
 
 function AccountMenuSkeleton({ className }: { className?: string }) {
   return (
@@ -27,25 +26,25 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  const sidebarCollapsed = await getRequestSidebarCollapsed();
+  const [sidebarCollapsed, locale] = await Promise.all([
+    getRequestSidebarCollapsed(),
+    getLocale(),
+  ]);
 
   return (
-    <DashboardShell
-      initialSidebarCollapsed={sidebarCollapsed}
-      accountSlot={
-        <Suspense fallback={<AccountMenuSkeleton />}>
-          <AuthedAccountMenu />
-        </Suspense>
-      }
-      sidebarFooter={
+    <LocaleProvider locale={locale}>
+      <DashboardShell
+        initialSidebarCollapsed={sidebarCollapsed}
+        accountSlot={
+          <Suspense fallback={<AccountMenuSkeleton />}>
+            <AuthedAccountMenu />
+          </Suspense>
+        }
+      >
         <Suspense fallback={null}>
-          <AuthedSidebarUser />
+          <RequireOpsSession>{children}</RequireOpsSession>
         </Suspense>
-      }
-    >
-      <Suspense fallback={null}>
-        <RequireOpsSession>{children}</RequireOpsSession>
-      </Suspense>
-    </DashboardShell>
+      </DashboardShell>
+    </LocaleProvider>
   );
 }

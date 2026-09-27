@@ -48,19 +48,24 @@ function EeSmileArc({ className = "" }: { className?: string }) {
   );
 }
 
-/** Typography logo for Weeon Ops — gradient wordmark, smile under "ee". */
+/** Typography logo for Weeon Ops — "Weeon School" wordmark with "Ops" under "School". */
 export function Logo({ showTagline = false, className = "", ...props }: LogoProps) {
   return (
     <span
       className={`inline-flex select-none flex-col items-start ${className}`}
       {...props}
     >
-      <span className="relative inline-flex items-baseline whitespace-nowrap text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+      <span className="relative inline-flex items-baseline whitespace-nowrap text-2xl font-black tracking-tight sm:text-3xl">
         <span className="relative">
           <span className="brand-text">Weeon</span>
           <EeSmileArc className="left-[27%] right-[35%] -bottom-[0.14em] h-[0.24em]" />
         </span>
-        <span className="ml-1.5 font-bold tracking-tight logo-school">Ops</span>
+        <span className="ml-1.5 inline-flex flex-col items-start">
+          <span className="font-bold leading-none tracking-tight logo-school">School</span>
+          <span className="mt-[0.18em] text-[0.5em] font-semibold uppercase leading-none tracking-[0.16em] text-foreground/55">
+            Ops
+          </span>
+        </span>
       </span>
       {showTagline && (
         <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/50 sm:text-xs">
@@ -75,14 +80,19 @@ export function Logo({ showTagline = false, className = "", ...props }: LogoProp
 export function LogoCompact({ className = "", ...props }: Omit<LogoProps, "showTagline">) {
   return (
     <span
-      className={`inline-flex select-none items-baseline whitespace-nowrap text-xl font-black tracking-tight text-foreground ${className}`}
+      className={`inline-flex select-none items-baseline whitespace-nowrap text-xl font-black tracking-tight ${className}`}
       {...props}
     >
       <span className="relative">
         <span className="brand-text">Weeon</span>
         <EeSmileArc className="left-[27%] right-[35%] -bottom-[0.12em] h-[0.22em]" />
       </span>
-      <span className="ml-1 font-bold tracking-tight logo-school">Ops</span>
+      <span className="ml-1 inline-flex flex-col items-start">
+        <span className="font-bold leading-none tracking-tight logo-school">School</span>
+        <span className="mt-[0.18em] text-[0.5em] font-semibold uppercase leading-none tracking-[0.16em] text-foreground/55">
+          Ops
+        </span>
+      </span>
     </span>
   );
 }

@@ -27,10 +27,10 @@ unsure, check `node_modules/next/dist/docs/`.
 | `/accept-invite` | Client | Accept branded ops-staff invite |
 | `/auth/callback` | Route | Supabase auth code exchange |
 | `/dashboard` | RSC | Overview: totals, trials, at-risk tenants |
-| `/dashboard/tenants` | RSC | All tenants (status / seats) |
-| `/dashboard/tenants/[id]` | RSC (dynamic) | Single tenant + **school** admins |
+| `/dashboard/tenants` | RSC | All schools — card list with status filter chips, search, calendar + roster summary |
+| `/dashboard/tenants/[id]` | RSC (dynamic) | The **School page**: hero + segmented Modules / People / Overview / Activity |
 | `/dashboard/security` | RSC | Invite + **Weeon Ops** administrators |
-| `/dashboard/settings` | RSC | Appearance |
+| `/dashboard/settings` | RSC | Account & console info (appearance is in the account drawer) |
 | `/api/health` | Route handler | Liveness probe |
 | `/_not-found` | RSC | 404 |
 

@@ -1,103 +1,60 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Link from "next/link";
-import { Hourglass, School, ShieldCheck, TriangleAlert } from "lucide-react";
-import { OverviewPageSkeleton } from "@/components/dashboard/skeleton";
-import { StatCard } from "@/components/ui/StatCard";
-import { listTenants } from "@/lib/platform/metrics";
+import { MarketingAnalyticsShell } from "@/components/analytics/marketing-analytics-shell";
+import { AnalyticsPageSkeleton } from "@/components/dashboard/skeleton";
+import {
+  loadMarketingAnalytics,
+  type MarketingAnalyticsRange,
+} from "@/lib/platform/marketing-analytics";
 
 export const metadata: Metadata = {
-  title: "Overview",
+  title: "Analytics",
 };
 
-async function OverviewContent() {
-  const { tenants, reason } = await listTenants();
+function parseRange(value: string | undefined): MarketingAnalyticsRange {
+  if (value === "7" || value === "90") return Number(value) as MarketingAnalyticsRange;
+  return 30;
+}
 
-  const byStatus = tenants.reduce<Record<string, number>>((acc, t) => {
-    const s = t.status;
-    acc[s] = (acc[s] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const trials = byStatus["trial"] ?? 0;
-  const active = byStatus["active"] ?? 0;
-  const pastDue = byStatus["past_due"] ?? 0;
-  const suspended = byStatus["suspended"] ?? 0;
-  const needsAttention = pastDue + suspended;
+async function AnalyticsContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const params = await searchParams;
+  const rangeDays = parseRange(params.range);
+  const snapshot = await loadMarketingAnalytics(rangeDays);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Overview
+        <h1 className="brand-page-title text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Marketing analytics
         </h1>
         <p className="mt-1 text-sm font-medium text-foreground/55">
-          Platform-wide tenant health — trials, active schools, and at-risk
-          accounts.
+          Geographic traffic on{" "}
+          <span className="font-semibold text-foreground/70">weeon.school</span>.
         </p>
-      </header>
-      {tenants.length === 0 ? (
-        <p className="text-sm font-medium text-warning">
-          {reason ?? "No tenants found."}
-        </p>
-      ) : (
-        <>
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
-            <StatCard
-              label="Total tenants"
-              value={tenants.length}
-              icon={<School size={20} />}
-              tone="brand"
-            />
-            <StatCard
-              label="Active"
-              value={active}
-              icon={<ShieldCheck size={20} />}
-              tone="success"
-            />
-            <StatCard
-              label="Trial"
-              value={trials}
-              icon={<Hourglass size={20} />}
-              tone="brand"
-            />
-            <StatCard
-              label="Needs attention"
-              value={needsAttention}
-              hint={
-                needsAttention > 0
-                  ? [
-                      pastDue > 0 ? `${pastDue} past due` : null,
-                      suspended > 0 ? `${suspended} suspended` : null,
-                    ]
-                      .filter(Boolean)
-                      .join(", ")
-                  : undefined
-              }
-              icon={<TriangleAlert size={20} />}
-              tone="accent"
-            />
-          </section>
-
-          <p className="text-sm text-foreground/55">
-            <Link
-              href="/dashboard/tenants"
-              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
-            >
-              View all tenants
-            </Link>
-            {" · status and seats per school"}
+        {snapshot.reason ? (
+          <p className="mt-3 rounded-xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm font-medium text-warning">
+            {snapshot.reason}
           </p>
-        </>
-      )}
+        ) : null}
+      </header>
+
+      <MarketingAnalyticsShell snapshot={snapshot} rangeDays={rangeDays} />
     </div>
   );
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
   return (
-    <Suspense fallback={<OverviewPageSkeleton />}>
-      <OverviewContent />
+    <Suspense fallback={<AnalyticsPageSkeleton />}>
+      <AnalyticsContent searchParams={searchParams} />
     </Suspense>
   );
 }

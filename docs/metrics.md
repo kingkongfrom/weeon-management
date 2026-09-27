@@ -71,7 +71,14 @@ suspended`.
 ## Presenting
 
 - Overview page = aggregate cards across all tenants (totals, trials, at-risk).
-- Tenants page = table, one row per tenant, with users-per-tenant and status.
-- Tenant page = all columns of the tenant + its seat/health summary.
+- Schools page (`/dashboard/tenants`) = card list, one row per tenant, leading
+  with **Tenant / School calendar / Status**, plus a roster summary (Students,
+  Teachers, Seats). Status filter chips + search; rows link to the School page.
+- School page (`/dashboard/tenants/[id]`) = hero + segmented Modules / People /
+  Overview / Activity panes.
+- School identity tile (`components/dashboard/tenant-avatar.tsx`) shows the
+  uploaded logo when present, else the school initials. The logo path lives in
+  `tenants.settings.logoStoragePath` (owned by `weeon-tenants`) in the public
+  `school-branding` bucket; `resolveTenantLogoUrl` builds the URL.
 - Status colors and text live in `components/ui/StatusBadge.tsx`
   (`active=grey/ok`, `trial=violet`, `past_due=amber`, `suspended=red`).

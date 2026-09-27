@@ -2,7 +2,14 @@
 
 import { signOutAction } from "@/lib/auth/actions";
 
-export function SignOutButton({ variant = "default" }: { variant?: "default" | "drawer" }) {
+export function SignOutButton({
+  variant = "default",
+  label = "Sign out",
+}: {
+  variant?: "default" | "drawer";
+  /** Button label — pass a translated string from the message catalog. */
+  label?: string;
+}) {
   const drawer = variant === "drawer";
 
   return (
@@ -16,7 +23,7 @@ export function SignOutButton({ variant = "default" }: { variant?: "default" | "
         }
       >
         {drawer ? <LogoutIcon /> : null}
-        Sign out
+        {label}
       </button>
     </form>
   );

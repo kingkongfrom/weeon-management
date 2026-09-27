@@ -1,116 +1,83 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, LayoutDashboard, Settings, ShieldCheck } from "lucide-react";
+import { Building2, LayoutDashboard, Rocket, Settings, ShieldCheck } from "lucide-react";
 import { isNavItemActive } from "@/lib/dashboard/nav";
-import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
+import { useT } from "@/lib/i18n/client";
 
 const NAV_ITEMS = [
-  { id: "overview" as const, href: "/dashboard", icon: LayoutDashboard, label: "Overview", section: "primary" as const },
-  { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, label: "Tenants", section: "primary" as const },
-  { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, label: "Security", section: "admin" as const },
-  { id: "settings" as const, href: "/dashboard/settings", icon: Settings, label: "Settings", section: "admin" as const },
+  { id: "analytics" as const, href: "/dashboard", icon: LayoutDashboard, labelKey: "analytics" as const, section: "primary" as const },
+  { id: "onboarding" as const, href: "/dashboard/onboarding", icon: Rocket, labelKey: "onboarding" as const, section: "primary" as const },
+  { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, labelKey: "tenants" as const, section: "primary" as const },
+  { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, labelKey: "security" as const, section: "admin" as const },
+  { id: "settings" as const, href: "/dashboard/settings", icon: Settings, labelKey: "settings" as const, section: "admin" as const },
 ];
 
 export function Sidebar({
-  sessionUser,
-  footer,
   collapsed = false,
   onNavigate,
 }: {
-  sessionUser: DashboardSessionUser | null;
-  footer?: ReactNode;
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const t = useT();
   const navHrefs = NAV_ITEMS.map((item) => item.href);
   const primary = NAV_ITEMS.filter((item) => item.section === "primary");
   const admin = NAV_ITEMS.filter((item) => item.section === "admin");
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <nav
-        className={`flex flex-1 flex-col gap-1 overflow-y-auto ${collapsed ? "items-center px-2 py-3" : "p-4"}`}
-        aria-label="Main navigation"
-      >
-        {collapsed ? null : (
-          <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
-            Primary
-          </div>
-        )}
-        {primary.map((item) => (
-          <NavItem
-            key={item.id}
-            item={item}
-            active={isNavItemActive(pathname, item.href, navHrefs)}
-            collapsed={collapsed}
-            onClick={onNavigate}
-          />
-        ))}
+    <nav
+      className={`flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto ${collapsed ? "items-center px-2 py-3" : "p-4"}`}
+      aria-label={t.nav.ariaMain}
+    >
+      {collapsed ? null : (
+        <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
+          {t.nav.sectionPrimary}
+        </div>
+      )}
+      {primary.map((item) => (
+        <NavItem
+          key={item.id}
+          item={item}
+          label={t.nav[item.labelKey]}
+          active={isNavItemActive(pathname, item.href, navHrefs)}
+          collapsed={collapsed}
+          onClick={onNavigate}
+        />
+      ))}
 
-        {collapsed ? (
-          <div className="my-2 h-px w-6 bg-border" />
-        ) : (
-          <div className="mt-4 mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
-            Admin
-          </div>
-        )}
-        {admin.map((item) => (
-          <NavItem
-            key={item.id}
-            item={item}
-            active={isNavItemActive(pathname, item.href, navHrefs)}
-            collapsed={collapsed}
-            onClick={onNavigate}
-          />
-        ))}
-      </nav>
-
-      {footer ??
-        (sessionUser ? (
-          <div className={`border-t border-border ${collapsed ? "p-2" : "p-4"}`}>
-            <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full brand-gradient text-xs font-bold text-white"
-                title={
-                  collapsed
-                    ? [sessionUser.name, sessionUser.email].filter(Boolean).join(" · ")
-                    : undefined
-                }
-              >
-                {sessionUser.initials}
-              </div>
-              {collapsed ? null : (
-                <div className="min-w-0">
-                  {sessionUser.name ? (
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {sessionUser.name}
-                    </p>
-                  ) : null}
-                  {sessionUser.email ? (
-                    <p className="truncate text-xs text-foreground/50">
-                      {sessionUser.email}
-                    </p>
-                  ) : null}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : null)}
-    </div>
+      {collapsed ? (
+        <div className="my-2 h-px w-6 bg-border" />
+      ) : (
+        <div className="mt-4 mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
+          {t.nav.sectionAdmin}
+        </div>
+      )}
+      {admin.map((item) => (
+        <NavItem
+          key={item.id}
+          item={item}
+          label={t.nav[item.labelKey]}
+          active={isNavItemActive(pathname, item.href, navHrefs)}
+          collapsed={collapsed}
+          onClick={onNavigate}
+        />
+      ))}
+    </nav>
   );
 }
 
 function NavItem({
   item,
+  label,
   active,
   collapsed,
   onClick,
 }: {
   item: (typeof NAV_ITEMS)[number];
+  label: string;
   active: boolean;
   collapsed: boolean;
   onClick?: () => void;
@@ -119,8 +86,8 @@ function NavItem({
     <Link
       href={item.href}
       onClick={onClick}
-      title={collapsed ? item.label : undefined}
-      aria-label={collapsed ? item.label : undefined}
+      title={collapsed ? label : undefined}
+      aria-label={collapsed ? label : undefined}
       className={`group relative flex items-center rounded-xl text-sm font-semibold transition-all ${
         collapsed ? "h-10 w-10 justify-center" : "gap-3 px-3 py-2.5"
       } ${
@@ -141,13 +108,11 @@ function NavItem({
       </span>
       {collapsed ? (
         <span className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg border border-border bg-surface px-2 py-1 text-xs font-semibold text-foreground group-hover:block group-focus-within:block">
-          {item.label}
+          {label}
         </span>
       ) : (
-        item.label
+        label
       )}
     </Link>
   );
 }
-
-

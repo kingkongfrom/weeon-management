@@ -5,7 +5,7 @@ export const LOGO_WORDMARK_GRADIENT = {
 } as const;
 
 /** Light-surface foreground (`--foreground` in globals.css). */
-export const LOGO_WORDMARK_FOREGROUND = "#1a2331";
+export const LOGO_WORDMARK_FOREGROUND = "#1b2433";
 
 export const LOGO_WORDMARK_GRADIENT_CSS = `linear-gradient(90deg, ${LOGO_WORDMARK_GRADIENT.from} 0%, ${LOGO_WORDMARK_GRADIENT.to} 100%)`;
 

@@ -19,7 +19,7 @@ Columns (from the live schema):
 | ------ | ------------ |
 | `id` | uuid (PK) |
 | `name` | Institution name |
-| `status` | `active` \| `past_due` \| `suspended` \| `trial` |
+| `status` | `demo` \| `demo_expired` \| `active` \| `past_due` \| `suspended` (+ legacy `trial` \| `trial_expired`) |
 | `plan` | Paid tier; **top-level** column (observed: `pro`), not inside `settings` |
 | `subdomain` | `<slug>.weeon.school` (observed `weeon-demo-school`) |
 | `slug` | nullable URL slug |
@@ -28,7 +28,8 @@ Columns (from the live schema):
 | `billing_seats` | Paid seat count (per-student pricing). `0` until a school pays. |
 | `subscription_id` | nullable (payment provider sub id) |
 | `greenpay_subscription_id` | nullable |
-| `trial_started_at`, `trial_ends_at` | nullable |
+| `trial_started_at`, `trial_ends_at` | nullable (legacy trial clock) |
+| `demo_ends_at` | nullable; end of the 3-day guided-demo window. After it, access is read-only until activation. |
 | `paid_at`, `paid_until` | nullable |
 | `created_at`, `updated_at` | timestamps |
 
@@ -87,7 +88,7 @@ It is JSONB; the console only needs a few keys for statistics. Observed keys:
 
 | Key | Meaning |
 | --- | ------- |
-| `modules` | `{core: bool, finance: bool, transport: bool}` — paid add-on toggles (UI/API gate on these) |
+| `modules` | **legacy, display-only** `{core, finance, transport}` — superseded by `tenant_addons` / `tenant_module_catalog` for real gating. Do not wire new gates to this. |
 | `educationLevels` | e.g. `["primaria","secundaria"]` |
 | `schoolOffer` | `{grades[], primaria, secundaria, preescolar, tecnico, nationalSchedule, …}` |
 | `academicYear` | academic year identifier |
@@ -97,9 +98,51 @@ It is JSONB; the console only needs a few keys for statistics. Observed keys:
 | `saberClaimedAt`, `jornadaConfirmedAt`, `subjectsConfirmedAt`, `subjectsSeededAt` | setup milestones (timestamps) |
 | `adminEmail` | school admin contact |
 
-So modules (Finance/Transport enabled => revenue add-ons) and education/schedule
-flags are read from `settings` for per-tenant stats, while `status` /`plan` /
-`billing_seats` / trial columns drive subscription signaling.
+So education/schedule flags are read from `settings` for per-tenant stats, while
+`status` / `plan` / `billing_seats` / trial columns drive subscription
+signaling. **Module enablement is NOT read from `settings`** — see below.
+
+## Tenant modules (the real gate — `tenant_addons` + catalog)
+
+The single source of truth for per-tenant module on/off is **`public.tenant_addons`**
+(`(tenant_id, addon_key, enabled, enabled_at, disabled_at, metadata)`), paired
+with the catalog `public.tenant_module_catalog`. Both live in `weeon-tenants`
+(migrations `20260915180000_parent_payments.sql`,
+`20260927120000_tenant_module_gating.sql`).
+
+- **Tier `core`** — the plan minimum (Calificaciones, Aula virtual, Asistencia,
+  Agenda y horarios, Comunicación, Momentos, Administración). Seeded `enabled =
+  true` for every tenant and **never disabled from Ops**; the Ops School page
+  renders them as locked rows.
+- **Tier `addon`** — optional paid modules (currently only `parent_payments`).
+  Ops toggles these from the School page.
+
+Ops reads/writes via the service-role platform client:
+
+| Concern | File |
+| --- | --- |
+| List catalog + tenant state | `lib/platform/tenant-modules.ts` (`listTenantModules`) |
+| Toggle an add-on (refuses core) | `lib/platform/tenant-modules.ts` (`setTenantModuleEnabled`) |
+| Server action | `lib/dashboard/tenant-module-actions.ts` |
+| UI | `components/dashboard/module-list-card.tsx` |
+
+Consumers keep their own gates: the ERP nav (`weeon-tenants`
+`lib/dashboard/tenant-addons.ts` + `addon-keys.ts`, `core` always on; `ADDON_NAV`
+gates `parent_payments`) and mobile (`tenant_parent_payments_status()` RPC
+reading `tenant_addons.addon_key='parent_payments'`). The parent-payments RPC is
+unchanged by the module-gating migration.
+
+## School status control (Ops → tenant lifecycle)
+
+`lib/platform/tenant-status.ts` (`setTenantStatus`) + `lib/dashboard/tenant-status-actions.ts`
+let Ops **suspend** (`suspended`) and **reactivate** (`active`) a school from the
+School page. Only this manual subset is allowed — `demo` / `demo_expired` /
+`trial` / `trial_expired` stay lifecycle-driven (demo clock, trial clock, payment
+webhooks). Suspension blocks every user of the tenant.
+
+Every cross-tenant mutation (admin add/remove, module toggle, status change) is
+also appended to **`public.tenant_ops_audit`** with the acting ops-staff member
+and before/after values — see `audit-log.md` and `lib/platform/ops-audit.ts`.
 
 ## Platform & audit tables (built for console / ops reads)
 
@@ -111,7 +154,10 @@ Already in the DB from `weeon-tenants` migrations:
 - `trial_requests` — SABER trial-request funnel state (`saber_code`, `email`,
   `email_verified`, `consumed_at`, `tenant_id`).
 - `tenant_restore_log`, `tenant_admin_log` — internal ops/audit rows.
-- `admin_invites`, `admin_password_resets` — school-admin onboarding ops.
+  `tenant_admin_log.provision_kind` records admin `created`/`linked`/`removed`,
+  including Ops school-admin add/remove.
+- `admin_invites` (legacy — no longer created, unreadable by tenants),
+  `admin_password_resets` — school-admin password-reset ops.
 
 These live in the same DB and are the raw material for the console's health /
 audit views (see `audit-log.md`).

@@ -25,7 +25,7 @@ body {
 #capture {
   font-size: 36px;
   display: inline-block;
-  color: #1a2331;
+  color: #1b2433;
   overflow: visible;
   /* Smile arc sits below baseline (-0.14em) and the stroke dips past its box. */
   padding-bottom: 0.6em;
@@ -83,7 +83,7 @@ body {
 }
 
 #capture .text-foreground {
-  color: #1a2331;
+  color: #1b2433;
 }
 
 #capture .ml-1\.5 {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AccountDrawer } from "@/components/dashboard/account-drawer";
 import { UserAvatar } from "@/components/dashboard/user-avatar";
+import { useAvatarPreference } from "@/lib/profile/use-profile-preferences";
 import type { DashboardSessionUser } from "@/lib/dashboard/session-types";
 
 export function AccountMenu({
@@ -18,6 +19,7 @@ export function AccountMenu({
   showName?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const avatarUrl = useAvatarPreference();
   const displayName = sessionUser?.name?.trim() || "Platform staff";
 
   return (
@@ -44,7 +46,7 @@ export function AccountMenu({
             </span>
           </span>
         ) : null}
-        <UserAvatar initials={initials} size="sm" className="shrink-0" />
+        <UserAvatar initials={initials} src={avatarUrl} size="sm" className="shrink-0" />
       </button>
       <AccountDrawer
         open={open}

@@ -7,6 +7,7 @@ import { LogoCompact, LogoMark } from "@/components/logo";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 import { Header } from "./header";
+import { useT } from "@/lib/i18n/client";
 import {
   useSidebarCollapsed,
   writeSidebarCollapsed,
@@ -15,17 +16,16 @@ import {
 type DashboardShellProps = {
   children: ReactNode;
   accountSlot: ReactNode;
-  sidebarFooter: ReactNode;
   initialSidebarCollapsed?: boolean;
 };
 
 export function DashboardShell({
   children,
   accountSlot,
-  sidebarFooter,
   initialSidebarCollapsed = false,
 }: DashboardShellProps) {
   const collapsed = useSidebarCollapsed(initialSidebarCollapsed);
+  const t = useT();
 
   useEffect(() => {
     document.documentElement.classList.add("shell-ready");
@@ -33,9 +33,9 @@ export function DashboardShell({
   }, []);
 
   return (
-    <div className="dashboard-shell bg-background">
+    <div className="dashboard-shell min-h-screen bg-background">
       <a href="#main-content" className="skip-link">
-        Skip to content
+        {t.shell.skipToContent}
       </a>
 
       <aside className="dashboard-sidebar fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-surface transition-[width] duration-200 lg:flex">
@@ -47,13 +47,13 @@ export function DashboardShell({
           <Link
             href="/dashboard"
             className="transition-opacity hover:opacity-85"
-            aria-label="Weeon Ops"
+            aria-label={t.header.ariaBrand}
           >
             {collapsed ? <LogoMark /> : <LogoCompact />}
           </Link>
         </div>
         <SidebarToggle collapsed={collapsed} />
-        <Sidebar sessionUser={null} footer={sidebarFooter} collapsed={collapsed} />
+        <Sidebar collapsed={collapsed} />
       </aside>
 
       <div className="dashboard-content">
@@ -74,13 +74,15 @@ export function DashboardShell({
 }
 
 function SidebarToggle({ collapsed }: { collapsed: boolean }) {
+  const t = useT();
+  const label = collapsed ? t.shell.expandMenu : t.shell.collapseMenu;
   return (
     <button
       type="button"
       onClick={() => writeSidebarCollapsed(!collapsed)}
       className="absolute top-8 right-0 z-50 flex h-7 w-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-foreground/55 transition-colors hover:bg-surface-muted hover:text-foreground"
-      aria-label={collapsed ? "Expand menu" : "Collapse menu"}
-      title={collapsed ? "Expand menu" : "Collapse menu"}
+      aria-label={label}
+      title={label}
     >
       {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
     </button>

@@ -57,14 +57,44 @@ Operational / admin action logs used by `weeon-tenants` for restore and admin
 actions. Read them read-only to give staff a historical trail of admin/restore
 operations per tenant.
 
+### `tenant_ops_audit`
+
+The **general ops audit trail** (migration `20260927130000_tenant_ops_audit.sql`).
+Append-only; written by this console for every cross-tenant mutation:
+
+| Column | Meaning |
+| --- | --- |
+| `tenant_id` | school the action targeted |
+| `actor_user_id`, `actor_email` | acting ops-staff member (Auth user id + email — **not** a `profiles` row) |
+| `action` | `admin.added` · `admin.removed` · `module.enabled` · `module.disabled` · `status.suspend` · `status.reactivate` · `status.past_due` · `status.active` |
+| `target` | subject of the action (profile id, addon key, …) |
+| `before_value`, `after_value` | JSONB snapshots for the diff |
+| `created_at` | when |
+
+For `status.suspend`, `after_value` also carries `reason`
+(`delinquency` | `manual`) and, for a delinquency hold, `readOnlyAt` — so the
+audit shows *why* a school was suspended and when access changes, not just the
+status. On `status.reactivate` the suspension stamps are cleared and the row
+returns to `active`.
+
+Written via `lib/platform/ops-audit.ts` (`writeTenantOpsAudit`), read via
+`listTenantOpsAudit` and surfaced on the School page as **Ops activity**
+(`components/dashboard/ops-audit-card.tsx`). Audit writes are best-effort and
+never block the underlying action.
+
+> Note: `tenant_admin_log` still records admin provisioning/removal too (its own
+> `provision_kind` check). `tenant_ops_audit` is the broader trail; module and
+> status changes exist only here.
+
 ### `admin_invites`, `admin_password_resets`
 
-School-admin onboarding mechanics (invite + password-reset attempts). Useful to
-spot stuck onboarding (an invite issued but never accepted).
+School-admin password-reset attempts. **`admin_invites` is legacy** — the tenant
+invite flow was removed (migration `20260926210000_delegate_school_admins_to_ops.sql`)
+and school admins are now added/removed from Ops (see `tenant_admin_log`).
 
 `admin_invites` (verified live): `tenant_id`, `email`, `invited_by`,
-`token_hash`, `expires_at`, `accepted_at`, `accepted_user_id`. An invite with a
-past `expires_at` and no `accepted_at` is a stuck/welcome follow-up signal.
+`token_hash`, `expires_at`, `accepted_at`, `accepted_user_id`. Do **not** treat
+it as a live onboarding signal — historical rows only.
 
 ## Console patterns
 

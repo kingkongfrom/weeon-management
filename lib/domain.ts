@@ -17,7 +17,10 @@ export type Json =
   | Json[];
 
 export type TenantStatus =
+  | "demo"
+  | "demo_expired"
   | "trial"
+  | "trial_expired"
   | "active"
   | "past_due"
   | "suspended";
@@ -41,6 +44,11 @@ export interface Tenant {
   trial_ends_at: string | null;
   paid_at: string | null;
   paid_until: string | null;
+  /** Why the school is suspended: "delinquency" | "manual" (null when not). */
+  suspend_reason?: string | null;
+  suspended_at?: string | null;
+  /** Delinquency only: when access becomes read-only (null = immediate). */
+  suspended_grace_ends_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +76,27 @@ export function resolveBillingSeats(
   }
 
   return 0;
+}
+
+/**
+ * Public URL for a school logo, or null when the school has not uploaded one.
+ *
+ * The logo object path lives in `tenants.settings.logoStoragePath` (owned by
+ * `weeon-tenants`) inside the **public** `school-branding` bucket, so it can be
+ * rendered straight from the storage URL without signing. Falls back to null
+ * (callers render the tenant initials) when there is no logo or no storage URL.
+ */
+export function resolveTenantLogoUrl(
+  tenant: Pick<Tenant, "settings">,
+): string | null {
+  const obj = settingsObject(tenant.settings);
+  const path = obj?.logoStoragePath;
+  if (typeof path !== "string" || !path.trim()) return null;
+
+  const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  if (!base) return null;
+
+  return `${base}/storage/v1/object/public/school-branding/${path.replace(/^\/+/, "")}`;
 }
 
 export type EducationLevelKey =
@@ -133,7 +162,16 @@ export function resolveMemberSince(
 }
 
 export function formatTenantTimestamp(iso?: string | null): string {
-  return iso ? new Date(iso).toISOString().slice(0, 16).replace("T", " ") : "—";
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 /** Calendar date for tenant-facing labels (no time). */
@@ -146,22 +184,6 @@ export function formatTenantDate(iso?: string | null): string {
     day: "numeric",
     year: "numeric",
   });
-}
-
-/** Enabled add-ons from `settings.modules` (Core, Finance, Transport). */
-export function resolveTenantModules(settings: Json): string {
-  const obj = settingsObject(settings);
-  const modules = obj?.modules;
-  if (!modules || typeof modules !== "object" || Array.isArray(modules)) {
-    return "Core";
-  }
-
-  const flags = modules as Record<string, Json | undefined>;
-  const enabled: string[] = [];
-  if (flags.core !== false) enabled.push("Core");
-  if (flags.finance === true) enabled.push("Finance");
-  if (flags.transport === true) enabled.push("Transport");
-  return enabled.length > 0 ? enabled.join(", ") : "—";
 }
 
 /** School year label from `settings.academicYear` (e.g. 2026-2027). */

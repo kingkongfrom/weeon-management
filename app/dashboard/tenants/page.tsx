@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { TenantsPageSkeleton } from "@/components/dashboard/skeleton";
 import { TenantTableClient } from "@/components/dashboard/tenant-table-client";
+import { resolveTenantLogoUrl } from "@/lib/domain";
 import { listTenantMetrics, listTenants } from "@/lib/platform/metrics";
 
 export const metadata: Metadata = {
-  title: "Tenants",
+  title: "Schools",
 };
 
 async function TenantsContent() {
@@ -22,7 +23,10 @@ async function TenantsContent() {
         </p>
       ) : (
         <TenantTableClient
-          tenants={tenants}
+          tenants={tenants.map((tenant) => ({
+            ...tenant,
+            logoUrl: resolveTenantLogoUrl(tenant),
+          }))}
           counts={Object.fromEntries(metrics)}
         />
       )}

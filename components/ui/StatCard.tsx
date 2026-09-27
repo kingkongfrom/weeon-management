@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ICON_TONE_CLASSES, type IconTone } from "@/lib/dashboard/icon-tone";
+import {
+  STAT_CARD_AVATAR,
+  STAT_CARD_SURFACE,
+  type IconTone,
+} from "@/lib/dashboard/icon-tone";
 
 export function StatCard({
   label,
@@ -22,11 +26,12 @@ export function StatCard({
   const content = (
     <>
       {icon ? (
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${ICON_TONE_CLASSES[tone]}`}
+        <span
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${STAT_CARD_AVATAR[tone]}`}
+          aria-hidden
         >
           {icon}
-        </div>
+        </span>
       ) : null}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50">
@@ -45,15 +50,11 @@ export function StatCard({
     </>
   );
 
-  const base =
-    "flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 sm:p-5";
+  const base = `group card-lift flex items-center gap-4 rounded-2xl border border-border/80 bg-surface p-4 shadow-sm sm:p-5 ${STAT_CARD_SURFACE[tone]} hover:border-brand-200 hover:bg-brand-50/40 dark:hover:border-brand-900 dark:hover:bg-brand-950/20`;
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={`${base} cursor-pointer transition-colors duration-150 hover:bg-surface-muted/40 dark:hover:bg-surface-elevated/40`}
-      >
+      <Link href={href} className={base}>
         {content}
       </Link>
     );

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createPlatformClient } from "@/lib/supabase/platform";
+import { listTenantModules, setTenantModuleEnabled } from "@/lib/platform/tenant-modules";
 
 export type ParentPaymentsAddonStatus = {
   enabled: boolean;
@@ -12,13 +13,8 @@ export async function getParentPaymentsAddonStatus(
   tenantId: string,
 ): Promise<ParentPaymentsAddonStatus> {
   const client = createPlatformClient();
-  const [addonRes, providerRes] = await Promise.all([
-    client
-      .from("tenant_addons")
-      .select("enabled, enabled_at")
-      .eq("tenant_id", tenantId)
-      .eq("addon_key", "parent_payments")
-      .maybeSingle(),
+  const [modules, providerRes] = await Promise.all([
+    listTenantModules(tenantId),
     client
       .from("tenant_payment_providers")
       .select("tenant_id")
@@ -26,9 +22,11 @@ export async function getParentPaymentsAddonStatus(
       .maybeSingle(),
   ]);
 
+  const addon = modules.find((module) => module.key === "parent_payments");
+
   return {
-    enabled: Boolean(addonRes.data?.enabled),
-    enabledAt: (addonRes.data?.enabled_at as string | null) ?? null,
+    enabled: Boolean(addon?.enabled),
+    enabledAt: addon?.enabledAt ?? null,
     paymentsReady: Boolean(providerRes.data),
   };
 }
@@ -37,19 +35,9 @@ export async function setParentPaymentsAddonEnabled(input: {
   tenantId: string;
   enabled: boolean;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const client = createPlatformClient();
-  const now = new Date().toISOString();
-  const { error } = await client.from("tenant_addons").upsert({
-    tenant_id: input.tenantId,
-    addon_key: "parent_payments",
+  return setTenantModuleEnabled({
+    tenantId: input.tenantId,
+    moduleKey: "parent_payments",
     enabled: input.enabled,
-    enabled_at: input.enabled ? now : null,
-    updated_at: now,
   });
-
-  if (error) {
-    return { ok: false, error: error.message };
-  }
-
-  return { ok: true };
 }

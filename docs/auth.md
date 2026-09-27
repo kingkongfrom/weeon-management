@@ -39,8 +39,10 @@ Correct:
   schema)
 - Sign-in gate: `canAccessOpsConsole` — allow-list **or** an **accepted**
   invite. Pending invites cannot sign in until they set a password.
-- Tenant detail → Administrators still lists **school** admins from `profiles`.
-  That is a different list on purpose.
+- Tenant detail (the **School page**) → Administrators lists **school** admins
+  from `profiles`. That is a different list on purpose. The same page is where
+  Ops adds/removes those admins and toggles modules — see
+  `docs/data-model.md` § Tenant modules and the School page sections below.
 
 ## Invite flow (Settings)
 
@@ -85,6 +87,36 @@ school has more than one) has a trash action that opens a confirm dialog
 - Every removal is written to `public.tenant_admin_log`
   (`provision_kind='removed'`); see `../weeon-tenants/docs/account-security-ops.md`.
 
+## The School page (`/dashboard/tenants/[id]`)
+
+Ops manages one school from this page. Layout, top to bottom:
+
+- **Hero band** — gradient rule, avatar, name, status badge, subdomain + plan
+  pills, inline Student/Teacher/Admin counts, and a backup-health pill. No
+  separate stat-card row (counts live here instead of in their own boxes).
+- **Segmented workspace** (`SegmentedWorkspace`) — one surface with four panes,
+  each rendering a single card:
+  - **Modules** — `ModuleListCard`: add-ons list (paid, switchable) with a
+    locked "Included in every plan" core band in its footer.
+  - **People** — `AdministratorsCard` (add via provisioning API; remove with a
+    last-admin guard). The suspend/reactivate control (`SchoolStatusControl`) is
+    a footer band of the same card, not a separate box.
+  - **Overview** — one `SectionCard` with three `DetailGroup` blocks
+    (Subscription & lifecycle, Academic setup, Identity).
+  - **Activity** — `OpsAuditCard`, the `tenant_ops_audit` trail.
+
+Shared building blocks: `components/dashboard/section-card.tsx`
+(`SectionCard`/`DetailList`/`DetailRow`), `segmented-tabs.tsx`, and the
+`icon-tone.ts` token maps.
+
+`SchoolStatusControl` suspends (`suspended`) or reactivates (`active`) the
+school (`setTenantStatusAction`). Only the manual status subset is accepted.
+
+Adding an admin goes through `lib/dashboard/provisioning-actions.ts`
+(`addAdministratorAction` → `addSchoolAdministrator` → ERP
+`/api/ops/schools/administrators`). Removing uses `tenant-admin-actions.ts`
+above.
+
 ## Password reset
 
 Same isolation: only ops staff (directory or accepted invite). Branded Resend
@@ -118,6 +150,10 @@ mail, token in `data/ops-staff.json` (`kind: reset`), complete on
 | `lib/auth/auth-user.ts` | Auth user resolve without generic mail |
 | `lib/email/*` | Branded Resend templates |
 | `lib/dashboard/tenant-admin-actions.ts` | Remove a school administrator (offboarding) |
+| `lib/dashboard/tenant-module-actions.ts` | Toggle a paid module for a school |
+| `lib/dashboard/tenant-status-actions.ts` | Suspend / reactivate a school |
+| `lib/platform/tenant-modules.ts` | Module catalog + tenant module state (service-role) |
+| `lib/platform/tenant-status.ts` | Manual tenant status subset (suspend/reactivate) |
 | `components/dashboard/remove-administrator.tsx` | Offboarding confirm dialog |
 | `app/dashboard/security/page.tsx` | Administrators UI (ops staff) |
 | `app/accept-invite/page.tsx` | Accept branded invite |

@@ -2,24 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, LayoutDashboard, Settings, ShieldCheck } from "lucide-react";
+import { Building2, LayoutDashboard, Rocket, Settings, ShieldCheck } from "lucide-react";
 import { isNavItemActive } from "@/lib/dashboard/nav";
+import { useT } from "@/lib/i18n/client";
 
 const MOBILE_ITEMS = [
-  { id: "overview" as const, href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
-  { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
-  { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, label: "Security" },
-  { id: "settings" as const, href: "/dashboard/settings", icon: Settings, label: "Settings" },
+  { id: "analytics" as const, href: "/dashboard", icon: LayoutDashboard, labelKey: "analytics" as const },
+  { id: "onboarding" as const, href: "/dashboard/onboarding", icon: Rocket, labelKey: "onboarding" as const },
+  { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, labelKey: "tenants" as const },
+  { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, labelKey: "security" as const },
+  { id: "settings" as const, href: "/dashboard/settings", icon: Settings, labelKey: "settings" as const },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
+  const t = useT();
   const navHrefs = MOBILE_ITEMS.map((item) => item.href);
 
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-surface/95 px-2 pb-safe pt-2 backdrop-blur-md lg:hidden"
-      aria-label="Mobile navigation"
+      aria-label={t.nav.ariaMain}
     >
       <ul className="flex items-center justify-around">
         {MOBILE_ITEMS.map((item) => {
@@ -44,7 +47,7 @@ export function MobileNav() {
                 >
                   <item.icon size={20} />
                 </span>
-                {item.label}
+                {t.nav[item.labelKey]}
               </Link>
             </li>
           );
