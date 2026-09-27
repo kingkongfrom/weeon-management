@@ -6,6 +6,7 @@ import { isAuthDisabled } from "@/lib/auth/policy";
 import { createSessionClient } from "@/lib/supabase/session";
 import { passwordSchema } from "@/lib/auth/password";
 import { opsAppOrigin } from "@/lib/auth/ops-origin";
+import { clientIpFrom, consumeRateLimit } from "@/lib/auth/rate-limit";
 import {
   applyPasswordReset,
   consumeResettableToken,
@@ -13,6 +14,10 @@ import {
 } from "@/lib/auth/password-reset";
 
 export type PasswordResetFormState = { ok?: boolean; error?: string } | null;
+
+/** Reset-email attempts allowed per IP per window. */
+const RESET_LIMIT = 5;
+const RESET_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 /**
  * Sends the branded reset email for an ops staff account. Enumeration-safe:
@@ -27,6 +32,22 @@ export async function requestPasswordReset(
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Enter a valid email address." };
+  }
+
+  // Throttle reset emailing per IP: this endpoint is unauthenticated and sends
+  // branded mail, so it is an abuse/spam vector. Enumeration-safe response
+  // either way (we do not reveal whether the address exists).
+  const ip = clientIpFrom(await headers());
+  const limit = consumeRateLimit(`reset:ip:${ip}`, {
+    limit: RESET_LIMIT,
+    windowMs: RESET_WINDOW_MS,
+  });
+  if (!limit.allowed) {
+    return {
+      error: `Too many requests. Try again in ${limit.retryAfterSeconds} second${
+        limit.retryAfterSeconds === 1 ? "" : "s"
+      }.`,
+    };
   }
 
   const origin = await currentOrigin();

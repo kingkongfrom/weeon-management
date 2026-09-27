@@ -42,6 +42,57 @@ repo as an **ops credential surface**.
 - Full per-tenant roster PII dumps (unless a specific, authorized staff view).
 - Audit payload blobs.
 
+## Hardening (implemented)
+
+### Security headers (`next.config.ts`)
+
+Mirrors `weeon-tenants` so the products stay aligned. A **static CSP** (no
+nonces) keeps pages statically rendered and CDN-cacheable while still blocking
+the major vectors: `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`,
+`frame-ancestors 'none'` (clickjacking), `upgrade-insecure-requests`.
+
+- `'unsafe-inline'` on `script-src` is required by the App Router (it injects
+  inline bootstrap/flight scripts); `'unsafe-eval'` is **development only**.
+- Two external origins are required and allowlisted deliberately:
+  **Supabase** (auth/session, project images) and
+  **`demotiles.maplibre.org`** (MapLibre glyphs for country labels on the
+  analytics map — see `lib/analytics/map-basemap-style.ts`). Adding a new
+  third-party script/origin means editing the CSP here, not loosening it.
+- Also sets `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, and
+  `X-Robots-Tag: noindex, nofollow, noarchive` (belt-and-braces with the layout
+  metadata `robots`). `poweredByHeader` is disabled.
+
+### Login / reset throttling (`lib/auth/rate-limit.ts`)
+
+Sliding-window throttle on the two unauthenticated, abusable actions:
+
+| Action | Limit |
+| ------ | ----- |
+| Sign-in, per email | 10 attempts / 10 min |
+| Sign-in, per client IP | 30 attempts / 10 min |
+| Password reset, per IP | 5 requests / 15 min |
+
+This is **not account lockout, by design.** Nothing is ever disabled, counters
+expire on their own, and a successful sign-in clears the email bucket — so a
+real admin cannot be locked out and no "unlock" support flow is needed. It is a
+speed bump against brute force, not a lock.
+
+> **Limitation:** the store is in-process. On multi-instance/serverless deploys
+> each instance keeps its own counters, so the effective limit is
+> `limit × instances`. `consumeRateLimit()` is the single seam — move the store
+> to Redis/Upstash or a shared table for a hard cross-instance guarantee.
+> Supabase Auth applies its own project-level limits on `signInWithPassword`,
+> so this is defence in depth.
+
+### Not implemented, on purpose
+
+- **Account lockout** — rejected. It adds a denial-of-service vector (an attacker
+  can lock a real admin out) while stopping little at this scale. Manual
+  **suspend** / **delete** cover the real cases and are audited.
+- **MFA** — not built. This is the highest-value remaining control, since Ops can
+  suspend/delete every school; Supabase supports TOTP natively.
+
 ## Reference
 
 Sibling `weeon-tenants` keeps a fuller `SECURITY.md`/`docs/security.md`. When that
