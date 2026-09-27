@@ -47,7 +47,7 @@ type Props = {
 
 /** Portrait frame so the tall LATAM extent fits the viewport. */
 const MAP_FRAME_CLASS =
-  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-2 ring-border-strong";
+  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-border-strong";
 
 /** Costa Rica — Weeon home base. */
 const COSTA_RICA: [number, number] = [-84.1, 9.8];
