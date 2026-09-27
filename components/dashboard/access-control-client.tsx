@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Search, X } from "lucide-react";
-import { AdminDetailDrawer } from "@/components/dashboard/admin-detail-drawer";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { CopyableValue } from "@/components/ui/CopyableValue";
 import type { AdminAccount } from "@/lib/platform/access-control";
 
 const FILTERS = [
@@ -43,9 +45,21 @@ function accountStateLabel(account: AdminAccount): { label: string; tone: string
   return { label: "Active", tone: "bg-success-subtle text-success" };
 }
 
-/** Short profile id for the table (`profiles.id` is a uuid). */
 function shortId(id: string): string {
   return id.slice(0, 8);
+}
+
+function formatDateTime(iso: string | null): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 export function AccessControlClient({
@@ -148,9 +162,20 @@ export function AccessControlClient({
         })}
       </div>
 
-      <AdminTable accounts={filtered} onSelect={setSelected} />
+      {filtered.length === 0 ? (
+        <p className="rounded-2xl border border-border/80 bg-surface px-5 py-6 text-sm font-medium text-foreground/50">
+          No administrator matches this search.
+        </p>
+      ) : (
+        <AdminTable accounts={filtered} onSelect={setSelected} />
+      )}
 
-      <AdminDetailDrawer account={selected} onClose={() => setSelected(null)} />
+      {selected ? (
+        <AdminDetailPopover
+          account={selected}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -162,14 +187,6 @@ function AdminTable({
   accounts: AdminAccount[];
   onSelect: (account: AdminAccount) => void;
 }) {
-  if (accounts.length === 0) {
-    return (
-      <p className="rounded-2xl border border-border/80 bg-surface px-5 py-6 text-sm font-medium text-foreground/50">
-        No administrator matches this search.
-      </p>
-    );
-  }
-
   return (
     <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm">
       <div className="overflow-x-auto">
@@ -198,7 +215,7 @@ function AdminTable({
                   key={account.id}
                   tabIndex={0}
                   role="button"
-                  aria-label={`Open ${account.name}`}
+                  aria-label={`View ${account.name}`}
                   onClick={() => onSelect(account)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -237,4 +254,161 @@ function AdminTable({
       </div>
     </div>
   );
+}
+
+/**
+ * Anchored popover with the full administrator record. Rendered as a fixed,
+ * viewport-centred panel so it is never clipped by the table's overflow; sized
+ * for a phone width up to a comfortable dialog on desktop. Escape and an
+ * outside click dismiss it.
+ */
+function AdminDetailPopover({
+  account,
+  onClose,
+}: {
+  account: AdminAccount;
+  onClose: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    closeRef.current?.focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    function onPointerDown(event: PointerEvent) {
+      if (event.target instanceof Node && !panelRef.current?.contains(event.target)) {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <button
+        type="button"
+        aria-label="Close details"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default bg-black/30"
+      />
+
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${account.name} details`}
+        className="dash-enter relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+      >
+        <div className="flex items-start gap-4 border-b border-border px-5 py-4">
+          <span
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white dark:bg-brand-500"
+            aria-hidden
+          >
+            {initialsFor(account.name)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-bold text-foreground">
+              {account.name}
+            </p>
+            <p className="truncate text-sm font-medium text-foreground/55">
+              {account.email || "—"}
+            </p>
+          </div>
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close details"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/60 outline-none transition-colors hover:bg-surface-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-4">
+          <div className="flex items-center gap-2">
+            <StatusBadge status={account.tenantStatus} />
+            <span
+              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                account.active
+                  ? "bg-success-subtle text-success"
+                  : "bg-surface-muted text-foreground/60"
+              }`}
+            >
+              {account.active ? "Active" : "Inactive"}
+            </span>
+            <span className="inline-flex rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-foreground/60">
+              {account.role}
+            </span>
+          </div>
+
+          <Link
+            href={`/dashboard/tenants/${account.tenantId}`}
+            className="mt-4 flex items-center gap-3 rounded-xl bg-surface-muted px-4 py-3 transition-colors hover:bg-surface-muted/70"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-foreground/45">
+                School
+              </p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {account.tenantName}
+              </p>
+            </div>
+          </Link>
+
+          <dl className="mt-4 divide-y divide-border/60">
+            <PopoverRow label="Account status" value={account.accountStatus} />
+            <PopoverRow
+              label="User ID"
+              value={<CopyableValue value={account.id} label="user ID" mono />}
+            />
+            <PopoverRow label="Username" value={account.username ?? "—"} />
+            <PopoverRow label="Added" value={formatDateTime(account.createdAt)} />
+            <PopoverRow
+              label="Last sign-in"
+              value={
+                account.firstLoginAt
+                  ? formatDateTime(account.firstLoginAt)
+                  : "Never signed in"
+              }
+            />
+            <PopoverRow
+              label="Welcome email"
+              value={
+                account.emailSentAt
+                  ? formatDateTime(account.emailSentAt)
+                  : "Not sent"
+              }
+            />
+          </dl>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PopoverRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-2.5">
+      <dt className="shrink-0 text-xs font-medium text-foreground/50">{label}</dt>
+      <dd className="min-w-0 text-right text-sm font-semibold text-foreground">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function initialsFor(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }

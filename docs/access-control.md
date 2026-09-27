@@ -36,8 +36,9 @@ administrator:
 Search covers name, email, username, school name, and profile id; filter chips
 bucket by access state (All / Active / Pending first login / Inactive).
 
-**Detail drawer** (`components/dashboard/admin-detail-drawer.tsx`) — clicking a
-row opens a right-side drawer with the full record:
+**Detail popover** (`components/dashboard/access-control-client.tsx`) — clicking
+a row opens a centred popover with the full record (Escape / outside-click
+dismisses):
 
 | Field | Source |
 | ----- | ------ |
