@@ -29,6 +29,7 @@ unsure, check `node_modules/next/dist/docs/`.
 | `/dashboard` | RSC | Overview: totals, trials, at-risk tenants |
 | `/dashboard/tenants` | RSC | All schools — card list with status filter chips, search, calendar + roster summary |
 | `/dashboard/tenants/[id]` | RSC (dynamic) | The **School page**: hero + segmented Modules / People / Overview / Activity |
+| `/dashboard/access` | RSC | **Access control** — cross-tenant administrator directory (search + access state) |
 | `/dashboard/security` | RSC | Invite + **Weeon Ops** administrators |
 | `/dashboard/settings` | RSC | Account & console info (appearance is in the account drawer) |
 | `/api/health` | Route handler | Liveness probe |

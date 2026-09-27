@@ -2,7 +2,6 @@ import { Mail, ShieldCheck, Users } from "lucide-react";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { AddAdministrator } from "@/components/dashboard/add-administrator";
 import { RemoveAdministratorButton } from "@/components/dashboard/remove-administrator";
-import { SchoolStatusControl } from "@/components/dashboard/school-status-control";
 import type { TenantAdminContact } from "@/lib/domain";
 
 function initialsFor(name: string): string {
@@ -13,22 +12,16 @@ function initialsFor(name: string): string {
 }
 
 /**
- * School administrators for a tenant, plus the school-level suspend/reactivate
- * control as a footer band. Ops adds/removes admins here; the school ERP only
- * shows a read-only list. The last admin cannot be removed.
+ * School administrators for a tenant. Ops adds/removes admins here; the school
+ * ERP only shows a read-only list. The last admin cannot be removed.
+ * School-level suspend/reactivate lives on the Overview tab (School access).
  */
 export function AdministratorsCard({
   admins,
   tenantId,
-  status,
-  suspendReason,
-  readOnlyOn,
 }: {
   admins: TenantAdminContact[];
   tenantId: string;
-  status: string;
-  suspendReason?: string | null;
-  readOnlyOn?: string | null;
 }) {
   const canRemove = admins.length > 1;
 
@@ -94,15 +87,6 @@ export function AdministratorsCard({
           ? "The last administrator cannot be removed — add another first."
           : "New admins set their password on first login."}
       </p>
-
-      <div className="border-t border-border/60">
-        <SchoolStatusControl
-          tenantId={tenantId}
-          status={status}
-          suspendReason={suspendReason}
-          readOnlyOn={readOnlyOn}
-        />
-      </div>
     </SectionCard>
   );
 }

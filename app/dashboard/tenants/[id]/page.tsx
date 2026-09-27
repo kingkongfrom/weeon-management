@@ -10,11 +10,13 @@ import {
   GraduationCap,
   History,
   ShieldAlert,
+  ShieldCheck,
   TriangleAlert,
   Users,
 } from "lucide-react";
 import { TenantDetailSkeleton } from "@/components/dashboard/skeleton";
 import { AdministratorsCard } from "@/components/dashboard/administrators-card";
+import { SchoolStatusControl } from "@/components/dashboard/school-status-control";
 import { ModuleListCard } from "@/components/dashboard/module-list-card";
 import { OpsAuditCard } from "@/components/dashboard/ops-audit-card";
 import {
@@ -133,15 +135,7 @@ async function SchoolDetailContent({
           ]}
           panels={{
             modules: <ModuleListCard tenantId={tenant.id} modules={modules} />,
-            people: (
-              <AdministratorsCard
-                admins={admins}
-                tenantId={tenant.id}
-                status={tenant.status}
-                suspendReason={tenant.suspend_reason ?? null}
-                readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
-              />
-            ),
+            people: <AdministratorsCard admins={admins} tenantId={tenant.id} />,
             overview: (
               <div className="grid gap-4 lg:grid-cols-2">
                 <FactPanel
@@ -173,6 +167,37 @@ async function SchoolDetailContent({
                     hint={billingSeats === 0 ? "Set on payment" : undefined}
                   />
                   <Fact label="Plan" value={tenant.plan ?? "—"} />
+                </FactPanel>
+
+                <FactPanel
+                  title="School access"
+                  icon={<ShieldCheck size={15} />}
+                  tone="brand"
+                >
+                  <Fact
+                    label="State"
+                    value={
+                      <StatusBadge
+                        status={tenant.status}
+                        suspendReason={tenant.suspend_reason}
+                      />
+                    }
+                  />
+                  {tenant.suspend_reason === "delinquency" &&
+                  formatReadOnlyOn(tenant.suspended_grace_ends_at) ? (
+                    <Fact
+                      label="Read-only on"
+                      value={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
+                    />
+                  ) : null}
+                  <div className="border-t border-border/60">
+                    <SchoolStatusControl
+                      tenantId={tenant.id}
+                      status={tenant.status}
+                      suspendReason={tenant.suspend_reason ?? null}
+                      readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
+                    />
+                  </div>
                 </FactPanel>
 
                 <FactPanel

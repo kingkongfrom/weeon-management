@@ -187,6 +187,46 @@ export function TenantsPageSkeleton() {
   );
 }
 
+export function AccessControlPageSkeleton() {
+  return (
+    <Screen
+      label="Loading access control"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-5"
+    >
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="mt-2 h-4 w-96 max-w-full" />
+        </div>
+        <Skeleton className="h-10 w-full rounded-lg sm:w-72" />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Skeleton key={index} className="h-8 w-28 rounded-full" />
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 rounded-2xl border border-border/80 bg-surface p-4 sm:gap-5 sm:p-5"
+          >
+            <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-4 w-44 max-w-full" />
+              <Skeleton className="mt-2 h-3 w-56 max-w-full" />
+              <Skeleton className="mt-2 h-3 w-72 max-w-full" />
+            </div>
+            <Skeleton className="hidden h-6 w-20 shrink-0 rounded-full sm:block" />
+          </div>
+        ))}
+      </div>
+    </Screen>
+  );
+}
+
 export function TenantDetailSkeleton() {
   return (
     <Screen
