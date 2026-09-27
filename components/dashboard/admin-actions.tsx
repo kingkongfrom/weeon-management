@@ -30,6 +30,9 @@ export function AdminActions({ account }: { account: AdminAccount }) {
   const [confirmText, setConfirmText] = useState("");
 
   const suspended = account.accountStatus === "suspended";
+  // Deletion is destructive and cannot be undone from the console, so the submit
+  // stays disabled until the operator types DELETE exactly.
+  const confirmed = confirmText.trim().toUpperCase() === "DELETE";
 
   return (
     <div className="mt-5 border-t border-border pt-4">
@@ -85,9 +88,9 @@ export function AdminActions({ account }: { account: AdminAccount }) {
           <input type="hidden" name="tenantId" value={account.tenantId} />
           <input type="hidden" name="name" value={account.name} />
           <p className="text-xs font-medium text-foreground/70">
-            This deletes <strong>{account.name}</strong> immediately, destroys their
-            login, and purges the record after 72 hours. Type{" "}
-            <strong>DELETE</strong> to confirm.
+            This deletes <strong>{account.name}</strong> immediately, destroys
+            their login, and purges the record after 72 hours. This cannot be
+            undone. Type <strong>DELETE</strong> to confirm.
           </p>
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
             <input
@@ -96,17 +99,18 @@ export function AdminActions({ account }: { account: AdminAccount }) {
               value={confirmText}
               onChange={(event) => setConfirmText(event.target.value)}
               placeholder="DELETE"
-              aria-label="Type DELETE to confirm"
+              aria-label="Type DELETE to confirm deletion"
               autoComplete="off"
+              autoFocus
               className="h-9 w-32 rounded-lg border border-border bg-surface px-3 text-sm text-foreground outline-none transition-colors focus:border-error focus:ring-[3px] focus:ring-error/15"
             />
             <button
               type="submit"
-              disabled={deletePending || confirmText.toUpperCase() !== "DELETE"}
-              className="inline-flex items-center gap-2 rounded-lg bg-error px-3.5 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50"
+              disabled={deletePending || !confirmed}
+              className="inline-flex items-center gap-2 rounded-lg bg-error px-3.5 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {deletePending ? <Loader2 size={14} className="animate-spin" /> : null}
-              Delete permanently
+              Delete {account.name}
             </button>
             <button
               type="button"

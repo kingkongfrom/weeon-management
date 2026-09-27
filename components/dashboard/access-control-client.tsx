@@ -70,7 +70,15 @@ export function AccessControlClient({
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
-  const [selected, setSelected] = useState<AdminAccount | null>(null);
+  // Hold only the id: the account is derived from the live `accounts` prop, so
+  // after a suspend/delete + router.refresh() the popover shows fresh state
+  // (button flips Suspend <-> Reactivate) instead of a stale snapshot.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selected = useMemo(
+    () => accounts.find((account) => account.id === selectedId) ?? null,
+    [accounts, selectedId],
+  );
 
   const filterCounts = useMemo(() => {
     const map: Record<FilterId, number> = {
@@ -169,13 +177,13 @@ export function AccessControlClient({
           No administrator matches this search.
         </p>
       ) : (
-        <AdminTable accounts={filtered} onSelect={setSelected} />
+        <AdminTable accounts={filtered} onSelect={(account) => setSelectedId(account.id)} />
       )}
 
       {selected ? (
         <AdminDetailPopover
           account={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => setSelectedId(null)}
         />
       ) : null}
     </div>
@@ -390,7 +398,12 @@ function AdminDetailPopover({
             } />
           </dl>
 
-          <AdminActions account={account} />
+          {/* Keyed by id + status so a status flip remounts the actions with a
+              clean confirm state instead of carrying a stale one. */}
+          <AdminActions
+            key={`${account.id}:${account.accountStatus}`}
+            account={account}
+          />
         </div>
       </div>
     </div>
