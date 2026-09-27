@@ -66,9 +66,17 @@ misleading.
 **Login data comes from Supabase Auth, not `profiles`.** `profiles.first_login_at`
 exists in the generated types but is **never written by any app** — it is always
 `NULL`. Real sign-in activity lives in `auth.users.last_sign_in_at`, so
-`listAdminAccounts()` pages the Auth Admin API and merges by user id. If the
-Admin API is unavailable the field falls back to `NULL` (shows "Never signed
-in") rather than failing the page.
+`listAdminAccounts()` resolves it via the Auth Admin API per user.
+
+> **Use `getUserById`, not `listUsers`.** On this project
+> `auth.admin.listUsers()` returns **HTTP 500 "Database error finding users"**
+> (a GoTrue server-side fault in the *list* endpoint), which silently produced
+> "Never signed in" for every row. Single-user `getUserById` works. Admins are a
+> small set, so N lookups are cheap — `Promise.all` over the admin ids.
+>
+> Failures are logged with `console.error` and fall back to `NULL` (shows
+> "Never signed in"), so a broken Auth call is visible in the server log rather
+> than masquerading as real data.
 
 **Note on "last password updated":** there is no `profiles.password_updated_at`
 in the schema, so the popover shows **Last password reset** from

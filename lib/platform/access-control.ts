@@ -96,29 +96,31 @@ export async function listAdminAccounts(): Promise<{
 
   // Supabase Auth is the only place login activity is recorded. Pull it via the
   // Admin API and merge by user id — `profiles.first_login_at` is never written.
-  // Page until every admin id is matched (admins are a small subset of Auth
-  // users, so this usually resolves on the first pages).
+  //
+  // We use per-user `getUserById` rather than `listUsers`: on this project
+  // `listUsers` returns HTTP 500 ("Database error finding users") while single
+  // lookups work. Admins are a small set, so N lookups are cheap and reliable.
   const lastSignInByUser = new Map<string, string | null>();
-  if (ids.length > 0) {
-    const wanted = new Set(ids);
-    try {
-      const perPage = 1000;
-      for (let page = 1; page <= 10; page += 1) {
-        const { data: authData, error: authError } =
-          await client.auth.admin.listUsers({ page, perPage });
-        if (authError) break;
-        for (const user of authData.users) {
-          if (wanted.has(user.id)) {
-            lastSignInByUser.set(user.id, user.last_sign_in_at ?? null);
-          }
+  await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const { data, error } = await client.auth.admin.getUserById(id);
+        if (error) {
+          console.error(
+            `[access-control] auth.admin.getUserById failed for ${id}:`,
+            error.message,
+          );
+          return;
         }
-        if (authData.users.length < perPage) break;
-        if (lastSignInByUser.size >= wanted.size) break;
+        lastSignInByUser.set(id, data.user?.last_sign_in_at ?? null);
+      } catch (error) {
+        console.error(
+          `[access-control] auth.admin.getUserById threw for ${id}:`,
+          error,
+        );
       }
-    } catch {
-      // Auth Admin API unavailable (or key lacks scope) — fall back to null.
-    }
-  }
+    }),
+  );
 
   // Latest consumed password reset per user — the closest available signal to
   // "last password change" (there is no `profiles.password_updated_at` yet).
