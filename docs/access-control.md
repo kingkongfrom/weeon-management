@@ -49,8 +49,7 @@ dismisses):
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
 | Last sign-in | **`auth.users.last_sign_in_at`** via the Auth Admin API |
-| Last password reset | latest `admin_password_resets.consumed_at` for the user |
-| Added | `profiles.created_at` |
+| Password set | latest `admin_password_resets.consumed_at`, else `profiles.created_at` (see note) |
 
 `profiles.id` is deliberately **not** shown at display level — it is an
 implementation detail, not something Ops acts on.
@@ -78,11 +77,15 @@ exists in the generated types but is **never written by any app** — it is alwa
 > "Never signed in"), so a broken Auth call is visible in the server log rather
 > than masquerading as real data.
 
-**Note on "last password updated":** there is no `profiles.password_updated_at`
-in the schema, so the popover shows **Last password reset** from
-`admin_password_resets` (a reset *link that was used*). A true "password
-changed" timestamp needs an additive column in `weeon-tenants` set by the
-reset/change flows — see Phase 2.
+**Note on "Password set":** Supabase Auth exposes **no password timestamp**
+(`password_updated_at` does not exist in the Auth user payload; verified). Since
+an account that can sign in necessarily has a password, the popover resolves it
+as the last consumed reset if there is one, otherwise `profiles.created_at` —
+the moment the credential was created. It is labelled **"Password set"** with a
+hint (`Via password reset` / `On account creation`) rather than "last changed",
+so it never overstates. A true change timestamp needs an additive
+`profiles.password_updated_at` in `weeon-tenants` written by both the reset flow
+and the in-app change-password flow (see Phase 2).
 
 ## Phase 2 (planned — needs schema)
 
@@ -97,7 +100,9 @@ Mutations are **not** built yet. Each needs an additive change in
 - **Unlock** — there is **no lockout concept in the schema today**; it must be
   introduced (e.g. `account_locked_at`) or wired to Supabase Auth lockout.
 - **`password_updated_at`** — for a true "last password changed" timestamp
-  (today the popover approximates it with the last consumed password reset).
+  (today the popover approximates it: last consumed reset, else `created_at`,
+  labelled "Password set"). Must be written by both the reset flow and the
+  in-app change-password flow (`lib/auth/change-password.ts`).
 - **`profiles.last_sign_in_at`** — to mirror Auth's `last_sign_in_at` so the
   console can query/sort on sign-in without paging the Auth Admin API.
 

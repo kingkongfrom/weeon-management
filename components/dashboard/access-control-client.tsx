@@ -366,17 +366,26 @@ function AdminDetailPopover({
                   : <span className="text-foreground/45">Never signed in</span>
               }
             />
+            {/*
+              A signed-in account necessarily has a password. Supabase Auth does
+              not expose a password timestamp, so we show the last consumed
+              reset when there is one, otherwise the account creation date —
+              which is when the credential was created. Labelled "Password set"
+              (not "last changed") so it is never overstated.
+            */}
             <PopoverRow
-              label="Last password reset"
+              label="Password set"
               value={
-                account.passwordResetAt ? (
-                  formatDateTime(account.passwordResetAt)
-                ) : (
-                  <span className="text-foreground/45">No reset on record</span>
-                )
+                account.passwordResetAt
+                  ? formatDateTime(account.passwordResetAt)
+                  : formatDateTime(account.createdAt)
+              }
+              hint={
+                account.passwordResetAt
+                  ? "Via password reset"
+                  : "On account creation"
               }
             />
-            <PopoverRow label="Added" value={formatDateTime(account.createdAt)} />
           </dl>
         </div>
       </div>
@@ -384,12 +393,25 @@ function AdminDetailPopover({
   );
 }
 
-function PopoverRow({ label, value }: { label: string; value: React.ReactNode }) {
+function PopoverRow({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: React.ReactNode;
+  hint?: string;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-6 py-2.5">
       <dt className="shrink-0 text-xs font-medium text-foreground/50">{label}</dt>
-      <dd className="min-w-0 text-right text-sm font-semibold text-foreground">
-        {value}
+      <dd className="min-w-0 text-right">
+        <span className="text-sm font-semibold text-foreground">{value}</span>
+        {hint ? (
+          <span className="mt-0.5 block text-[11px] font-medium text-foreground/40">
+            {hint}
+          </span>
+        ) : null}
       </dd>
     </div>
   );
