@@ -209,9 +209,12 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       // without disappearing, and stops the outlines fighting the choropleth.
       border: "rgba(140, 150, 162, 0.28)",
       borderWidth: 0.2,
-      selected: "#0f766e",
-      selectedWidth: 1.2,
-      selectedFill: "rgba(15, 118, 110, 0.16)",
+      // Selected outline + wash use the purple of the "Top countries" card
+      // (TONE_RING.purple / TONE_AVATAR.purple) so the map highlight and the card
+      // read as one selection, and the outline is thin rather than heavy.
+      selected: "#7c3aed",
+      selectedWidth: 0.6,
+      selectedFill: "rgba(124, 58, 237, 0.14)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.4,
       label: "#000000",
@@ -230,9 +233,9 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       // Softer white so the hairlines read as thin on the dark canvas.
       border: "rgba(255, 255, 255, 0.07)",
       borderWidth: 0.2,
-      selected: "#5eead4",
-      selectedWidth: 1.2,
-      selectedFill: "rgba(94, 234, 212, 0.18)",
+      selected: "#a78bfa",
+      selectedWidth: 0.6,
+      selectedFill: "rgba(167, 139, 250, 0.16)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.45,
       label: "#ffffff",

@@ -46,11 +46,9 @@ type Props = {
 };
 
 /**
- * Portrait frame so the tall LATAM extent fits the viewport.
- *
- * The ring matches the purple "Top countries" card beside it: same 1px width and
- * the same translucent purple (TONE_RING.purple), so the two read as a pair
- * rather than the map floating in its own frame.
+ * Portrait frame so the tall LATAM extent fits the viewport. The ring matches
+ * the purple "Top countries" card beside it (same 1px width and translucent
+ * purple), so the two read as a pair.
  */
 const MAP_FRAME_CLASS =
   "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-[#c4b0ef]/70 dark:ring-[#5b4a9a]/80";
