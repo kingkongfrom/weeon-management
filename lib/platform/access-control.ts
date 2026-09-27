@@ -1,7 +1,11 @@
 import "server-only";
 
 import { createPlatformClient } from "@/lib/supabase/platform";
-import { resolveProfileEmail } from "@/lib/domain";
+import {
+  resolveAccountStatusLabel,
+  resolveProfileEmail,
+  resolveRoleLabel,
+} from "@/lib/domain";
 
 /**
  * Cross-tenant **administrator** accounts — the only user kind Ops manages.
@@ -19,8 +23,12 @@ export type AdminAccount = {
   username: string | null;
   email: string;
   role: string;
+  /** Human label for `role` (e.g. "School administrator"). */
+  roleLabel: string;
   /** `profiles.account_status` — e.g. `pending_first_login`, `active`. */
   accountStatus: string;
+  /** Human label for `accountStatus` (e.g. "Pending first login"). */
+  accountStatusLabel: string;
   active: boolean;
   emailSentAt: string | null;
   /**
@@ -156,7 +164,9 @@ export async function listAdminAccounts(): Promise<{
         auth_email: row.auth_email,
       }),
       role: row.role,
+      roleLabel: resolveRoleLabel(row.role),
       accountStatus: row.account_status ?? "active",
+      accountStatusLabel: resolveAccountStatusLabel(row.account_status),
       active: row.active ?? true,
       emailSentAt: row.email_sent_at,
       lastSignInAt: lastSignInByUser.get(row.id) ?? null,

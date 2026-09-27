@@ -228,8 +228,8 @@ function AdminTable({
                       {account.email || "—"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-foreground/70 capitalize sm:px-5">
-                    {account.role}
+                  <td className="px-4 py-3 text-foreground/70 sm:px-5">
+                    {account.roleLabel}
                   </td>
                   <td className="px-4 py-3 text-foreground/70 sm:px-5">
                     {account.tenantName}
@@ -357,11 +357,8 @@ function AdminDetailPopover({
           </Link>
 
           <dl className="mt-4 divide-y divide-border/60">
-            <PopoverRow
-              label="Role"
-              value={<span className="capitalize">{account.role}</span>}
-            />
-            <PopoverRow label="Account status" value={account.accountStatus} />
+            <PopoverRow label="Role" value={account.roleLabel} />
+            <PopoverRow label="Account status" value={account.accountStatusLabel} />
             <PopoverRow
               label="Last sign-in"
               value={

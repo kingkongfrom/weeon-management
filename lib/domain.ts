@@ -342,6 +342,52 @@ export function resolveProfileEmail(
   return profile.email?.trim() ?? "";
 }
 
+/**
+ * Human label for `profiles.role`. The schema has **no check constraint** on the
+ * column, so unknown values fall through to a title-cased version of the raw
+ * value rather than being hidden.
+ */
+export function resolveRoleLabel(role: string | null | undefined): string {
+  const key = role?.trim().toLowerCase();
+  if (!key) return "—";
+  return ROLE_LABELS[key] ?? titleCase(key);
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "School administrator",
+  teacher: "Teacher",
+  student: "Student",
+  parent: "Guardian",
+};
+
+function titleCase(value: string): string {
+  return value
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Human label for `profiles.account_status`
+ * (`active`, `pending_first_login`, …). Unknown values are title-cased.
+ */
+export function resolveAccountStatusLabel(
+  status: string | null | undefined,
+): string {
+  const key = status?.trim().toLowerCase();
+  if (!key) return "—";
+  return ACCOUNT_STATUS_LABELS[key] ?? titleCase(key);
+}
+
+const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+  active: "Active",
+  pending_first_login: "Pending first login",
+  pending: "Pending",
+  disabled: "Disabled",
+  suspended: "Suspended",
+};
+
 /** A person profile row (public.profiles). Users per tenant = count(*) grouped by tenant_id. */
 export interface Profile {
   id: string;

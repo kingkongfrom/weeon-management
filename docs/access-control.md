@@ -44,8 +44,8 @@ dismisses):
 | ----- | ------ |
 | Name | `profiles.name` (header) |
 | Login email | `auth_email` ?? `email` — shown under the name; **the credential admins sign in with** |
-| Role | `profiles.role` (table column + popover row) |
-| Account status | `profiles.account_status` |
+| Role | `profiles.role`, labelled by `resolveRoleLabel` (table column + popover row) |
+| Account status | `profiles.account_status`, labelled by `resolveAccountStatusLabel` |
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
 | Last sign-in | **`auth.users.last_sign_in_at`** via the Auth Admin API |
@@ -53,6 +53,14 @@ dismisses):
 
 `profiles.id` is deliberately **not** shown at display level — it is an
 implementation detail, not something Ops acts on.
+
+**Role vocabulary.** `profiles.role` is a plain `text` column with **no DB check
+constraint**; the live values are `admin`, `teacher`, `student`, `parent`. Only
+`roster_accounts.role` is constrained (`teacher|student|parent`). Both the role
+and the account status are rendered through human labels in `lib/domain.ts`
+(`resolveRoleLabel` → "School administrator", `resolveAccountStatusLabel` →
+"Pending first login"); unknown values fall back to a title-cased version of the
+raw string so nothing is silently hidden.
 
 **Admins log in with email + password, not a username.** `lib/auth/actions.ts`
 in `weeon-tenants` calls `signInWithPassword({ email })`, so the popover header
