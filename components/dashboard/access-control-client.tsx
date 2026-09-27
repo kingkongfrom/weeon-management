@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { CopyableValue } from "@/components/ui/CopyableValue";
 import type { AdminAccount } from "@/lib/platform/access-control";
 
 const FILTERS = [
@@ -335,7 +334,6 @@ function AdminDetailPopover({
 
         <div className="overflow-y-auto px-5 py-4">
           <div className="flex items-center gap-2">
-            <StatusBadge status={account.tenantStatus} />
             <span
               className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 account.active
@@ -345,8 +343,8 @@ function AdminDetailPopover({
             >
               {account.active ? "Active" : "Inactive"}
             </span>
-            <span className="inline-flex rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-foreground/60">
-              {account.role}
+            <span className="text-xs font-medium text-foreground/50">
+              Administrator
             </span>
           </div>
 
@@ -362,16 +360,19 @@ function AdminDetailPopover({
                 {account.tenantName}
               </p>
             </div>
+            <StatusBadge status={account.tenantStatus} />
           </Link>
 
           <dl className="mt-4 divide-y divide-border/60">
             <PopoverRow label="Account status" value={account.accountStatus} />
             <PopoverRow
-              label="User ID"
-              value={<CopyableValue value={account.id} label="user ID" mono />}
+              label="Username"
+              value={
+                account.username ?? (
+                  <span className="text-foreground/45">Not set</span>
+                )
+              }
             />
-            <PopoverRow label="Username" value={account.username ?? "—"} />
-            <PopoverRow label="Added" value={formatDateTime(account.createdAt)} />
             <PopoverRow
               label="Last sign-in"
               value={
@@ -380,6 +381,17 @@ function AdminDetailPopover({
                   : "Never signed in"
               }
             />
+            <PopoverRow
+              label="Last password reset"
+              value={
+                account.passwordResetAt ? (
+                  formatDateTime(account.passwordResetAt)
+                ) : (
+                  <span className="text-foreground/45">No reset on record</span>
+                )
+              }
+            />
+            <PopoverRow label="Added" value={formatDateTime(account.createdAt)} />
             <PopoverRow
               label="Welcome email"
               value={

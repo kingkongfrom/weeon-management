@@ -25,6 +25,12 @@ export type AdminAccount = {
   emailSentAt: string | null;
   firstLoginAt: string | null;
   provisionedAt: string | null;
+  /**
+   * When this user last completed a password reset (`admin_password_resets`).
+   * This is a proxy for "last password change" — there is no
+   * `password_updated_at` on `profiles` yet (see docs/access-control.md).
+   */
+  passwordResetAt: string | null;
   createdAt: string;
 };
 
@@ -80,7 +86,32 @@ export async function listAdminAccounts(): Promise<{
     return { accounts: [], reason: `Admin accounts read failed: ${error.message}` };
   }
 
-  const accounts = ((data ?? []) as ProfileRow[]).map((row) => {
+  const rows = (data ?? []) as ProfileRow[];
+
+  // Latest consumed password reset per user — the closest available signal to
+  // "last password change" (there is no `profiles.password_updated_at` yet).
+  const passwordResetByUser = new Map<string, string>();
+  if (rows.length > 0) {
+    const { data: resets } = await client
+      .from("admin_password_resets")
+      .select("user_id, consumed_at")
+      .in(
+        "user_id",
+        rows.map((row) => row.id),
+      )
+      .not("consumed_at", "is", null)
+      .order("consumed_at", { ascending: false });
+    for (const reset of (resets ?? []) as {
+      user_id: string;
+      consumed_at: string | null;
+    }[]) {
+      if (reset.consumed_at && !passwordResetByUser.has(reset.user_id)) {
+        passwordResetByUser.set(reset.user_id, reset.consumed_at);
+      }
+    }
+  }
+
+  const accounts = rows.map((row) => {
     const tenant = tenantOf(row);
     return {
       id: row.id,
@@ -99,6 +130,7 @@ export async function listAdminAccounts(): Promise<{
       emailSentAt: row.email_sent_at,
       firstLoginAt: row.first_login_at,
       provisionedAt: row.provisioned_at,
+      passwordResetAt: passwordResetByUser.get(row.id) ?? null,
       createdAt: row.created_at,
     };
   });

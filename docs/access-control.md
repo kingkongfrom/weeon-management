@@ -42,16 +42,25 @@ dismisses):
 
 | Field | Source |
 | ----- | ------ |
-| Name, email, username | `profiles.name`, `email`/`auth_email`, `username` |
-| Role | `profiles.role` |
+| Name, email | `profiles.name`, `email`/`auth_email` |
+| Role | `profiles.role` (always `admin` here) |
 | Account status | `profiles.account_status` |
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
-| Added | `profiles.created_at` |
+| Username | `profiles.username` (`Not set` when null) |
 | Last sign-in | `profiles.first_login_at` |
+| Last password reset | latest `admin_password_resets.consumed_at` for the user |
+| Added | `profiles.created_at` |
 | Welcome email | `profiles.email_sent_at` |
-| Provisioned | `profiles.provisioned_at` |
-| User ID (copyable) | `profiles.id` |
+
+`profiles.id` is deliberately **not** shown at display level — it is an
+implementation detail, not something Ops acts on.
+
+**Note on "last password updated":** there is no `profiles.password_updated_at`
+in the schema, so the popover shows **Last password reset** from
+`admin_password_resets` (a reset *link that was used*). A true "password
+changed" timestamp needs an additive column in `weeon-tenants` set by the
+reset/change flows — see Phase 2.
 
 ## Phase 2 (planned — needs schema)
 
@@ -65,6 +74,8 @@ Mutations are **not** built yet. Each needs an additive change in
   suspension is **tenant-level only** (`tenants.suspend_reason`).
 - **Unlock** — there is **no lockout concept in the schema today**; it must be
   introduced (e.g. `account_locked_at`) or wired to Supabase Auth lockout.
+- **`password_updated_at`** — for a true "last password changed" timestamp
+  (today the popover approximates it with the last consumed password reset).
 
 Do not invent these columns here — design and land them in `weeon-tenants`
 first, then consume them.
