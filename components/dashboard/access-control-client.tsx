@@ -316,9 +316,6 @@ function AdminDetailPopover({
             <p className="truncate text-sm font-medium text-foreground/55">
               {account.email || "—"}
             </p>
-            <p className="mt-0.5 truncate text-xs font-semibold capitalize text-foreground/45">
-              {account.role}
-            </p>
           </div>
           <button
             ref={closeRef}
@@ -341,9 +338,6 @@ function AdminDetailPopover({
               }`}
             >
               {account.active ? "Active" : "Inactive"}
-            </span>
-            <span className="text-xs font-medium text-foreground/50">
-              Administrator
             </span>
           </div>
 

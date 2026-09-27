@@ -44,7 +44,7 @@ dismisses):
 | ----- | ------ |
 | Name | `profiles.name` (header) |
 | Login email | `auth_email` ?? `email` — shown under the name; **the credential admins sign in with** |
-| Role | `profiles.role` (shown in the header and as a row) |
+| Role | `profiles.role` (table + popover row; omitted from the popover header as redundant) |
 | Account status | `profiles.account_status` |
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
