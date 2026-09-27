@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { ChevronRight, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
+import { AdminDetailDrawer } from "@/components/dashboard/admin-detail-drawer";
 import type { AdminAccount } from "@/lib/platform/access-control";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -44,22 +43,9 @@ function accountStateLabel(account: AdminAccount): { label: string; tone: string
   return { label: "Active", tone: "bg-success-subtle text-success" };
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function initialsFor(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+/** Short profile id for the table (`profiles.id` is a uuid). */
+function shortId(id: string): string {
+  return id.slice(0, 8);
 }
 
 export function AccessControlClient({
@@ -69,6 +55,7 @@ export function AccessControlClient({
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
+  const [selected, setSelected] = useState<AdminAccount | null>(null);
 
   const filterCounts = useMemo(() => {
     const map: Record<FilterId, number> = {
@@ -161,68 +148,93 @@ export function AccessControlClient({
         })}
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="rounded-2xl border border-border/80 bg-surface px-5 py-6 text-sm font-medium text-foreground/50">
-          {accounts.length === 0
-            ? "No administrator accounts found."
-            : "No administrator matches this search."}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2.5">
-          {filtered.map((account) => {
-            const state = accountStateLabel(account);
-            return (
-              <li key={account.id} className="group relative">
-                <Link
-                  href={`/dashboard/tenants/${account.tenantId}`}
-                  className="card-lift flex items-center gap-4 rounded-2xl border border-border/80 bg-surface p-4 shadow-sm hover:border-brand-200 hover:bg-brand-50/30 sm:gap-5 sm:p-5 dark:hover:border-brand-900 dark:hover:bg-brand-950/20"
+      <AdminTable accounts={filtered} onSelect={setSelected} />
+
+      <AdminDetailDrawer account={selected} onClose={() => setSelected(null)} />
+    </div>
+  );
+}
+
+function AdminTable({
+  accounts,
+  onSelect,
+}: {
+  accounts: AdminAccount[];
+  onSelect: (account: AdminAccount) => void;
+}) {
+  if (accounts.length === 0) {
+    return (
+      <p className="rounded-2xl border border-border/80 bg-surface px-5 py-6 text-sm font-medium text-foreground/50">
+        No administrator matches this search.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-border/70 bg-surface-muted/50 text-[11px] font-bold uppercase tracking-wider text-foreground/50">
+              <th scope="col" className="px-4 py-3 font-bold sm:px-5">
+                User ID
+              </th>
+              <th scope="col" className="px-4 py-3 font-bold sm:px-5">
+                Full name
+              </th>
+              <th scope="col" className="px-4 py-3 font-bold sm:px-5">
+                School
+              </th>
+              <th scope="col" className="px-4 py-3 font-bold sm:px-5">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((account) => {
+              const state = accountStateLabel(account);
+              return (
+                <tr
+                  key={account.id}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Open ${account.name}`}
+                  onClick={() => onSelect(account)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelect(account);
+                    }
+                  }}
+                  className="cursor-pointer border-b border-border/60 transition-colors last:border-b-0 hover:bg-surface-muted/60 focus-visible:bg-surface-muted/60 focus-visible:outline-none"
                 >
-                  <span
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white dark:bg-brand-500"
-                    aria-hidden
-                  >
-                    {initialsFor(account.name)}
-                  </span>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-foreground sm:text-base">
+                  <td className="px-4 py-3 font-mono text-xs text-foreground/55 sm:px-5">
+                    {shortId(account.id)}
+                  </td>
+                  <td className="px-4 py-3 sm:px-5">
+                    <span className="font-semibold text-foreground">
                       {account.name}
-                    </p>
-                    <p className="truncate text-xs font-medium text-foreground/50">
+                    </span>
+                    <span className="mt-0.5 block truncate text-xs font-medium text-foreground/45">
                       {account.email || "—"}
-                    </p>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-foreground/45">
-                      <span className="truncate">{account.tenantName}</span>
-                      <span aria-hidden>·</span>
-                      <span>Added {formatDate(account.createdAt)}</span>
-                      <span aria-hidden>·</span>
-                      <span>
-                        {account.firstLoginAt
-                          ? `Last sign-in ${formatDate(account.firstLoginAt)}`
-                          : "Never signed in"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-3">
-                    <StatusBadge status={account.tenantStatus} />
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-foreground/70 sm:px-5">
+                    {account.tenantName}
+                  </td>
+                  <td className="px-4 py-3 sm:px-5">
                     <span
-                      className={`hidden rounded-full px-2.5 py-0.5 text-xs font-semibold sm:inline-flex ${state.tone}`}
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${state.tone}`}
                     >
                       {state.label}
                     </span>
-                    <ChevronRight
-                      size={18}
-                      className="hidden text-foreground/25 transition-colors group-hover:text-brand-500 sm:block"
-                      aria-hidden
-                    />
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

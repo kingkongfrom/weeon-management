@@ -207,19 +207,19 @@ export function AccessControlPageSkeleton() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        {Array.from({ length: 6 }, (_, index) => (
+      <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface">
+        {Array.from({ length: 6 }, (_, row) => (
           <div
-            key={index}
-            className="flex items-center gap-4 rounded-2xl border border-border/80 bg-surface p-4 sm:gap-5 sm:p-5"
+            key={row}
+            className="flex items-center gap-4 border-b border-border/60 px-4 py-3.5 last:border-b-0 sm:px-5"
           >
-            <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+            <Skeleton className="h-3.5 w-16 shrink-0" />
             <div className="min-w-0 flex-1">
-              <Skeleton className="h-4 w-44 max-w-full" />
-              <Skeleton className="mt-2 h-3 w-56 max-w-full" />
-              <Skeleton className="mt-2 h-3 w-72 max-w-full" />
+              <Skeleton className="h-3.5 w-40 max-w-full" />
+              <Skeleton className="mt-1.5 h-3 w-52 max-w-full" />
             </div>
-            <Skeleton className="hidden h-6 w-20 shrink-0 rounded-full sm:block" />
+            <Skeleton className="hidden h-3.5 w-32 shrink-0 sm:block" />
+            <Skeleton className="hidden h-6 w-28 shrink-0 rounded-full md:block" />
           </div>
         ))}
       </div>

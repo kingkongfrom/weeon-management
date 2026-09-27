@@ -23,17 +23,34 @@ joined to `tenants` through the **platform (service-role)** client — this is a
 cross-tenant view, so tenant RLS does not apply. Never expose it to a
 non-ops caller.
 
-| Field | Source |
-| ----- | ------ |
-| Name, email, username | `profiles.name`, `email`/`auth_email`, `username` |
-| School + school state | `tenants.name`, `tenants.status` |
-| Access state | `profiles.account_status` + `profiles.active` → Active / Pending first login / Inactive |
-| Added | `profiles.created_at` |
-| Last sign-in | `profiles.first_login_at` |
-| Provisioning signals | `email_sent_at`, `provisioned_at` |
+**Table** (`components/dashboard/access-control-client.tsx`) — one row per
+administrator:
+
+| Column | Source |
+| ------ | ------ |
+| User ID | `profiles.id` (short 8-char form) |
+| Full name | `profiles.name` (+ email beneath) |
+| School | `tenants.name` |
+| Status | access state — Active / Pending first login / Inactive |
 
 Search covers name, email, username, school name, and profile id; filter chips
 bucket by access state (All / Active / Pending first login / Inactive).
+
+**Detail drawer** (`components/dashboard/admin-detail-drawer.tsx`) — clicking a
+row opens a right-side drawer with the full record:
+
+| Field | Source |
+| ----- | ------ |
+| Name, email, username | `profiles.name`, `email`/`auth_email`, `username` |
+| Role | `profiles.role` |
+| Account status | `profiles.account_status` |
+| Active flag | `profiles.active` |
+| School + school state | `tenants.name`, `tenants.status` (links to School page) |
+| Added | `profiles.created_at` |
+| Last sign-in | `profiles.first_login_at` |
+| Welcome email | `profiles.email_sent_at` |
+| Provisioned | `profiles.provisioned_at` |
+| User ID (copyable) | `profiles.id` |
 
 ## Phase 2 (planned — needs schema)
 
