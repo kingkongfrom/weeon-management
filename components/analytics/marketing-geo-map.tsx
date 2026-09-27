@@ -210,7 +210,7 @@ export function MarketingGeoDashboard({
                     className={`flex items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 ${TONE_WASH.rose}`}
                   >
                     <span className={`truncate text-sm font-semibold ${TONE_LABEL.rose}`}>
-                      {regionLabel(row.regionCode)}
+                      {regionLabel(row.regionCode, row.countryCode)}
                     </span>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${TONE_COUNT.rose}`}
