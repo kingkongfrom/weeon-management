@@ -11,12 +11,17 @@ export function AccountMenu({
   sessionUser,
   className,
   showName = false,
+  mfaEnrolled = false,
+  mfaFactorId = null,
 }: {
   initials: string;
   sessionUser: DashboardSessionUser | null;
   className?: string;
   /** Show the signed-in name beside the avatar (desktop header). */
   showName?: boolean;
+  /** Server-read MFA state, passed into the drawer. */
+  mfaEnrolled?: boolean;
+  mfaFactorId?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const avatarUrl = useAvatarPreference();
@@ -53,6 +58,8 @@ export function AccountMenu({
         onClose={() => setOpen(false)}
         initials={initials}
         sessionUser={sessionUser}
+        mfaEnrolled={mfaEnrolled}
+        mfaFactorId={mfaFactorId}
       />
     </>
   );

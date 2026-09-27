@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import {
   deleteAdminAccountAction,
   setAdminSuspendedAction,
   type AdminActionState,
 } from "@/lib/dashboard/admin-account-actions";
+import { resetUserMfaAction, type MfaSimpleState } from "@/lib/auth/mfa-actions";
 import type { AdminAccount } from "@/lib/platform/access-control";
 
 /**
@@ -25,6 +26,10 @@ export function AdminActions({ account }: { account: AdminAccount }) {
     AdminActionState,
     FormData
   >(deleteAdminAccountAction, null);
+  const [mfaState, mfaAction, mfaPending] = useActionState<
+    MfaSimpleState,
+    FormData
+  >(resetUserMfaAction, null);
 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
@@ -40,14 +45,14 @@ export function AdminActions({ account }: { account: AdminAccount }) {
         Access actions
       </p>
 
-      {suspendState?.error || deleteState?.error ? (
+      {suspendState?.error || deleteState?.error || mfaState?.error ? (
         <p className="mt-2 text-xs font-medium text-error">
-          {suspendState?.error ?? deleteState?.error}
+          {suspendState?.error ?? deleteState?.error ?? mfaState?.error}
         </p>
       ) : null}
-      {suspendState?.ok || deleteState?.ok ? (
+      {suspendState?.ok || deleteState?.ok || mfaState?.ok ? (
         <p className="mt-2 text-xs font-medium text-success">
-          {suspendState?.ok ?? deleteState?.ok}
+          {suspendState?.ok ?? deleteState?.ok ?? mfaState?.ok}
         </p>
       ) : null}
 
@@ -80,6 +85,28 @@ export function AdminActions({ account }: { account: AdminAccount }) {
             Delete
           </button>
         ) : null}
+
+        {/*
+          Recovery path for a lost authenticator. Deliberately needs no code from
+          the target — that is the point of a reset. Also clears their sessions.
+        */}
+        <form action={mfaAction}>
+          <input type="hidden" name="userId" value={account.id} />
+          <input type="hidden" name="email" value={account.email} />
+          <button
+            type="submit"
+            disabled={mfaPending}
+            title="Clear this account's two-factor so they can sign in and re-enroll"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground/70 transition-colors hover:bg-surface-muted disabled:opacity-60"
+          >
+            {mfaPending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <KeyRound size={14} />
+            )}
+            Reset 2FA
+          </button>
+        </form>
       </div>
 
       {confirmingDelete ? (

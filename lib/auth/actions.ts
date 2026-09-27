@@ -14,11 +14,12 @@ import {
   consumeRateLimit,
   resetRateLimit,
 } from "@/lib/auth/rate-limit";
+import { getMfaAssurance, listTotpFactors, verifyTotp } from "@/lib/auth/mfa";
 import { requestPasswordReset } from "@/lib/auth/password-reset-actions";
 
 export type AuthResult = { ok: true; redirectTo?: string } | { ok: false; error: string };
 
-export type LoginState = { error?: string } | null;
+export type LoginState = { error?: string; mfaRequired?: boolean } | null;
 
 /** Attempts allowed per window, per email and per IP. */
 const LOGIN_LIMIT = 10;
@@ -34,11 +35,16 @@ const LOGIN_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
  *  - Throttled per email AND per client IP. This is **not** an account lockout:
  *    nothing is disabled, counters expire on their own, and a successful sign-in
  *    clears the email bucket, so a real admin cannot be locked out.
+ *
+ * When the account has a verified TOTP factor, the password step yields an
+ * **aal1** session only. This function reports `mfaRequired` so the UI collects
+ * the 6-digit code; the session is not usable for the dashboard until the
+ * challenge is passed (`proxy.ts` and the dashboard gate enforce aal2).
  */
 export async function signInStaff(
   emailRaw: string,
   password: string,
-): Promise<AuthResult> {
+): Promise<AuthResult & { mfaRequired?: boolean }> {
   if (!isAllowedStaffEmailDomain(emailRaw)) {
     return { ok: false, error: isAllowedStaffEmailDomainError() };
   }
@@ -82,6 +88,13 @@ export async function signInStaff(
       return { ok: false, error: friendlyAuthError() };
     }
 
+    // Password accepted — but a verified TOTP factor means this is only aal1.
+    // Report the requirement instead of redirecting into the dashboard.
+    const assurance = await getMfaAssurance(supabase);
+    if (assurance.needsChallenge) {
+      return { ok: true, mfaRequired: true };
+    }
+
     // Success clears the counter for this email (IP bucket keeps its own count).
     resetRateLimit(emailKey);
     return { ok: true, redirectTo: "/dashboard" };
@@ -103,8 +116,71 @@ export async function loginAction(prev: LoginState, formData: FormData): Promise
     return { error: result.error };
   }
 
+  // Password ok but a second factor is required: hand off to the code step.
+  if (result.mfaRequired) {
+    return { mfaRequired: true };
+  }
+
   const target = next === "/" ? "/dashboard" : next;
   redirect(target);
+}
+
+/**
+ * Complete the second factor. The session is already aal1 from the password
+ * step; verifying a TOTP code upgrades it to aal2, which is what the dashboard
+ * gate requires.
+ */
+export async function verifyMfaLoginAction(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  const code = String(formData.get("code") ?? "").trim();
+  const next = safeNextPath(String(formData.get("next") ?? "/dashboard"));
+
+  if (!/^\d{6}$/.test(code)) {
+    return { mfaRequired: true, error: "Enter the 6-digit code from your authenticator app." };
+  }
+
+  const supabase = await createSessionClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Your session expired. Sign in again." };
+  }
+
+  const status = await listTotpFactors(supabase);
+  const factor = status.factors.find((f) => f.status === "verified");
+  if (!factor) {
+    return { error: "No two-factor method is set up. Contact another ops admin." };
+  }
+
+  // Throttle code attempts too — a 6-digit space is small enough to matter.
+  const limit = consumeRateLimit(`mfa:${user.id}`, {
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!limit.allowed) {
+    return {
+      mfaRequired: true,
+      error: `Too many attempts. Try again in ${limit.retryAfterSeconds} seconds.`,
+    };
+  }
+
+  const result = await verifyTotp(supabase, factor.id, code);
+  if (!result.ok) {
+    return { mfaRequired: true, error: "That code is not valid. Try the next one." };
+  }
+
+  const target = next === "/" ? "/dashboard" : next;
+  redirect(target);
+}
+
+/** Abandon a half-finished MFA login (signs the aal1 session out). */
+export async function cancelMfaLoginAction(): Promise<void> {
+  const supabase = await createSessionClient();
+  await supabase.auth.signOut();
+  redirect("/");
 }
 
 export async function signOutAction(): Promise<void> {

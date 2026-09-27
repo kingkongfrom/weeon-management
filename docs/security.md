@@ -85,13 +85,57 @@ speed bump against brute force, not a lock.
 > Supabase Auth applies its own project-level limits on `signInWithPassword`,
 > so this is defence in depth.
 
+### Two-factor authentication (TOTP) — implemented
+
+Ops supports **TOTP** (authenticator app: Google Authenticator, Authy, 1Password).
+Chosen over email/SMS OTP because it is native to Supabase (no vendor, no
+per-message cost), the secret lives on the device so a compromised inbox does
+not defeat it, and it works offline.
+
+**Supabase requirement — do this first:** the Supabase project must have
+**Auth → Multi-Factor Auth → TOTP enabled**. Until then `mfa.enroll()` fails.
+*(Dashboard action; it cannot be set from this repo.)*
+
+How it works — Supabase models this as **AAL**:
+
+| Level | Meaning |
+| ----- | ------- |
+| `aal1` | Password only |
+| `aal2` | Password **+** verified TOTP code |
+
+Flow:
+
+1. **Enroll** (self-service) — account drawer → *Two-factor authentication* →
+   *Turn on*. Shows a QR code + manual secret; the factor is **unverified**
+   until a 6-digit code is confirmed, so an abandoned attempt cannot lock
+   anyone out.
+2. **Sign in** — password → if a verified factor exists, the login action
+   reports `mfaRequired` and the form switches to the 6-digit challenge. Only a
+   successful `verify` upgrades the session to `aal2`.
+3. **Gate** — `getPlatformSession()` treats a non-`aal2` session as
+   unauthenticated when the user has a verified factor, so navigating straight
+   to a `/dashboard` URL from a half-finished login does not work.
+4. **Disable** — requires a **fresh `aal2` session**; a password-only session
+   cannot remove the second factor (that would defeat it).
+5. **Recovery** — if a phone is lost, another ops admin uses **Access control →
+   Reset 2FA**, which deletes the factors through the Auth Admin API
+   (`auth.admin.mfa.deleteFactor`) and drops the target's sessions. This is the
+   deliberate substitute for recovery codes, so a lost phone is never a
+   permanent lockout.
+
+Code files: `lib/auth/mfa.ts` (API helpers), `lib/auth/mfa-actions.ts` (server
+actions), `components/dashboard/mfa-settings.tsx` (enroll/manage),
+`components/auth/login-form.tsx` (challenge step).
+
+**Rollout advice:** enroll your own account first and confirm the full
+challenge works before making it mandatory for other staff. TOTP is **not
+enforced** by the app — it is opt-in per account.
+
 ### Not implemented, on purpose
 
 - **Account lockout** — rejected. It adds a denial-of-service vector (an attacker
   can lock a real admin out) while stopping little at this scale. Manual
   **suspend** / **delete** cover the real cases and are audited.
-- **MFA** — not built. This is the highest-value remaining control, since Ops can
-  suspend/delete every school; Supabase supports TOTP natively.
 
 ## Reference
 

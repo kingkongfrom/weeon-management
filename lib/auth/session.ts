@@ -12,6 +12,7 @@ import {
     staffRoleFor,
 } from "@/lib/auth/policy";
 import {canAccessOpsConsole} from "@/lib/auth/platform-staff";
+import {getMfaAssurance, listTotpFactors} from "@/lib/auth/mfa";
 
 /** Derive a display model for the ops UI from a Supabase Auth user. */
 export function toSessionUser(user: User): DashboardSessionUser | null {
@@ -45,6 +46,13 @@ function initialsFor(name: string | null, email: string): string {
 /**
  * Load the valid platform staff session for Server Components.
  * Returns null when unauthenticated or the signed-in email is not allowed.
+ *
+ * When the account has a verified TOTP factor, the session must also be at
+ * **aal2** (second factor passed). An aal1 session — password only — is treated
+ * as unauthenticated here, so a half-finished MFA login cannot reach the console
+ * by navigating straight to a dashboard URL. Further factor enrollment (which
+ * happens at aal1) is unaffected because that lives behind an already-verified
+ * session.
  */
 export const getPlatformSession = cache(async function getPlatformSession() {
     const supabase = await createSessionClient();
@@ -63,6 +71,20 @@ export const getPlatformSession = cache(async function getPlatformSession() {
         // A signed-in but unauthorized identity should not see the ops UI.
         await supabase.auth.signOut();
         return {user: null, sessionUser: null};
+    }
+
+    // Enforce the second factor when one is enrolled. Skipped entirely when the
+    // user has no verified factor, so this is a no-op until they opt in.
+    try {
+        const status = await listTotpFactors(supabase);
+        if (status.enrolled) {
+            const assurance = await getMfaAssurance(supabase);
+            if (assurance.currentLevel !== "aal2") {
+                return {user: null, sessionUser: null};
+            }
+        }
+    } catch {
+        // MFA read failure must not lock staff out of the console.
     }
 
     return {user, sessionUser: toSessionUser(user)};

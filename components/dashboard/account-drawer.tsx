@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { LogoMark } from "@/components/logo";
 import { SignOutButton } from "@/components/dashboard/sign-out-button";
 import { UserAvatar } from "@/components/dashboard/user-avatar";
+import { MfaSettings } from "@/components/dashboard/mfa-settings";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import {
   applyTheme,
@@ -53,11 +54,15 @@ export function AccountDrawer({
   onClose,
   initials,
   sessionUser,
+  mfaEnrolled = false,
+  mfaFactorId = null,
 }: {
   open: boolean;
   onClose: () => void;
   initials: string;
   sessionUser: DashboardSessionUser | null;
+  mfaEnrolled?: boolean;
+  mfaFactorId?: string | null;
 }) {
   const theme = useThemePreference();
   const isDark = theme === "dark";
@@ -262,6 +267,7 @@ export function AccountDrawer({
                   </span>
                   <StatusSwitch checked={isDark} onCheckedChange={toggleTheme} showLabel={false} />
                 </div>
+                <MfaSettings enrolled={mfaEnrolled} factorId={mfaFactorId} />
               </div>
             </div>
 

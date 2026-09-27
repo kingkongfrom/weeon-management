@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { AmbientPage } from "@/components/brand/ambient-page";
-import { loginAction, type LoginState } from "@/lib/auth/actions";
+import {
+  cancelMfaLoginAction,
+  loginAction,
+  verifyMfaLoginAction,
+  type LoginState,
+} from "@/lib/auth/actions";
 import { isAllowedStaffEmailDomain } from "@/lib/auth/policy";
 
 export function LoginForm() {
@@ -28,6 +33,11 @@ export function LoginForm() {
       return;
     }
     setLocalError(null);
+  }
+
+  // Password accepted, second factor still required.
+  if (state?.mfaRequired) {
+    return <MfaChallenge error={state.error ?? null} />;
   }
 
   return (
@@ -87,6 +97,64 @@ export function LoginForm() {
         className="brand-gradient inline-flex h-10 w-full items-center justify-center rounded-full px-6 text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Signing in…" : "Sign in"}
+      </button>
+    </form>
+  );
+}
+
+/** Second-factor step: 6-digit TOTP code from the user's authenticator app. */
+function MfaChallenge({ error }: { error: string | null }) {
+  const [state, formAction, pending] = useActionState<LoginState, FormData>(
+    verifyMfaLoginAction,
+    {},
+  );
+  const message = state?.error ?? error;
+
+  return (
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="next" value="/dashboard" />
+      <div className="flex flex-col gap-2">
+        <label htmlFor="code" className="text-sm font-semibold">
+          Verification code
+        </label>
+        <p className="text-xs text-white/60">
+          Enter the 6-digit code from your authenticator app.
+        </p>
+        <input
+          id="code"
+          name="code"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="[0-9]*"
+          maxLength={6}
+          required
+          autoFocus
+          className="login-field h-8 rounded-lg border px-2.5 text-sm tracking-[0.3em] outline-none transition-all"
+          placeholder="000000"
+        />
+      </div>
+
+      {message ? (
+        <div className="rounded-xl border border-red-300/30 bg-red-500/15 px-4 py-3 text-sm text-red-100">
+          {message}
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="brand-gradient inline-flex h-10 w-full items-center justify-center rounded-full px-6 text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {pending ? "Verifying…" : "Verify and sign in"}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => void cancelMfaLoginAction()}
+        className="text-center text-xs font-medium text-white/55 transition-colors hover:text-white"
+      >
+        Cancel and sign out
       </button>
     </form>
   );
