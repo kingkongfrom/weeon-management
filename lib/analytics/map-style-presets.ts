@@ -211,10 +211,12 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.2,
       // Selected outline + wash use the purple of the "Top countries" card
       // (TONE_RING.purple / TONE_AVATAR.purple) so the map highlight and the card
-      // read as one selection, and the outline is thin rather than heavy.
+      // read as one selection.
       selected: "#7c3aed",
-      selectedWidth: 0.6,
-      selectedFill: "rgba(124, 58, 237, 0.14)",
+      selectedWidth: 0.45,
+      // Barely-there wash: the outline locates the country, the tint must not
+      // fight the choropleth underneath.
+      selectedFill: "rgba(124, 58, 237, 0.07)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.4,
       label: "#000000",
@@ -234,8 +236,8 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       border: "rgba(255, 255, 255, 0.07)",
       borderWidth: 0.2,
       selected: "#a78bfa",
-      selectedWidth: 0.6,
-      selectedFill: "rgba(167, 139, 250, 0.16)",
+      selectedWidth: 0.45,
+      selectedFill: "rgba(167, 139, 250, 0.08)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.45,
       label: "#ffffff",
