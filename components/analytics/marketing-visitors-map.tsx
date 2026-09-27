@@ -259,6 +259,22 @@ export function MarketingVisitorsMap({
               ...(theme.borderDash ? { "line-dasharray": theme.borderDash } : {}),
             }}
           />
+          {/*
+            Selection is a paint wash plus an outline in the *same* hue, so the
+            picked country reads as one object rather than a tint with a
+            mismatched border. The fill sits under the outline (layer order) so
+            the stroke stays crisp on top of the wash. The wash is low-alpha by
+            design: the choropleth underneath must stay readable.
+          */}
+          <Layer
+            id="countries-selected-fill"
+            type="fill"
+            layout={{ visibility: selectedCountry ? "visible" : "none" }}
+            filter={["==", ["get", "iso"], selectedCountry ?? ""]}
+            paint={{
+              "fill-color": theme.selectedFill,
+            }}
+          />
           <Layer
             id="countries-selected"
             type="line"

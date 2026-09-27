@@ -29,8 +29,16 @@ export type MapStyleTheme = {
   border: string;
   borderWidth: number;
   borderDash?: [number, number];
+  /** Outline of the selected country — usually the same hue as `selectedFill`. */
   selected: string;
   selectedWidth: number;
+  /**
+   * Interior wash for the selected country. Deliberately low-alpha so the
+   * choropleth underneath still reads; the outline carries the emphasis. Keep
+   * this the same hue as `selected` so the selected country looks like one
+   * object rather than a tinted fill with a mismatched border.
+   */
+  selectedFill: string;
   fillOpacity: number;
   dimmedOpacity: number;
   /** Country name label text. */
@@ -66,6 +74,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.55,
       selected: "#1f6feb",
       selectedWidth: 1.7,
+      selectedFill: "rgba(31, 111, 235, 0.22)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.4,
       label: "#5c6775",
@@ -85,6 +94,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.55,
       selected: "#7db0ff",
       selectedWidth: 1.7,
+      selectedFill: "rgba(125, 176, 255, 0.26)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.45,
       label: "#9aa5b4",
@@ -109,6 +119,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#2b6cb0",
       selectedWidth: 1.6,
+      selectedFill: "rgba(43, 108, 176, 0.22)",
       fillOpacity: 0.88,
       dimmedOpacity: 0.4,
       label: "#66727a",
@@ -128,6 +139,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#63b3ed",
       selectedWidth: 1.6,
+      selectedFill: "rgba(99, 179, 237, 0.26)",
       fillOpacity: 0.88,
       dimmedOpacity: 0.45,
       label: "#96a1a3",
@@ -152,6 +164,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#a15c1f",
       selectedWidth: 1.6,
+      selectedFill: "rgba(161, 92, 31, 0.22)",
       fillOpacity: 0.88,
       dimmedOpacity: 0.4,
       label: "#6f6256",
@@ -171,6 +184,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#e6a15f",
       selectedWidth: 1.6,
+      selectedFill: "rgba(230, 161, 95, 0.26)",
       fillOpacity: 0.88,
       dimmedOpacity: 0.45,
       label: "#a99a88",
@@ -193,8 +207,9 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       ],
       border: "rgba(140, 150, 162, 0.5)",
       borderWidth: 0.55,
-      selected: "rgba(15, 118, 110, 0.35)",
-      selectedWidth: 0.5,
+      selected: "#0f766e",
+      selectedWidth: 1.7,
+      selectedFill: "rgba(15, 118, 110, 0.25)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.4,
       label: "#5c6775",
@@ -212,8 +227,9 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       ],
       border: "rgba(255, 255, 255, 0.1)",
       borderWidth: 0.55,
-      selected: "rgba(94, 234, 212, 0.45)",
-      selectedWidth: 0.5,
+      selected: "#5eead4",
+      selectedWidth: 1.7,
+      selectedFill: "rgba(94, 234, 212, 0.28)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.45,
       label: "#8b96a5",
@@ -238,6 +254,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#334155",
       selectedWidth: 1.6,
+      selectedFill: "rgba(51, 65, 85, 0.24)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.4,
       label: "#606874",
@@ -257,6 +274,7 @@ export const MAP_STYLE_PRESETS: readonly MapStylePreset[] = [
       borderWidth: 0.5,
       selected: "#e2e8f0",
       selectedWidth: 1.6,
+      selectedFill: "rgba(226, 232, 240, 0.24)",
       fillOpacity: 0.9,
       dimmedOpacity: 0.45,
       label: "#8d97a3",
