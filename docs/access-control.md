@@ -42,12 +42,12 @@ dismisses):
 
 | Field | Source |
 | ----- | ------ |
-| Name | `profiles.name` |
+| Name | `profiles.name` (header) |
+| Login email | `auth_email` ?? `email` — shown under the name; **the credential admins sign in with** |
 | Role | `profiles.role` (always `admin` here) |
 | Account status | `profiles.account_status` |
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
-| Login email | `auth_email` ?? `email` — **the credential admins sign in with** |
 | Last sign-in | **`auth.users.last_sign_in_at`** via the Auth Admin API |
 | Last password reset | latest `admin_password_resets.consumed_at` for the user |
 | Added | `profiles.created_at` |
@@ -56,11 +56,12 @@ dismisses):
 implementation detail, not something Ops acts on.
 
 **Admins log in with email + password, not a username.** `lib/auth/actions.ts`
-in `weeon-tenants` calls `signInWithPassword({ email })`, so the popover labels
-the credential **Login email**. `profiles.username` is a *teacher/roster*
-concept (teachers sign in with a username resolved to a synthetic
-`…@…accounts.weeon.school` auth email) and is therefore **not** shown here —
-admins have no username by design, so a "Not set" row would be misleading.
+in `weeon-tenants` calls `signInWithPassword({ email })`, so the popover header
+shows the email under the name as the credential. `profiles.username` is a
+*teacher/roster* concept (teachers sign in with a username resolved to a
+synthetic `…@…accounts.weeon.school` auth email) and is therefore **not** shown
+here — admins have no username by design, so a "Not set" row would be
+misleading.
 
 **Login data comes from Supabase Auth, not `profiles`.** `profiles.first_login_at`
 exists in the generated types but is **never written by any app** — it is always

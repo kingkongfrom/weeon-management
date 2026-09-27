@@ -317,6 +317,9 @@ function AdminDetailPopover({
             <p className="truncate text-base font-bold text-foreground">
               {account.name}
             </p>
+            <p className="truncate text-sm font-medium text-foreground/55">
+              {account.email || "—"}
+            </p>
           </div>
           <button
             ref={closeRef}
@@ -361,10 +364,6 @@ function AdminDetailPopover({
           </Link>
 
           <dl className="mt-4 divide-y divide-border/60">
-            <PopoverRow
-              label="Login email"
-              value={account.email || "—"}
-            />
             <PopoverRow label="Account status" value={account.accountStatus} />
             <PopoverRow
               label="Last sign-in"
