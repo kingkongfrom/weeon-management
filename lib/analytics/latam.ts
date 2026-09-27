@@ -31,40 +31,23 @@ export const LATAM_COUNTRY_CODES = new Set([
 export type MapRegionPreset = "latam" | "world";
 
 /**
- * Small island states whose names are suppressed on the map.
+ * Minimum polygon area (in squared degrees) for a country to be labelled.
  *
- * They are geographically tiny, so on the LATAM/World framing their labels
- * collide, sit on top of each other, and add noise without useful signal. The
- * countries still render (fill + border) and still take clicks; only the *name*
- * is hidden. Weeon's visitors concentrate in the mainland markets.
+ * Tiny islands are geometrically minuscule at the LATAM/World framing, so their
+ * names collide and add noise without signal. Filtering by an explicit name list
+ * proved hopeless — every pass missed more islands (Curaçao, Montserrat, Cayman,
+ * Turks and Caicos, Bermuda, Aruba, the Virgin Islands, the Pacific territories
+ * …). A size threshold catches them all, including ones the dataset mislabels,
+ * and never needs updating when the boundary data changes.
+ *
+ * In this dataset there is a clean natural gap: islands top out at ~0.94 and the
+ * smallest labelled mainland country (El Salvador) is 1.68. 1.2 sits in the void.
+ *
+ * SIZE ONLY HIDES THE NAME. Islands still render with fill and border and still
+ * respond to clicks — a small territory with visits stays visible in the
+ * choropleth, it just has no text.
  */
-export const MAP_LABEL_EXCLUDED_CODES = new Set([
-  "AG", // Antigua and Barbuda
-  "BB", // Barbados
-  "BS", // The Bahamas
-  "CU", // Cuba
-  "DM", // Dominica
-  "DO", // Dominican Republic
-  "GD", // Grenada
-  "HT", // Haiti
-  "JM", // Jamaica
-  "KN", // Saint Kitts and Nevis
-  "LC", // Saint Lucia
-  "PR", // Puerto Rico
-  "TT", // Trinidad and Tobago
-  "VC", // Saint Vincent and the Grenadines
-]);
-
-/**
- * Islands whose features carry a broken/missing ISO code (`-99` in the bundled
- * dataset), so they cannot be filtered by code. Matched case-insensitively
- * against the rendered label.
- */
-export const MAP_LABEL_EXCLUDED_NAMES = new Set([
-  "saint martin",
-  "sint maarten",
-  "us naval base guantanamo bay",
-]);
+export const MAP_LABEL_MIN_AREA = 1.2;
 
 export const MAP_REGION_PRESETS: Array<{ id: MapRegionPreset; label: string }> = [
   { id: "latam", label: "LATAM" },

@@ -7,8 +7,7 @@ import type {
 } from "geojson";
 import {
   LATAM_COUNTRY_CODES,
-  MAP_LABEL_EXCLUDED_CODES,
-  MAP_LABEL_EXCLUDED_NAMES,
+  MAP_LABEL_MIN_AREA,
   type MapRegionPreset,
 } from "@/lib/analytics/latam";
 
@@ -120,10 +119,13 @@ function ringCentroid(ring: Ring): [number, number] {
   return [cx / (6 * area), cy / (6 * area)];
 }
 
-/** Centroid of the largest polygon part — one clean label point per country. */
-function labelPointForFeature(
+/**
+ * Centroid of the largest polygon part, plus that part's area — one traversal,
+ * so callers can filter on size without walking the geometry twice.
+ */
+function largestPart(
   feature: Feature<Geometry, GeoJsonProperties>,
-): [number, number] | null {
+): { point: [number, number]; area: number } | null {
   const { geometry } = feature;
   const polygons =
     geometry.type === "Polygon"
@@ -131,15 +133,13 @@ function labelPointForFeature(
       : geometry.type === "MultiPolygon"
         ? geometry.coordinates
         : [];
-  let best: [number, number] | null = null;
-  let bestArea = 0;
+  let best: { point: [number, number]; area: number } | null = null;
   for (const polygon of polygons) {
     const outer = polygon[0] as Ring | undefined;
     if (!outer || outer.length < 4) continue;
     const area = Math.abs(ringArea(outer));
-    if (area > bestArea) {
-      bestArea = area;
-      best = ringCentroid(outer);
+    if (!best || area > best.area) {
+      best = { point: ringCentroid(outer), area };
     }
   }
   return best;
@@ -149,9 +149,9 @@ function labelPointForFeature(
  * One point per country (largest polygon part) so the symbol layer never draws
  * duplicate labels for archipelagos and overseas territories.
  *
- * Small island states listed in `MAP_LABEL_EXCLUDED_CODES` are skipped: their
- * labels collide and add noise at this framing. They keep their fill, border and
- * click behaviour — only the name is suppressed.
+ * Countries whose largest polygon is below `MAP_LABEL_MIN_AREA` are skipped —
+ * tiny islands produce colliding, noisy labels. They keep their fill, border and
+ * click behaviour; only the name is suppressed.
  */
 export function buildCountryLabelPoints(
   collection: FeatureCollection,
@@ -160,19 +160,15 @@ export function buildCountryLabelPoints(
   for (const feature of collection.features) {
     const label = String(feature.properties?.label ?? "");
     if (!label) continue;
-    const iso = String(feature.properties?.iso ?? "").toUpperCase();
-    if (iso && MAP_LABEL_EXCLUDED_CODES.has(iso)) continue;
-    // Islands whose dataset rows have a broken ISO code are matched by name.
-    if (MAP_LABEL_EXCLUDED_NAMES.has(label.trim().toLowerCase())) continue;
-    const point = labelPointForFeature(feature);
-    if (!point) continue;
+    const part = largestPart(feature);
+    if (!part || part.area < MAP_LABEL_MIN_AREA) continue;
     features.push({
       type: "Feature",
       properties: {
         label,
         dimmed: Boolean(feature.properties?.dimmed),
       },
-      geometry: { type: "Point", coordinates: point },
+      geometry: { type: "Point", coordinates: part.point },
     });
   }
   return { type: "FeatureCollection", features };
