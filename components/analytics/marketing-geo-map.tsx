@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { MarketingVisitorsMap } from "@/components/analytics/marketing-visitors-map";
 import { DEFAULT_MAP_STYLE_PRESET } from "@/lib/analytics/map-style-presets";
-import { countryLabel, regionLabel } from "@/lib/analytics/country-labels";
+import { countryLabel } from "@/lib/analytics/country-labels";
 import {
   TONE_CARD,
   TONE_COUNT,
@@ -91,13 +91,6 @@ export function MarketingGeoDashboard({
     const values = snapshot.byCountry.map((c) => c.views);
     return Math.max(1, ...values, 0);
   }, [snapshot.byCountry]);
-
-  const regionsForSelection = useMemo(() => {
-    if (!selectedCountry) return [];
-    return snapshot.byRegion.filter(
-      (r) => r.countryCode.toUpperCase() === selectedCountry,
-    );
-  }, [selectedCountry, snapshot.byRegion]);
 
   const countryRows = selectedCountry
     ? snapshot.byCountry.filter(
@@ -190,39 +183,6 @@ export function MarketingGeoDashboard({
             </ul>
           )}
         </Card>
-
-        {selectedCountry ? (
-          <Card tone="rose">
-            <SectionHeader
-              tone="rose"
-              title="Provinces / regions"
-              subtitle="Subdivisions of the selected country"
-            />
-            {regionsForSelection.length === 0 ? (
-              <p className="mt-4 text-sm font-medium text-foreground/45">
-                No subdivision data yet (edge must send region codes).
-              </p>
-            ) : (
-              <ul className="mt-4 space-y-2">
-                {regionsForSelection.map((row) => (
-                  <li
-                    key={`${row.countryCode}-${row.regionCode}`}
-                    className={`flex items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 ${TONE_WASH.rose}`}
-                  >
-                    <span className={`truncate text-sm font-semibold ${TONE_LABEL.rose}`}>
-                      {regionLabel(row.regionCode, row.countryCode)}
-                    </span>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${TONE_COUNT.rose}`}
-                    >
-                      {row.views.toLocaleString()}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        ) : null}
 
         <Card tone="green">
           <SectionHeader

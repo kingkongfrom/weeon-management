@@ -10,12 +10,6 @@ export type MarketingCountryViews = {
   views: number;
 };
 
-export type MarketingRegionViews = {
-  countryCode: string;
-  regionCode: string;
-  views: number;
-};
-
 export type MarketingPathViews = {
   path: string;
   views: number;
@@ -27,14 +21,12 @@ export type MarketingAnalyticsSnapshot = {
   latamViews: number;
   unknownGeoViews: number;
   byCountry: MarketingCountryViews[];
-  byRegion: MarketingRegionViews[];
   topPaths: MarketingPathViews[];
   reason?: string;
 };
 
 type PageViewRow = {
   country_code: string | null;
-  region_code: string | null;
   path: string;
 };
 
@@ -74,7 +66,6 @@ export async function loadMarketingAnalytics(
     latamViews: 0,
     unknownGeoViews: 0,
     byCountry: [],
-    byRegion: [],
     topPaths: [],
   };
 
@@ -89,7 +80,7 @@ export async function loadMarketingAnalytics(
   const client = createPlatformClient();
   const { data, error } = await client
     .from("marketing_site_page_views")
-    .select("country_code, region_code, path")
+    .select("country_code, path")
     .gte("viewed_at", sinceIso(rangeDays))
     .limit(50_000);
 
@@ -105,7 +96,6 @@ export async function loadMarketingAnalytics(
 
   const rows = (data ?? []) as PageViewRow[];
   const countryMap = new Map<string, number>();
-  const regionMap = new Map<string, MarketingRegionViews>();
   const pathMap = new Map<string, number>();
   let latamViews = 0;
   let unknownGeoViews = 0;
@@ -119,28 +109,12 @@ export async function loadMarketingAnalytics(
       if (LATAM_COUNTRY_CODES.has(cc)) latamViews += 1;
     }
 
-    if (cc && row.region_code) {
-      const key = `${cc}|${row.region_code}`;
-      const existing = regionMap.get(key);
-      if (existing) {
-        existing.views += 1;
-      } else {
-        regionMap.set(key, {
-          countryCode: cc,
-          regionCode: row.region_code,
-          views: 1,
-        });
-      }
-    }
-
     pathMap.set(row.path, (pathMap.get(row.path) ?? 0) + 1);
   }
 
   const byCountry = [...countryMap.entries()]
     .map(([countryCode, views]) => ({ countryCode, views }))
     .sort((a, b) => b.views - a.views);
-
-  const byRegion = [...regionMap.values()].sort((a, b) => b.views - a.views);
 
   const topPaths = [...pathMap.entries()]
     .map(([path, views]) => ({ path, views }))
@@ -153,7 +127,6 @@ export async function loadMarketingAnalytics(
     latamViews,
     unknownGeoViews,
     byCountry,
-    byRegion,
     topPaths,
   };
 }
