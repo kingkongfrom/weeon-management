@@ -48,13 +48,19 @@ dismisses):
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |
 | Username | `profiles.username` (`Not set` when null) |
-| Last sign-in | `profiles.first_login_at` |
+| Last sign-in | **`auth.users.last_sign_in_at`** via the Auth Admin API |
 | Last password reset | latest `admin_password_resets.consumed_at` for the user |
 | Added | `profiles.created_at` |
-| Welcome email | `profiles.email_sent_at` |
 
 `profiles.id` is deliberately **not** shown at display level — it is an
 implementation detail, not something Ops acts on.
+
+**Login data comes from Supabase Auth, not `profiles`.** `profiles.first_login_at`
+exists in the generated types but is **never written by any app** — it is always
+`NULL`. Real sign-in activity lives in `auth.users.last_sign_in_at`, so
+`listAdminAccounts()` pages the Auth Admin API and merges by user id. If the
+Admin API is unavailable the field falls back to `NULL` (shows "Never signed
+in") rather than failing the page.
 
 **Note on "last password updated":** there is no `profiles.password_updated_at`
 in the schema, so the popover shows **Last password reset** from
@@ -76,6 +82,8 @@ Mutations are **not** built yet. Each needs an additive change in
   introduced (e.g. `account_locked_at`) or wired to Supabase Auth lockout.
 - **`password_updated_at`** — for a true "last password changed" timestamp
   (today the popover approximates it with the last consumed password reset).
+- **`profiles.last_sign_in_at`** — to mirror Auth's `last_sign_in_at` so the
+  console can query/sort on sign-in without paging the Auth Admin API.
 
 Do not invent these columns here — design and land them in `weeon-tenants`
 first, then consume them.

@@ -376,9 +376,9 @@ function AdminDetailPopover({
             <PopoverRow
               label="Last sign-in"
               value={
-                account.firstLoginAt
-                  ? formatDateTime(account.firstLoginAt)
-                  : "Never signed in"
+                account.lastSignInAt
+                  ? formatDateTime(account.lastSignInAt)
+                  : <span className="text-foreground/45">Never signed in</span>
               }
             />
             <PopoverRow
@@ -392,14 +392,6 @@ function AdminDetailPopover({
               }
             />
             <PopoverRow label="Added" value={formatDateTime(account.createdAt)} />
-            <PopoverRow
-              label="Welcome email"
-              value={
-                account.emailSentAt
-                  ? formatDateTime(account.emailSentAt)
-                  : "Not sent"
-              }
-            />
           </dl>
         </div>
       </div>

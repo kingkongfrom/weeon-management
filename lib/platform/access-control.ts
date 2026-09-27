@@ -23,11 +23,15 @@ export type AdminAccount = {
   accountStatus: string;
   active: boolean;
   emailSentAt: string | null;
-  firstLoginAt: string | null;
-  provisionedAt: string | null;
+  /**
+   * Real sign-in signal from **Supabase Auth** (`auth.users.last_sign_in_at`).
+   * `profiles.first_login_at` exists in the schema but is never written by any
+   * app — login activity lives in Auth, not `profiles`.
+   */
+  lastSignInAt: string | null;
   /**
    * When this user last completed a password reset (`admin_password_resets`).
-   * This is a proxy for "last password change" — there is no
+   * A proxy for "last password change" — there is no
    * `password_updated_at` on `profiles` yet (see docs/access-control.md).
    */
   passwordResetAt: string | null;
@@ -88,17 +92,42 @@ export async function listAdminAccounts(): Promise<{
 
   const rows = (data ?? []) as ProfileRow[];
 
+  const ids = rows.map((row) => row.id);
+
+  // Supabase Auth is the only place login activity is recorded. Pull it via the
+  // Admin API and merge by user id — `profiles.first_login_at` is never written.
+  // Page until every admin id is matched (admins are a small subset of Auth
+  // users, so this usually resolves on the first pages).
+  const lastSignInByUser = new Map<string, string | null>();
+  if (ids.length > 0) {
+    const wanted = new Set(ids);
+    try {
+      const perPage = 1000;
+      for (let page = 1; page <= 10; page += 1) {
+        const { data: authData, error: authError } =
+          await client.auth.admin.listUsers({ page, perPage });
+        if (authError) break;
+        for (const user of authData.users) {
+          if (wanted.has(user.id)) {
+            lastSignInByUser.set(user.id, user.last_sign_in_at ?? null);
+          }
+        }
+        if (authData.users.length < perPage) break;
+        if (lastSignInByUser.size >= wanted.size) break;
+      }
+    } catch {
+      // Auth Admin API unavailable (or key lacks scope) — fall back to null.
+    }
+  }
+
   // Latest consumed password reset per user — the closest available signal to
   // "last password change" (there is no `profiles.password_updated_at` yet).
   const passwordResetByUser = new Map<string, string>();
-  if (rows.length > 0) {
+  if (ids.length > 0) {
     const { data: resets } = await client
       .from("admin_password_resets")
       .select("user_id, consumed_at")
-      .in(
-        "user_id",
-        rows.map((row) => row.id),
-      )
+      .in("user_id", ids)
       .not("consumed_at", "is", null)
       .order("consumed_at", { ascending: false });
     for (const reset of (resets ?? []) as {
@@ -128,8 +157,7 @@ export async function listAdminAccounts(): Promise<{
       accountStatus: row.account_status ?? "active",
       active: row.active ?? true,
       emailSentAt: row.email_sent_at,
-      firstLoginAt: row.first_login_at,
-      provisionedAt: row.provisioned_at,
+      lastSignInAt: lastSignInByUser.get(row.id) ?? null,
       passwordResetAt: passwordResetByUser.get(row.id) ?? null,
       createdAt: row.created_at,
     };
