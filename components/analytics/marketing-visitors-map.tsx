@@ -48,12 +48,12 @@ type Props = {
 /**
  * Portrait frame so the tall LATAM extent fits the viewport.
  *
- * The frame uses the *regular* border token (not `border-strong`) and a hairline
- * ring: a lighter colour reads as a thin edge even at 1px, which is the effect
- * we want — it frames the map without competing with it.
+ * The ring matches the purple "Top countries" card beside it: same 1px width and
+ * the same translucent purple (TONE_RING.purple), so the two read as a pair
+ * rather than the map floating in its own frame.
  */
 const MAP_FRAME_CLASS =
-  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-border";
+  "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-[#c4b0ef]/70 dark:ring-[#5b4a9a]/80";
 
 /** Costa Rica — Weeon home base. */
 const COSTA_RICA: [number, number] = [-84.1, 9.8];
