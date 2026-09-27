@@ -28,8 +28,8 @@ administrator:
 
 | Column | Source |
 | ------ | ------ |
-| User ID | `profiles.id` (short 8-char form) |
 | Full name | `profiles.name` (+ email beneath) |
+| Role | `profiles.role` |
 | School | `tenants.name` |
 | Status | access state — Active / Pending first login / Inactive |
 
@@ -44,7 +44,7 @@ dismisses):
 | ----- | ------ |
 | Name | `profiles.name` (header) |
 | Login email | `auth_email` ?? `email` — shown under the name; **the credential admins sign in with** |
-| Role | `profiles.role` (always `admin` here) |
+| Role | `profiles.role` (shown in the header and as a row) |
 | Account status | `profiles.account_status` |
 | Active flag | `profiles.active` |
 | School + school state | `tenants.name`, `tenants.status` (links to School page) |

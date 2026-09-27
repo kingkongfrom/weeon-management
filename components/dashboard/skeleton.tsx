@@ -213,13 +213,13 @@ export function AccessControlPageSkeleton() {
             key={row}
             className="flex items-center gap-4 border-b border-border/60 px-4 py-3.5 last:border-b-0 sm:px-5"
           >
-            <Skeleton className="h-3.5 w-16 shrink-0" />
             <div className="min-w-0 flex-1">
               <Skeleton className="h-3.5 w-40 max-w-full" />
               <Skeleton className="mt-1.5 h-3 w-52 max-w-full" />
             </div>
+            <Skeleton className="hidden h-3.5 w-20 shrink-0 md:block" />
             <Skeleton className="hidden h-3.5 w-32 shrink-0 sm:block" />
-            <Skeleton className="hidden h-6 w-28 shrink-0 rounded-full md:block" />
+            <Skeleton className="hidden h-6 w-28 shrink-0 rounded-full lg:block" />
           </div>
         ))}
       </div>

@@ -44,10 +44,6 @@ function accountStateLabel(account: AdminAccount): { label: string; tone: string
   return { label: "Active", tone: "bg-success-subtle text-success" };
 }
 
-function shortId(id: string): string {
-  return id.slice(0, 8);
-}
-
 function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
   const date = new Date(iso);
@@ -193,10 +189,10 @@ function AdminTable({
           <thead>
             <tr className="border-b border-border/70 bg-surface-muted/50 text-[11px] font-bold uppercase tracking-wider text-foreground/50">
               <th scope="col" className="px-4 py-3 font-bold sm:px-5">
-                User ID
+                Full name
               </th>
               <th scope="col" className="px-4 py-3 font-bold sm:px-5">
-                Full name
+                Role
               </th>
               <th scope="col" className="px-4 py-3 font-bold sm:px-5">
                 School
@@ -224,9 +220,6 @@ function AdminTable({
                   }}
                   className="cursor-pointer border-b border-border/60 transition-colors last:border-b-0 hover:bg-surface-muted/60 focus-visible:bg-surface-muted/60 focus-visible:outline-none"
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-foreground/55 sm:px-5">
-                    {shortId(account.id)}
-                  </td>
                   <td className="px-4 py-3 sm:px-5">
                     <span className="font-semibold text-foreground">
                       {account.name}
@@ -234,6 +227,9 @@ function AdminTable({
                     <span className="mt-0.5 block truncate text-xs font-medium text-foreground/45">
                       {account.email || "—"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-foreground/70 capitalize sm:px-5">
+                    {account.role}
                   </td>
                   <td className="px-4 py-3 text-foreground/70 sm:px-5">
                     {account.tenantName}
@@ -319,6 +315,9 @@ function AdminDetailPopover({
             </p>
             <p className="truncate text-sm font-medium text-foreground/55">
               {account.email || "—"}
+            </p>
+            <p className="mt-0.5 truncate text-xs font-semibold capitalize text-foreground/45">
+              {account.role}
             </p>
           </div>
           <button
