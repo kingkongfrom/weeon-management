@@ -21,6 +21,7 @@ export function SchoolStatusControl({
   status,
   suspendReason,
   readOnlyOn,
+  variant = "band",
 }: {
   tenantId: string;
   status: string;
@@ -28,6 +29,12 @@ export function SchoolStatusControl({
   suspendReason?: string | null;
   /** Preformatted date the hold becomes read-only, when set. */
   readOnlyOn?: string | null;
+  /**
+   * `band` — full-width strip with a title + description (inline sections).
+   * `hero` — compact, no chrome: a state hint plus the button, for the school
+   * page header where the surrounding hero already carries the identity.
+   */
+  variant?: "band" | "hero";
 }) {
   const [state, action, pending] = useActionState<
     TenantStatusActionState,
@@ -50,6 +57,41 @@ export function SchoolStatusControl({
         : "Payment hold (set by billing) — currently read-only."
       : "Manual hold — users can read but not edit."
     : "Suspending is a manual hold: users can read but not edit until you reactivate.";
+
+  if (variant === "hero") {
+    return (
+      <div className="flex flex-col items-start gap-1.5 sm:items-end">
+        {state?.error ? (
+          <span className="text-xs font-medium text-error">{state.error}</span>
+        ) : null}
+        {state?.ok ? (
+          <span className="text-xs font-medium text-success">{state.ok}</span>
+        ) : null}
+        <form action={action}>
+          <input type="hidden" name="tenantId" value={tenantId} />
+          <input type="hidden" name="action" value={nextAction} />
+          <input type="hidden" name="reason" value="manual" />
+          <button
+            type="submit"
+            disabled={pending}
+            title={description}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-60 ${
+              suspended ? "bg-brand-600" : "bg-error"
+            }`}
+          >
+            {pending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : suspended ? (
+              <CirclePlay size={14} />
+            ) : (
+              <CirclePause size={14} />
+            )}
+            {suspended ? "Reactivate school" : "Suspend school"}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 bg-surface-muted/40 px-4 py-3 sm:px-5">

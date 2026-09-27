@@ -42,7 +42,7 @@ reason-aware, and Ops only performs the manual kind:
 | `suspend_reason` | Set by | Access | Admin message |
 | ---------------- | ------ | ------ | ------------- |
 | `delinquency` | **Billing system, automatic** | `full` during `suspended_grace_ends_at`, then `read_only` | payment CTA |
-| `manual` | **Ops** — School page → Suspend (no reason picker) | `read_only` immediately | support CTA |
+| `manual` | **Ops** — School page header → *Suspend school* (no reason picker) | `read_only` immediately | support CTA |
 
 - The ops Suspend button sends `reason=manual`; `NULL` also reads as `manual`.
 - On suspend, Ops emails the school administrators (branded Resend,

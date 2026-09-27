@@ -10,7 +10,6 @@ import {
   GraduationCap,
   History,
   ShieldAlert,
-  ShieldCheck,
   TriangleAlert,
   Users,
 } from "lucide-react";
@@ -170,37 +169,6 @@ async function SchoolDetailContent({
                 </FactPanel>
 
                 <FactPanel
-                  title="School access"
-                  icon={<ShieldCheck size={15} />}
-                  tone="brand"
-                >
-                  <Fact
-                    label="State"
-                    value={
-                      <StatusBadge
-                        status={tenant.status}
-                        suspendReason={tenant.suspend_reason}
-                      />
-                    }
-                  />
-                  {tenant.suspend_reason === "delinquency" &&
-                  formatReadOnlyOn(tenant.suspended_grace_ends_at) ? (
-                    <Fact
-                      label="Read-only on"
-                      value={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
-                    />
-                  ) : null}
-                  <div className="border-t border-border/60">
-                    <SchoolStatusControl
-                      tenantId={tenant.id}
-                      status={tenant.status}
-                      suspendReason={tenant.suspend_reason ?? null}
-                      readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
-                    />
-                  </div>
-                </FactPanel>
-
-                <FactPanel
                   title="Academic setup"
                   icon={<GraduationCap size={15} />}
                   tone="accent"
@@ -331,20 +299,29 @@ function HeroHeader({
             <HeroFact label="Admins" value={admins} />
           </div>
         </div>
-        <span
-          className={`inline-flex shrink-0 items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-xs font-semibold ${
-            healthy
-              ? "bg-success-subtle text-success"
-              : "bg-error-subtle text-error"
-          }`}
-        >
+        <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
           <span
-            className={`h-2 w-2 shrink-0 rounded-full ${
-              healthy ? "bg-success" : "bg-error"
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+              healthy
+                ? "bg-success-subtle text-success"
+                : "bg-error-subtle text-error"
             }`}
+          >
+            <span
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                healthy ? "bg-success" : "bg-error"
+              }`}
+            />
+            Backup {formatBackupAgeHours(backup.hoursSinceBackup)}
+          </span>
+          <SchoolStatusControl
+            tenantId={tenant.id}
+            status={status}
+            suspendReason={suspend_reason ?? null}
+            readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
+            variant="hero"
           />
-          Backup {formatBackupAgeHours(backup.hoursSinceBackup)}
-        </span>
+        </div>
       </div>
     </header>
   );
