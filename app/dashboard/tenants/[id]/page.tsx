@@ -21,6 +21,7 @@ import { OpsAuditCard } from "@/components/dashboard/ops-audit-card";
 import {
   Fact,
   FactPanel,
+  SectionCard,
 } from "@/components/dashboard/section-card";
 import { SegmentedWorkspace } from "@/components/dashboard/segmented-tabs";
 import { TenantAvatar } from "@/components/dashboard/tenant-avatar";
@@ -216,6 +217,21 @@ async function SchoolDetailContent({
                     value={formatTenantDate(tenant.created_at)}
                   />
                 </FactPanel>
+
+                <SectionCard
+                  title="Danger zone"
+                  description="Irreversible or service-affecting actions for this school."
+                  icon={<TriangleAlert size={16} />}
+                  tone="error"
+                  className="lg:col-span-2"
+                >
+                  <SchoolStatusControl
+                    tenantId={tenant.id}
+                    status={tenant.status}
+                    suspendReason={tenant.suspend_reason ?? null}
+                    readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
+                  />
+                </SectionCard>
               </div>
             ),
             activity: <OpsAuditCard entries={audit} />,
@@ -314,13 +330,6 @@ function HeroHeader({
             />
             Backup {formatBackupAgeHours(backup.hoursSinceBackup)}
           </span>
-          <SchoolStatusControl
-            tenantId={tenant.id}
-            status={status}
-            suspendReason={suspend_reason ?? null}
-            readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
-            variant="hero"
-          />
         </div>
       </div>
     </header>

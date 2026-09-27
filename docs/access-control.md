@@ -14,8 +14,8 @@ Two concerns, both here:
 
 1. **User access** — locate an administrator, see their access state.
 2. **School access** — the school's own state is shown on each row (status pill)
-   and managed on the School page header (**Suspend school** / **Reactivate
-   school**, in the hero — not a tab).
+   and managed on the School page → **Overview → Danger zone** (bottom of the
+   tab, with a confirmation step on suspend; reactivate is one click).
 
 ## What it shows (read-only, Phase 1)
 
