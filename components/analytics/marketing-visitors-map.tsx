@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LocateFixed, MapPin } from "lucide-react";
+import { LocateFixed } from "lucide-react";
 import Map, {
   Layer,
-  Marker,
   Source,
   type MapLayerMouseEvent,
   type MapRef,
@@ -52,9 +51,6 @@ type Props = {
  */
 const MAP_FRAME_CLASS =
   "aspect-[3/4] w-full max-w-[585px] overflow-hidden rounded-xl ring-1 ring-[#c4b0ef]/70 dark:ring-[#5b4a9a]/80";
-
-/** Costa Rica — Weeon home base. */
-const COSTA_RICA: [number, number] = [-84.1, 9.8];
 
 /** LATAM silhouette placeholder; the frame is supplied by the caller. */
 function MapSurfaceSkeleton() {
@@ -327,18 +323,6 @@ export function MarketingVisitorsMap({
             />
           </Source>
         ) : null}
-
-        <Marker
-          longitude={COSTA_RICA[0]}
-          latitude={COSTA_RICA[1]}
-          anchor="bottom"
-        >
-          <MapPin
-            className="h-3.5 w-3.5 text-brand-600 drop-shadow-sm dark:text-brand-300"
-            strokeWidth={2.5}
-            fill="currentColor"
-          />
-        </Marker>
       </Map>
 
       <div
