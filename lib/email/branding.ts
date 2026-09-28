@@ -3,17 +3,29 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-/** Inline attachment id for the Weeon wordmark in transactional email HTML. */
-export const WEEON_EMAIL_LOGO_CID = "weeon-ops-logo";
+/**
+ * Inline attachment id for the **company** wordmark in transactional email HTML.
+ *
+ * Email is customer-facing, so it always carries the company brand
+ * ("Weeon School"), never a console surface label such as "Ops".
+ */
+export const WEEON_EMAIL_LOGO_CID = "weeon-school-logo";
 
-/** Public URL for the wordmark (fallback when clients block inline attachments). */
+/**
+ * Public URL for the wordmark, for clients that block inline attachments.
+ *
+ * Served from the **company** marketing origin — not the ops console — because
+ * this asset is company branding, not console branding.
+ */
 export function weeonEmailLogoUrl(): string {
-  const origin = process.env.WEEON_OPS_ORIGIN ?? "https://ops.weeon.school";
+  const origin =
+    process.env.WEEON_MARKETING_ORIGIN ?? "https://www.weeon.school";
   return `${origin.replace(/\/$/, "")}/email/logo-wordmark.png`;
 }
 
-/** Loads the Weeon Ops wordmark as a Resend inline attachment.
- *  PNG is a Playwright raster of `Logo` from `components/logo.tsx`.
+/** Loads the company wordmark as a Resend inline attachment.
+ *  PNG is a Playwright raster of `EmailBrandLogo` (`components/email-brand-logo.tsx`),
+ *  which is intentionally separate from the console `Logo`.
  *  Read from disk each send so `npm run render:email-logo` updates apply without restart. */
 export async function loadWeeonEmailLogoAttachment(): Promise<{
   filename: string;
@@ -24,7 +36,7 @@ export async function loadWeeonEmailLogoAttachment(): Promise<{
   const content = await readFile(path);
 
   return {
-    filename: "weeon-ops-logo.png",
+    filename: "weeon-school-logo.png",
     content,
     contentId: WEEON_EMAIL_LOGO_CID,
   };

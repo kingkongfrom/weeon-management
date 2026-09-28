@@ -7,11 +7,17 @@ export type EmailSendResult =
   | { success: true; id: string }
   | { success: false; error: string };
 
-/** From-address for Weeon Ops mail. Never use Supabase's generic sender. */
+/**
+ * From-address for transactional mail.
+ *
+ * The display name is the **company** ("Weeon School"), not the internal console
+ * name — this string is what recipients (school admins) see in their inbox.
+ * Never use Supabase's generic sender.
+ */
 export function brandedFromAddress(): string {
-  const raw = process.env.RESEND_FROM?.trim() || "Weeon Ops <ops@weeon.school>";
+  const raw = process.env.RESEND_FROM?.trim() || "Weeon School <ops@weeon.school>";
   if (raw.includes("<")) return raw;
-  return `Weeon Ops <${raw}>`;
+  return `Weeon School <${raw}>`;
 }
 
 export async function sendBrandedEmail(input: {

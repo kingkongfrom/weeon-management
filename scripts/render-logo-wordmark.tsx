@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import sharp from "sharp";
-import { Logo } from "../components/logo";
+import { EmailBrandLogo } from "../components/email-brand-logo";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public", "email", "logo-wordmark.png");
@@ -21,7 +21,7 @@ async function main() {
     pathToFileURL(fontBlack).href,
   );
 
-  const logoHtml = renderToStaticMarkup(createElement(Logo));
+  const logoHtml = renderToStaticMarkup(createElement(EmailBrandLogo));
   const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -60,7 +60,7 @@ async function main() {
 
     await mkdir(dirname(out), { recursive: true });
     await writeFile(out, png);
-    console.log(`wrote ${out} (${png.byteLength} bytes) from Logo component`);
+    console.log(`wrote ${out} (${png.byteLength} bytes) from EmailBrandLogo component`);
   } finally {
     await browser.close();
     await unlink(tmpHtml).catch(() => undefined);
