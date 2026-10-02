@@ -20,11 +20,19 @@ export function brandedFromAddress(): string {
   return `Weeon School <${raw}>`;
 }
 
+type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+};
+
 export async function sendBrandedEmail(input: {
-  to: string;
+  to: string | string[];
+  cc?: string[];
   subject: string;
   text: string;
   html: string;
+  replyTo?: string;
+  extraAttachments?: EmailAttachment[];
 }): Promise<EmailSendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -38,13 +46,27 @@ export async function sendBrandedEmail(input: {
   const logo = await loadWeeonEmailLogoAttachment();
 
   try {
+    const replyTo = input.replyTo?.trim();
+    const toList = (Array.isArray(input.to) ? input.to : [input.to])
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+    const ccList = (input.cc ?? [])
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+    const fileAttachments = (input.extraAttachments ?? []).map((file) => ({
+      filename: file.filename,
+      content: file.content,
+    }));
+
     const { data, error } = await resend.emails.send({
       from: brandedFromAddress(),
-      to: [input.to.trim().toLowerCase()],
+      to: toList,
+      cc: ccList.length > 0 ? ccList : undefined,
       subject: input.subject,
       text: input.text,
       html: input.html,
-      attachments: [logo],
+      attachments: [logo, ...fileAttachments],
+      ...(replyTo ? { replyTo: [replyTo] } : {}),
     });
 
     if (error) {

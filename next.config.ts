@@ -22,20 +22,19 @@ const isDev = process.env.NODE_ENV === "development";
  * inline bootstrap / flight-data scripts on every page; without it client
  * components never hydrate.
  *
- * Ops has no third-party script origins (the console is first-party plus
- * Supabase only). The two external origins that ARE required:
- *   - `demotiles.maplibre.org` — MapLibre glyphs for country labels on the
- *     analytics map (`lib/analytics/map-basemap-style.ts`). Needed on both
- *     connect-src (fetch) and font-src (the .pbf glyphs).
- *   - Supabase — session/auth and any images served from the project.
+ * Third-party origins (aligned with `weeon-tenants` where the product matches):
+ *   - MapLibre glyphs on the analytics map.
+ *   - Supabase session/auth and storage images.
+ *   - Dropbox Chooser + Google Drive Picker for email compose attachments.
  */
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.dropbox.com https://accounts.google.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com https://demotiles.maplibre.org;
-  img-src 'self' blob: data: https://wlyrqyiqrgelsehjmtta.supabase.co;
-  connect-src 'self' https://wlyrqyiqrgelsehjmtta.supabase.co wss://wlyrqyiqrgelsehjmtta.supabase.co https://demotiles.maplibre.org;
+  img-src 'self' blob: data: https://wlyrqyiqrgelsehjmtta.supabase.co https://*.google.com https://*.gstatic.com;
+  connect-src 'self' https://wlyrqyiqrgelsehjmtta.supabase.co wss://wlyrqyiqrgelsehjmtta.supabase.co https://demotiles.maplibre.org https://www.dropbox.com https://dl.dropboxusercontent.com https://*.dl.dropboxusercontent.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://apis.google.com;
+  frame-src https://accounts.google.com https://docs.google.com https://drive.google.com;
   worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';

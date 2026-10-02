@@ -66,3 +66,67 @@ export function brandedEmailHtml(input: BrandedEmailInput): string {
 export function brandedEmailText(lines: string[]): string {
   return lines.join("\n");
 }
+
+/** Branded letter (logo + body) without a CTA button — ops compose mail. */
+export function brandedLetterHtml(input: {
+  title: string;
+  introHtml: string;
+  footer: string;
+}): string {
+  const title = escapeHtml(input.title);
+  const footer = escapeHtml(input.footer);
+  return `<!doctype html>
+<html lang="es">
+  <body style="margin:0;padding:0;background-color:#f6f7f9;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f7f9;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;text-align:left;">
+            <tr>
+              <td align="center" style="padding:28px 28px 12px;">
+                <img src="cid:${WEEON_EMAIL_LOGO_CID}" alt="Weeon School" width="180" style="display:block;width:180px;height:auto;border:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 28px 12px;">
+                <p style="margin:0;color:#24292f;font-size:18px;font-weight:600;">${title}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 28px 16px;">
+                ${input.introHtml}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 28px 28px;">
+                <p style="margin:0;color:#8b949e;font-size:13px;line-height:1.5;">${footer}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+/** Plain message lines → HTML paragraphs for compose mail. */
+export function plainTextToEmailParagraphs(body: string): string {
+  const blocks = body
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  if (blocks.length === 0) {
+    return `<p style="margin:0;color:#57606a;font-size:15px;line-height:1.5;">&nbsp;</p>`;
+  }
+
+  return blocks
+    .map((block) => {
+      const lines = block.split("\n").map((line) => escapeHtml(line.trim()));
+      const inner = lines.join("<br />");
+      return `<p style="margin:0 0 14px;color:#57606a;font-size:15px;line-height:1.5;">${inner}</p>`;
+    })
+    .join("");
+}
