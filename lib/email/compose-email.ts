@@ -3,7 +3,6 @@ import "server-only";
 import {
   brandedEmailText,
   brandedLetterHtml,
-  escapeHtml,
   plainTextToEmailParagraphs,
 } from "@/lib/email/layout";
 import { sendBrandedEmail, type EmailSendResult } from "@/lib/email/send";
@@ -24,36 +23,29 @@ export async function sendOpsComposeEmail(input: {
   body: string;
   bodyHtml?: string;
   actorEmail: string | null;
+  fromAddress: string;
   extraAttachments?: { filename: string; content: Buffer }[];
 }): Promise<EmailSendResult> {
   const subject = input.subject.trim();
   const body = input.body.trim();
   const replyTo = replyToForActor(input.actorEmail);
-  const safeReply = escapeHtml(replyTo);
 
   const introHtml = input.bodyHtml?.trim()
     ? `<div class="rte-content">${input.bodyHtml}</div>`
     : plainTextToEmailParagraphs(body);
-  const footer = `Este mensaje fue enviado por el equipo de Weeon School. Podés responder a ${safeReply}.`;
 
   return sendBrandedEmail({
     to: input.to,
     cc: input.cc,
     subject,
+    from: input.fromAddress,
     replyTo,
     extraAttachments: input.extraAttachments,
-    text: brandedEmailText([
-      subject,
-      "",
-      ...body.split(/\r?\n/),
-      "",
-      `— Weeon School`,
-      `Respondé a ${replyTo}.`,
-    ]),
+    text: brandedEmailText([subject, "", ...body.split(/\r?\n/)]),
     html: brandedLetterHtml({
       title: subject,
       introHtml,
-      footer,
+      footer: "",
     }),
   });
 }

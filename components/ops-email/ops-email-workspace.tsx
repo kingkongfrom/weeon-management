@@ -23,6 +23,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { ACTION_NAV_LINK } from "@/lib/ui/action-button";
 import { useT } from "@/lib/i18n/client";
 import { opsEmailTone } from "@/lib/ops-email/messages-tone";
 import type { OpsEmailFolder } from "@/lib/ops-email/folders";
@@ -120,7 +121,6 @@ export function OpsEmailWorkspace({
     setLocalLabels(labels);
   }, [labels]);
 
-  const sentCount = rows.length;
   const failedCount = rows.filter((row) => row.status === "failed").length;
 
   const listMessages: OpsMailboxMessage[] = useMemo(() => {
@@ -171,7 +171,6 @@ export function OpsEmailWorkspace({
     label: string;
     icon: typeof Inbox;
     href: string;
-    count?: number;
     inboxBadge?: number;
   }> = [
     {
@@ -186,7 +185,7 @@ export function OpsEmailWorkspace({
       label: t.opsEmail.folderSent,
       icon: Send,
       href: OPS_EMAIL,
-      count: sentCount,
+      inboxBadge: failedCount,
     },
     {
       id: "favorite",
@@ -345,7 +344,7 @@ export function OpsEmailWorkspace({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "inline-flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                  ACTION_NAV_LINK,
                   active
                     ? "bg-[#0891B2] text-white"
                     : "text-foreground/70 hover:bg-surface-muted/60 hover:text-foreground",
@@ -353,18 +352,9 @@ export function OpsEmailWorkspace({
               >
                 <Icon className="h-4 w-4" />
                 <span className="flex-1">{item.label}</span>
-                {item.id === "inbox" ? (
+                {item.id === "inbox" || item.id === "sent" ? (
                   <OpsUnreadCountBadge count={item.inboxBadge ?? 0} />
-                ) : item.count && item.count > 0 ? (
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-[11px] font-bold",
-                      opsEmailTone.countBadge,
-                    )}
-                  >
-                    {item.count}
-                  </span>
-                ) : failedCount > 0 && item.id === "sent" ? null : null}
+                ) : null}
               </Link>
             );
           })}
@@ -428,7 +418,10 @@ export function OpsEmailWorkspace({
           <button
             type="button"
             onClick={() => setSignatureOpen(true)}
-            className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-foreground/70 transition-colors hover:bg-surface-muted/60 hover:text-foreground"
+            className={cn(
+              ACTION_NAV_LINK,
+              "w-full text-foreground/70 hover:bg-surface-muted/60 hover:text-foreground",
+            )}
           >
             <Signature className="h-4 w-4" />
             <span className="flex-1 text-left">{t.opsEmail.signatureTitle}</span>

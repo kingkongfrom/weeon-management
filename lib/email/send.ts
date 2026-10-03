@@ -31,6 +31,7 @@ export async function sendBrandedEmail(input: {
   subject: string;
   text: string;
   html: string;
+  from?: string;
   replyTo?: string;
   extraAttachments?: EmailAttachment[];
 }): Promise<EmailSendResult> {
@@ -58,8 +59,10 @@ export async function sendBrandedEmail(input: {
       content: file.content,
     }));
 
+    const from = input.from?.trim() || brandedFromAddress();
+
     const { data, error } = await resend.emails.send({
-      from: brandedFromAddress(),
+      from,
       to: toList,
       cc: ccList.length > 0 ? ccList : undefined,
       subject: input.subject,

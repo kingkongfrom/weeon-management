@@ -94,7 +94,7 @@ export function InviteAdministrator({
         <button
           type="submit"
           disabled={disabled || pending || !email.trim()}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-brand-600 bg-brand-600 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-brand-600 bg-brand-600 px-4 text-sm font-semibold text-white transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Plus size={16} />
           {pending ? "Sending…" : "Send invitation"}

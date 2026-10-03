@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getPlatformSession } from "@/lib/auth/session";
 import { sendOpsComposeEmail } from "@/lib/email/compose-email";
+import { brandedFromAddress } from "@/lib/email/send";
 import { insertOutboundEmailLog } from "@/lib/platform/outbound-email";
 import { loadOpsMailboxSettings } from "@/lib/platform/ops-mailbox-settings";
 
@@ -56,6 +57,7 @@ export async function sendOpsEmailAction(
     subject,
     body: bodyWithSignature,
     actorEmail: actor.email,
+    fromAddress: brandedFromAddress(),
   });
 
   const log = await insertOutboundEmailLog({

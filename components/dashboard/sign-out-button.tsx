@@ -19,7 +19,7 @@ export function SignOutButton({
         className={
           drawer
             ? "inline-flex w-full items-center justify-center gap-2 rounded-xl bg-error px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-95"
-            : "inline-flex w-full items-center justify-center rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+            : "inline-flex h-10 w-full items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
         }
       >
         {drawer ? <LogoutIcon /> : null}

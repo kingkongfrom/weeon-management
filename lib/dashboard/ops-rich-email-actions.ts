@@ -7,6 +7,7 @@ import type { RichTextDoc } from "@/lib/comms/model";
 import { docHasContent } from "@/lib/comms/model";
 import { getPlatformSession } from "@/lib/auth/session";
 import { sendOpsComposeEmail } from "@/lib/email/compose-email";
+import { resolveOpsFromAddress } from "@/lib/email/ops-from-addresses";
 import { insertOutboundEmailLog } from "@/lib/platform/outbound-email";
 import { loadOpsMailboxSettings } from "@/lib/platform/ops-mailbox-settings";
 
@@ -19,6 +20,7 @@ export async function sendOpsRichEmailAction(input: {
   cc: string[];
   subject: string;
   body: RichTextDoc;
+  fromKey?: string;
   attachments: { filename: string; contentBase64: string }[];
 }): Promise<OpsRichEmailResult> {
   const { user, sessionUser } = await getPlatformSession();
@@ -39,6 +41,9 @@ export async function sendOpsRichEmailAction(input: {
   const subject = input.subject.trim();
   if (!subject) return { ok: false, error: "Subject is required." };
   if (!docHasContent(input.body)) return { ok: false, error: "Message is required." };
+
+  const fromResolved = resolveOpsFromAddress(actorEmail, input.fromKey);
+  if (!fromResolved.ok) return { ok: false, error: fromResolved.error };
 
   const mailbox = await loadOpsMailboxSettings(user.id);
   let bodyDoc = input.body;
@@ -70,6 +75,7 @@ export async function sendOpsRichEmailAction(input: {
     body: text,
     bodyHtml: html,
     actorEmail,
+    fromAddress: fromResolved.option.resendFrom,
     extraAttachments,
   });
 

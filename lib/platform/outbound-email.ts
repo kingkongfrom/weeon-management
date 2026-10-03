@@ -73,6 +73,27 @@ export async function listOutboundEmails(
   };
 }
 
+export async function getOutboundEmailById(
+  id: string,
+): Promise<{ ok: true; row: OutboundEmailRow } | { ok: false; reason: string }> {
+  const client = createPlatformClient();
+  const { data, error } = await client
+    .from("platform_outbound_emails")
+    .select(
+      "id, to_email, subject, body_text, actor_email, status, resend_id, error_message, label_id, created_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, reason: error.message };
+  }
+  if (!data) {
+    return { ok: false, reason: "not_found" };
+  }
+  return { ok: true, row: mapRow(data as Record<string, unknown>) };
+}
+
 export async function insertOutboundEmailLog(input: {
   actorUserId: string | null;
   actorEmail: string;

@@ -10,7 +10,8 @@ Delivery uses the same branded Weeon School HTML as invites (`lib/email/send.ts`
 | Variable | Purpose |
 | -------- | ------- |
 | `RESEND_API_KEY` | Resend API key (server-only) |
-| `RESEND_FROM` | Verified sender domain in Resend (defaults toward `Weeon School <ops@weeon.school>`) |
+| `RESEND_FROM` | Default From in compose (defaults toward `Weeon School <ops@weeon.school>`) |
+| `OPS_EMAIL_FROM_ALIASES` | Optional comma/newline list of extra **De** identities (`Name <addr@weeon.school>`). Each address must be allowed on your Resend sending domain. If unset, compose offers `RESEND_FROM`, `support@`, and `hello@`, plus the signed-in `@weeon.school` mailbox. |
 | `OPS_EMAIL_REPLY_TO` | Optional Reply-To when the signed-in user is not `@weeon.school` |
 | `NEXT_PUBLIC_DROPBOX_APP_KEY` | Dropbox Chooser (compose attachments) — same app as school ERP or a separate Dropbox app with `ops.weeon.school` origin |
 | `NEXT_PUBLIC_GOOGLE_DRIVE_CLIENT_ID` | Google OAuth client for Drive Picker |

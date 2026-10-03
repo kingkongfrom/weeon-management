@@ -1,12 +1,15 @@
 import { emptyDoc, type RichTextDoc } from "@/lib/comms/model";
 import type { InboundEmailRow } from "@/lib/platform/inbound-email";
+import type { OutboundEmailRow } from "@/lib/platform/outbound-email";
 
 export type OpsComposeInitial = {
   to: string[];
   subject: string;
   body: RichTextDoc;
   allowReplies: boolean;
-  inboundId: string;
+  /** When set, compose skips restoring a local draft. */
+  inboundId?: string;
+  outboundId?: string;
 };
 
 /** Extract bare address from `Name <user@host>` or plain email. */
@@ -86,6 +89,34 @@ export function inboundReplyComposeInitial(row: InboundEmailRow): OpsComposeInit
     allowReplies: true,
     body: buildReplyBodyDoc({
       fromDisplay: row.fromEmail.trim(),
+      sentAtLabel,
+      bodyText: row.bodyText,
+    }),
+  };
+}
+
+/** Follow-up to a recipient from a sent Ops message (Enviados). */
+export function outboundReplyComposeInitial(row: OutboundEmailRow): OpsComposeInitial | null {
+  const to = parseMailboxAddress(row.toEmail);
+  if (!to.includes("@")) return null;
+
+  const sentAtLabel = new Date(row.createdAt).toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const fromDisplay = row.actorEmail.trim() || "Weeon Ops";
+
+  return {
+    outboundId: row.id,
+    to: [to],
+    subject: replySubjectLine(row.subject),
+    allowReplies: true,
+    body: buildReplyBodyDoc({
+      fromDisplay: `${fromDisplay} → ${row.toEmail.trim()}`,
       sentAtLabel,
       bodyText: row.bodyText,
     }),

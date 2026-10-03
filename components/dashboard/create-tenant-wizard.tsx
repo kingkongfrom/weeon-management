@@ -23,6 +23,7 @@ import {
   getSchoolCountry,
   SCHOOL_COUNTRIES,
 } from "@/lib/platform/school-countries";
+import { actionButtonPrimaryClass, actionButtonSecondaryClass } from "@/lib/ui/action-button";
 
 type PreviewData = Extract<PreviewState, { status: "ok" }>["data"];
 type CreatedData = Extract<CreateDemoTenantResult, { ok: true }>;
@@ -30,10 +31,8 @@ type CreatedData = Extract<CreateDemoTenantResult, { ok: true }>;
 const FIELD =
   "h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-500 focus:ring-[3px] focus:ring-brand-500/15 disabled:cursor-not-allowed disabled:opacity-60";
 const LABEL = "text-xs font-semibold uppercase tracking-wider text-foreground/55";
-const PRIMARY =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-brand-600 bg-brand-600 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60";
-const SECONDARY =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-surface px-5 text-sm font-semibold text-foreground/70 transition-colors hover:bg-surface-muted disabled:opacity-60";
+const PRIMARY = actionButtonPrimaryClass();
+const SECONDARY = actionButtonSecondaryClass();
 
 export function CreateTenantWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1);

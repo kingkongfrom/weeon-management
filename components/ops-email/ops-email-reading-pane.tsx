@@ -97,10 +97,23 @@ export function OpsEmailReadingPane({ message }: { message: OpsMailboxMessage | 
   }
 
   const fromLabel = message.actorEmail || "Weeon Ops";
+  const replyHref = `/dashboard/email/nuevo?replySent=${encodeURIComponent(message.id)}`;
 
   return (
     <article className="min-w-[24rem] flex-1 overflow-y-auto px-6 py-5">
-      <h2 className="text-xl font-semibold text-foreground">{message.subject}</h2>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h2 className="min-w-0 flex-1 text-xl font-semibold text-foreground">{message.subject}</h2>
+        <Link
+          href={replyHref}
+          className={cn(
+            "inline-flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold",
+            opsEmailTone.primaryButton,
+          )}
+        >
+          <Reply className="h-4 w-4" />
+          {t.opsEmail.replyAction}
+        </Link>
+      </div>
 
       <div className="mt-5 flex items-start gap-3">
         <span

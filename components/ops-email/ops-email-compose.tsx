@@ -38,9 +38,23 @@ type DraftSnapshot = {
   subject: string;
   body: RichTextDoc;
   allowReplies: boolean;
+  fromKey: string;
 };
 
-export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitial | null }) {
+export type OpsFromOption = {
+  key: string;
+  label: string;
+};
+
+export function OpsEmailCompose({
+  initial = null,
+  fromOptions = [],
+  defaultFromKey = "",
+}: {
+  initial?: OpsComposeInitial | null;
+  fromOptions?: OpsFromOption[];
+  defaultFromKey?: string;
+}) {
   const t = useT();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +64,9 @@ export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitia
   const [subject, setSubject] = useState(() => initial?.subject ?? "");
   const [body, setBody] = useState<RichTextDoc>(() => initial?.body ?? emptyDoc());
   const [allowReplies, setAllowReplies] = useState(() => initial?.allowReplies ?? false);
+  const [fromKey, setFromKey] = useState(
+    () => defaultFromKey || fromOptions[0]?.key || "",
+  );
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +74,7 @@ export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitia
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initial?.inboundId) return;
+    if (initial?.inboundId || initial?.outboundId) return;
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return;
@@ -67,13 +84,31 @@ export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitia
       setSubject(draft.subject ?? "");
       setBody(draft.body ?? emptyDoc());
       setAllowReplies(draft.allowReplies ?? false);
+      if (draft.fromKey && fromOptions.some((row) => row.key === draft.fromKey)) {
+        setFromKey(draft.fromKey);
+      }
     } catch {
       /* ignore */
     }
-  }, [initial?.inboundId, initial?.body, initial?.subject, initial?.to, initial?.allowReplies]);
+  }, [
+    initial?.inboundId,
+    initial?.outboundId,
+    initial?.body,
+    initial?.subject,
+    initial?.to,
+    initial?.allowReplies,
+    fromOptions,
+  ]);
 
   function saveDraftLocal() {
-    const snap: DraftSnapshot = { to: toEmails, cc: ccEmails, subject, body, allowReplies };
+    const snap: DraftSnapshot = {
+      to: toEmails,
+      cc: ccEmails,
+      subject,
+      body,
+      allowReplies,
+      fromKey,
+    };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
     setNotice(t.opsEmail.draftSaved);
     window.setTimeout(() => setNotice(null), 2500);
@@ -127,6 +162,7 @@ export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitia
       cc: ccEmails,
       subject,
       body,
+      fromKey,
       attachments,
     });
 
@@ -190,6 +226,26 @@ export function OpsEmailCompose({ initial = null }: { initial?: OpsComposeInitia
         </div>
 
         <div className="flex flex-col gap-0 px-4 py-4">
+          {fromOptions.length > 0 ? (
+            <label className="flex flex-wrap items-center gap-3 border-b border-border py-3">
+              <span className="w-16 shrink-0 text-sm font-semibold text-foreground/55">
+                {t.opsEmail.fromField}
+              </span>
+              <select
+                value={fromKey}
+                onChange={(event) => setFromKey(event.target.value)}
+                disabled={sending}
+                className={cn(inputClass, "max-w-full flex-1 cursor-pointer")}
+              >
+                {fromOptions.map((row) => (
+                  <option key={row.key} value={row.key}>
+                    {row.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
           <RecipientRow
             label={t.opsEmail.toField}
             actionLabel={t.opsEmail.addRecipient}

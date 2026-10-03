@@ -74,7 +74,14 @@ export function brandedLetterHtml(input: {
   footer: string;
 }): string {
   const title = escapeHtml(input.title);
-  const footer = escapeHtml(input.footer);
+  const footer = input.footer.trim();
+  const footerRow = footer
+    ? `<tr>
+              <td style="padding:4px 28px 28px;">
+                <p style="margin:0;color:#8b949e;font-size:13px;line-height:1.5;">${escapeHtml(footer)}</p>
+              </td>
+            </tr>`
+    : "";
   return `<!doctype html>
 <html lang="es">
   <body style="margin:0;padding:0;background-color:#f6f7f9;font-family:Arial,Helvetica,sans-serif;">
@@ -93,15 +100,11 @@ export function brandedLetterHtml(input: {
               </td>
             </tr>
             <tr>
-              <td style="padding:4px 28px 16px;">
+              <td style="padding:4px 28px ${footer ? "16px" : "28px"};">
                 ${input.introHtml}
               </td>
             </tr>
-            <tr>
-              <td style="padding:4px 28px 28px;">
-                <p style="margin:0;color:#8b949e;font-size:13px;line-height:1.5;">${footer}</p>
-              </td>
-            </tr>
+            ${footerRow}
           </table>
         </td>
       </tr>
