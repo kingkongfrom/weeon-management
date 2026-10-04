@@ -37,18 +37,19 @@ If a sibling still says “three repos” or “platform admin is planned”, pr
                     service-role, cross-tenant
 ```
 
-Commercial path (from `weeon-tenants/docs/lifecycle.md` +
-`weeon-marketing/docs/trial-request-flow.md`):
+Commercial path (canonical: [`../../docs/onboarding-commercial.md`](../../docs/onboarding-commercial.md)):
 
-1. Marketing collects Código SABER + institutional email.
-2. Auto-approve verifies inbox (`/verify`), then sends the person to
-   `app.weeon.school/complete-signup` to set a **school admin** password.
-3. `weeon-tenants` creates a **new tenant** + `profiles.role = 'admin'`.
-4. 14-day trial → GreenPay → provision teachers/students/parents.
-5. Those end users set passwords in **weeon-mobile-apps** (mobile), not here.
+1. Sales: live guided demo + video call.
+2. **This console** creates tenant + school admin (`/dashboard/onboarding`).
+3. Admin first password on `app.weeon.school` → demo sandbox ERP.
+4. Payment / activation → `active` (ONVO target; tasks in
+   [`../../docs/product-roadmap-backlog.md`](../../docs/product-roadmap-backlog.md)).
+5. Roster Auth provisioning after `active` → **`weeon-mobile`** / **`weeon-teachers`**.
 
-This console never implements that funnel. It **observes** the result:
-tenants, trial/paid status, school-admin contacts, backups, audit.
+Legacy trial funnel: archive only (`weeon-marketing/docs/trial-request-flow.md`).
+
+This console **creates** demo tenants and **observes** health: status, seats,
+school-admin contacts, backups, audit.
 
 ## Who authenticates where
 

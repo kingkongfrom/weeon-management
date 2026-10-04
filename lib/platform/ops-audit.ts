@@ -13,7 +13,8 @@ export type TenantOpsAction =
   | "status.suspend"
   | "status.reactivate"
   | "status.past_due"
-  | "status.active";
+  | "status.active"
+  | "demo.extended";
 
 export type OpsAuditActor = {
   userId: string;

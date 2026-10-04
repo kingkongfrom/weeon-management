@@ -42,6 +42,7 @@ export interface Tenant {
   greenpay_subscription_id: string | null;
   trial_started_at: string | null;
   trial_ends_at: string | null;
+  demo_ends_at: string | null;
   paid_at: string | null;
   paid_until: string | null;
   /** Why the school is suspended: "delinquency" | "manual" (null when not). */
@@ -213,6 +214,20 @@ export function formatTrialEndsHint(trialEndsAt: string | null): string | undefi
   if (days < 0) return "Trial expired";
   if (days === 0) return "Ends today";
   return `${days} day${days === 1 ? "" : "s"} left`;
+}
+
+export function demoDaysRemaining(demoEndsAt: string | null): number | null {
+  if (!demoEndsAt) return null;
+  const ms = new Date(demoEndsAt).getTime() - Date.now();
+  return Math.ceil(ms / 86_400_000);
+}
+
+export function formatDemoEndsHint(demoEndsAt: string | null): string | undefined {
+  const days = demoDaysRemaining(demoEndsAt);
+  if (days === null) return undefined;
+  if (days < 0) return "Demo expired";
+  if (days === 0) return "Demo ends today";
+  return `${days} day${days === 1 ? "" : "s"} left in demo`;
 }
 
 /** Primary, secondary, etc. from `settings.educationLevels` and `settings.schoolOffer`. */

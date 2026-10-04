@@ -26,7 +26,12 @@ shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS)
 | `docs/architecture.md` | Stack, routes, Supabase clients, **platform vs tenant authorization** |
 | `docs/data-model.md` | **Live shared schema** — `tenants`, `profiles`, roster tables; compute users-per-tenant & stats correctly |
 | `docs/metrics.md` | The specific metrics the console exposes and how to source them |
-| `docs/lifecycle.md` | Tenant lifecycle & subscription signals (trial/active/past_due/suspended, seats) |
+| `../docs/onboarding-commercial.md` | **Guided demo onboarding requirements** (canonical, workspace) |
+| `docs/provisioning.md` | **Ops create school + admin** after sales demo |
+| `docs/lifecycle.md` | Tenant lifecycle & subscription signals (demo/active/past_due/suspended, seats) |
+| `docs/addon-parent-payments.md` | **Cobros en línea** add-on toggle; ONVO school onboarding (not GreenPay secrets in Ops) |
+| `weeon-tenants/docs/finance-module.md` | Finance scope (cross-repo product spec) |
+| `weeon-tenants/docs/payments-rails.md` | SaaS vs parent payment providers |
 | `docs/audit-log.md` | Platform-internal audit tables (`tenant_backups`, `tenant_restore_log`, `tenant_admin_log`, …) |
 | `docs/security.md` | Secret handling & platform-scope authorization (read before wiring credentials) |
 | `README.md` | Status, run/verify commands, project structure |

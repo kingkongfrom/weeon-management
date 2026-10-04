@@ -53,6 +53,11 @@ const ACTION_META: Record<string, ActionMeta> = {
     icon: <CirclePlay size={14} />,
     tone: "bg-success-subtle text-success",
   },
+  "demo.extended": {
+    label: "Demo window extended",
+    icon: <History size={14} />,
+    tone: "bg-icon-accent-bg text-icon-accent-fg",
+  },
 };
 
 function metaFor(action: string): ActionMeta {

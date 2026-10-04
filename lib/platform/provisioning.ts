@@ -99,6 +99,25 @@ export async function addSchoolAdministrator(
   );
 }
 
+export type ExtendDemoWindowInput = {
+  tenantId: string;
+  extraDays: number;
+};
+
+export type ExtendDemoWindowResult =
+  | {
+      ok: true;
+      demoEndsAt: string;
+      previousDemoEndsAt: string | null;
+    }
+  | ProvisioningUnavailable;
+
+export async function extendDemoWindow(
+  input: ExtendDemoWindowInput,
+): Promise<ExtendDemoWindowResult> {
+  return post<ExtendDemoWindowResult>("/api/ops/schools/demo-window", input);
+}
+
 /** Generic, user-safe failure text; technical detail stays on the server. */
 const GENERIC_FAILURE =
   "No pudimos completar la operación. Intente de nuevo en unos minutos.";

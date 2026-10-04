@@ -1,13 +1,16 @@
 # School provisioning (guided demo)
 
-*How Weeon Ops creates a school space and its administrator account. This
-replaces the retired self-serve trial funnel.*
+*How Weeon Ops creates a school space and its administrator account after a
+**live demo and video call**. This replaces the retired self-serve trial funnel.*
+
+**Product requirements:** **`docs/onboarding-commercial.md`** (workspace root).
 
 ## One line
 
-Ops creates the tenant + admin from the **Onboarding** sidebar item
-(`/dashboard/onboarding`); the tenant runs in `demo` for 3 days; the admin sets
-a password on first login.
+Sales runs a guided demo; Ops creates the tenant + admin from **Onboarding**
+(`/dashboard/onboarding`); the tenant runs in **`demo`** (default **3 days**,
+extendable); the admin sets a password on first login; **payment → `active`**
+starts roster Auth provisioning at scale.
 
 ## Ownership
 
@@ -67,13 +70,27 @@ The school ERP **cannot create its own admins** (the invite flow was removed; se
   `components/dashboard/remove-administrator.tsx`.
 - The school's `/dashboard/safety` shows a **read-only** administrators list.
 
+## Sales handoff (before Ops clicks Create)
+
+On the **video call**, align and record (Ops notes / CRM):
+
+- **Plan** and **`billing_seats`**
+- **Core modules** (always on) vs **add-ons** (e.g. `parent_payments`) — toggled in Ops
+- **Default expectation:** continuation + **activation** after demo, not a public trial
+- **Demo length:** default 3 days; extend **`demo_ends_at`** when junta/director needs
+  **7–14 days** total
+- **Pilot:** only if capped mobile/grupo proof is required before pay — see
+  `docs/onboarding-commercial.md`
+
 ## Access & expiry
 
 - `demo` → `full` until `demo_ends_at`, then `read_only`.
 - `demo_expired` → `read_only` until the tenant is activated (paid → `active`).
 - The daily cron calls `sync_tenant_demo_statuses()` to flip the label; access is
   date-derived so it is correct even before the cron runs.
-- Demos send **no** reminder emails.
+- Demos send **no** reminder emails (unlike legacy `trial` reminders).
+- Ops may **extend `demo_ends_at`** for evaluation; avoid indefinite free ERP without
+  a convert-or-close decision.
 
 ## Configuration
 

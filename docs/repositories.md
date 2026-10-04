@@ -64,7 +64,7 @@ All school apps use **one Supabase project**:
 
 | Want to build… | Goes in |
 | -------------- | ------- |
-| Public pages, trial request funnel | `weeon-marketing` |
+| Public pages, contact / demo booking | `weeon-marketing` (no live trial funnel) |
 | School admin UI for one tenant (ERP, people, classes, calendar, settings) | `weeon-tenants` |
 | Teacher / student / parent **mobile** screens | `weeon-mobile-apps` |
 | Teacher **web** reports | `weeon-teachers` |

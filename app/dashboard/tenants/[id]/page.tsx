@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { TenantDetailSkeleton } from "@/components/dashboard/skeleton";
 import { AdministratorsCard } from "@/components/dashboard/administrators-card";
+import { DemoWindowCard } from "@/components/dashboard/demo-window-card";
 import { SchoolStatusControl } from "@/components/dashboard/school-status-control";
 import { ModuleListCard } from "@/components/dashboard/module-list-card";
 import { OpsAuditCard } from "@/components/dashboard/ops-audit-card";
@@ -31,6 +32,7 @@ import type { TenantBackupStatus } from "@/lib/dashboard/backup-alerts";
 import {
   formatTenantDate,
   formatTenantTimestamp,
+  formatDemoEndsHint,
   formatTrialEndsHint,
   resolveAcademicYearLabel,
   resolveBillingSeats,
@@ -96,9 +98,12 @@ async function SchoolDetailContent({
   ]);
 
   const isTrial = tenant.status === "trial";
+  const isDemo =
+    tenant.status === "demo" || tenant.status === "demo_expired";
   const billingSeats = resolveBillingSeats(tenant);
   const trialDays = trialDaysRemaining(tenant.trial_ends_at);
   const trialUrgent = isTrial && trialDays !== null && trialDays <= 3;
+  const demoHint = formatDemoEndsHint(tenant.demo_ends_at);
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -143,6 +148,13 @@ async function SchoolDetailContent({
                   icon={<CreditCard size={15} />}
                   tone="brand"
                 >
+                  {isDemo ? (
+                    <Fact
+                      label="Demo ends"
+                      value={formatTenantDate(tenant.demo_ends_at)}
+                      hint={demoHint}
+                    />
+                  ) : null}
                   {isTrial ? (
                     <Fact
                       label="Trial ends"
@@ -217,6 +229,13 @@ async function SchoolDetailContent({
                     value={formatTenantDate(tenant.created_at)}
                   />
                 </FactPanel>
+
+                <DemoWindowCard
+                  tenantId={tenant.id}
+                  status={tenant.status}
+                  demoEndsAt={tenant.demo_ends_at}
+                  demoHint={demoHint}
+                />
 
                 <SectionCard
                   title="Danger zone"

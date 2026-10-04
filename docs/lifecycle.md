@@ -74,17 +74,22 @@ restorative and stays one click.
 
 ## Commercial path (context)
 
-1. Prospect books a **guided demo**; Weeon Ops creates the school space and the
-   administrator account from the demo wizard
-   (`/dashboard/onboarding`) via the tenants-owned provisioning API.
-2. The tenant starts in `demo` (full access) for **3 days** (`demo_ends_at`).
-   The administrator sets their password on first login.
-3. If the school pays before the window closes, the tenant becomes `active`
-   with seats. Otherwise it becomes `demo_expired` (**read-only**).
-4. Ongoing billing: renewal charges â†’ `past_due` on failure â†’ grace â†’ `suspended`.
+Canonical requirements: **`docs/onboarding-commercial.md`**.
 
-The console now **creates** demo tenants (and can reclaim them); lifecycle
-*state transitions* beyond creation still live in `weeon-tenants` / payment.
+1. Prospect gets a **live demo + video call**; plan, modules, add-ons, and seats
+   are discussed on the call (no self-serve trial signup).
+2. Weeon Ops creates the school space and administrator from
+   `/dashboard/onboarding` via the tenants-owned provisioning API.
+3. Tenant starts **`demo`** (full access), default **`demo_ends_at = now + 3 days`**
+   (Ops may extend for junta/director time). Admin sets password on first ERP login.
+4. **Default:** school **activates** (payment → **`active`**). If the clock passes
+   first, tenant becomes **`demo_expired`** (**read-only**) while negotiating.
+5. Optional **pilot** — capped proof before pay; roster bulk Auth still defaults to
+   post-`active` unless Ops seeds manually.
+6. Ongoing billing: renewal → `past_due` on failure → grace → `suspended`.
+
+The console **creates** demo tenants; payment-driven **`active`** transitions live
+in `weeon-tenants` / ONVO (GreenPay legacy in code).
 
 ## Seat & user accounting
 
@@ -96,6 +101,7 @@ The console now **creates** demo tenants (and can reclaim them); lifecycle
 ## Reading for health dashboards
 
 A good health view buckets tenants: **healthy** (`active`), **nurturing**
-(`trial`, expiring N days), **needs attention** (`past_due`), **at risk**
+(`demo`, expiring N days on `demo_ends_at`; legacy `trial` if any), **needs attention**
+(`demo_expired`, `past_due`), **at risk**
 (`suspended`, or no recent backup). Aggregation (additive view/RPC in
 `weeon-tenants`) computing these buckets from one query is preferred.
