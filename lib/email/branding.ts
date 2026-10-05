@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { WEEON_LETTER_WORDMARK_CID } from "@/lib/email/letter";
 
 /**
  * Inline attachment id for the **company** wordmark in transactional email HTML.
@@ -9,7 +10,7 @@ import { join } from "node:path";
  * Email is customer-facing, so it always carries the company brand
  * ("Weeon School"), never a console surface label such as "Ops".
  */
-export const WEEON_EMAIL_LOGO_CID = "weeon-school-logo";
+export const WEEON_EMAIL_LOGO_CID = WEEON_LETTER_WORDMARK_CID;
 
 /**
  * Public URL for the wordmark, for clients that block inline attachments.
@@ -24,9 +25,9 @@ export function weeonEmailLogoUrl(): string {
 }
 
 /** Loads the company wordmark as a Resend inline attachment.
- *  PNG is a Playwright raster of `EmailBrandLogo` (`components/email-brand-logo.tsx`),
- *  which is intentionally separate from the console `Logo`.
- *  Read from disk each send so `npm run render:email-logo` updates apply without restart. */
+ *  Transparent PNG: Weeon in #2b59ff, smile, School in white at medium weight,
+ *  so it sits on the navy header. Same artwork as weeon-tenants/public/email/logo-wordmark.png.
+ *  Read from disk each send so a replaced file applies without restart. */
 export async function loadWeeonEmailLogoAttachment(): Promise<{
   filename: string;
   content: Buffer;

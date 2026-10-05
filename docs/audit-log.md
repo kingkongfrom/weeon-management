@@ -103,7 +103,7 @@ it as a live onboarding signal — historical rows only.
   `created_at desc`.
 - Never surface `payload` JSON blobs wholesale in the UI unless on an explicit
   detail view.
-- Tag data labeled clearly: **backups**, **audit/ops log**, **trial funnel**.
+- Tag data labeled clearly: **backups**, **audit/ops log**, **demo provisioning**.
 
 ## Verification checklist for agents
 

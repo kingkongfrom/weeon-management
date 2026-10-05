@@ -182,7 +182,7 @@ Related schema additions from the same period (owned by `weeon-tenants`):
 1. Confirm schema against `weeon-tenants` before relying on or summing a column.
 2. All console reads are **platform scope** (service-role, server-only).
 3. Do not create or alter schema here; additively extend in `weeon-tenants` while
-   keeping `weeon-mobile-apps` mobile working.
+   keeping `weeon-mobile` mobile working.
 
 ## Verified against the live database — 2026-09-10
 

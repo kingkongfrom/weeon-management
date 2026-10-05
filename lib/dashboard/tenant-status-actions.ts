@@ -10,6 +10,7 @@ import {
 import { writeTenantOpsAudit, type TenantOpsAction } from "@/lib/platform/ops-audit";
 import { sendSchoolSuspensionEmail } from "@/lib/email/suspension-email";
 import { listTenantAdmins } from "@/lib/platform/metrics";
+import { provisionSchoolRoster } from "@/lib/platform/provisioning";
 
 export type TenantStatusActionState = { ok?: string; error?: string } | null;
 
@@ -86,6 +87,18 @@ export async function setTenantStatusAction(
     }
   }
 
+  let rosterNote = "";
+  if (result.status === "active" && result.previousStatus !== "active") {
+    const roster = await provisionSchoolRoster(tenantId);
+    if (!roster.ok) {
+      rosterNote = ` Roster logins were not prepared: ${roster.error}`;
+    } else if (roster.errors.length > 0) {
+      rosterNote = ` Roster logins prepared with ${roster.errors.length} error(s). ${roster.emailed} welcome email(s) sent.`;
+    } else {
+      rosterNote = ` Roster logins prepared. ${roster.emailed} welcome email(s) sent.`;
+    }
+  }
+
   revalidatePath(`/dashboard/tenants/${tenantId}`);
   revalidatePath("/dashboard/tenants");
   return {
@@ -94,6 +107,6 @@ export async function setTenantStatusAction(
         ? `School suspended (${result.suspendReason === "manual" ? "manual hold" : "payment hold"}).${emailNote}`
         : action === "mark_past_due"
           ? "School marked past due."
-          : "School reactivated.",
+          : `School reactivated.${rosterNote}`,
   };
 }

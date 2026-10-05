@@ -11,10 +11,10 @@ but at different scopes. Workspace map: `../AGENTS.md`.
 
 | Repo | URL | Surface | Audience | Scope | Stack |
 | ---- | --- | ------- | -------- | ----- | ----- |
-| **weeon-marketing** | https://github.com/kingkongfrom/weeon-marketing | Public site + trial funnel (`https://weeon.school`) | Prospects | Public | Next.js 16 |
+| **weeon-marketing** | https://github.com/kingkongfrom/weeon-marketing | Public site + demo booking (`https://weeon.school`) | Prospects | Public | Next.js 16 |
 | **weeon-tenants** | https://github.com/kingkongfrom/weeon-tenants | School web admin / ERP (`https://app.weeon.school`) | School administrators (one tenant) | Tenant-scoped RLS | Next.js 16 |
-| **weeon-mobile-apps** | https://github.com/kingkongfrom/weeon-mobile-apps | Mobile apps — teachers, students, parents | End users | Tenant-scoped RLS via end-user auth | Flutter |
-| **weeon-teachers** | https://github.com/kingkongfrom/weeon-teachers | Teacher web — reports / desktop | Teachers | Tenant-scoped RLS (when wired) | Next.js 16 |
+| **weeon-mobile** | https://github.com/kingkongfrom/weeon-mobile | Mobile apps — teachers, students, parents | End users | Tenant-scoped RLS | Expo / React Native |
+| **weeon-teachers** | https://github.com/kingkongfrom/weeon-teachers | Teacher web (`https://teachers.weeon.school`) | Teachers | Tenant-scoped RLS | Next.js 16 |
 | **weeon-management** | https://github.com/kingkongfrom/weeon-management | **Internal ops console** (`https://ops.weeon.school`) | **Weeon staff** | **Cross-tenant (platform)** | Next.js 16 |
 
 This `docs/repositories.md` lives in **`weeon-management`**, the platform ops
@@ -53,9 +53,9 @@ All school apps use **one Supabase project**:
 - The Supabase **schema is owned by `weeon-tenants`**. Confirm any table/column /
   RLS work against `weeon-tenants` self `lib/supabase/database.types.ts` and
   `supabase/migrations/` — never against stale local copies.
-- `weeon-mobile-apps` (Flutter / mobile) shares that schema and RLS. Any schema/RLS
+- `weeon-mobile` (Expo) shares that schema and RLS. Any schema/RLS
   change made anywhere must be **additive** and must not break the mobile app.
-- **RLS is tenant-scoped.** `weeon-tenants` and `weeon-mobile-apps` read through
+- **RLS is tenant-scoped.** `weeon-tenants` and `weeon-mobile` read through
   tenant-scoped RLS. `weeon-management` is the **exception**: it is the platform
   surface and reads **across** tenants via the **server-only service-role
   client**. It never relies on tenant-scoped RLS for its own views.
@@ -66,7 +66,7 @@ All school apps use **one Supabase project**:
 | -------------- | ------- |
 | Public pages, contact / demo booking | `weeon-marketing` (no live trial funnel) |
 | School admin UI for one tenant (ERP, people, classes, calendar, settings) | `weeon-tenants` |
-| Teacher / student / parent **mobile** screens | `weeon-mobile-apps` |
+| Teacher / student / parent **mobile** screens | `weeon-mobile` |
 | Teacher **web** reports | `weeon-teachers` |
 | Cross-tenant dashboards, tenant/user-per-tenant stats, platform audit UI, org-level health | **`weeon-management`** (this repo) |
 | Schema / RLS / Auth change | Additive, in `weeon-tenants`, safe for mobile and teacher web |

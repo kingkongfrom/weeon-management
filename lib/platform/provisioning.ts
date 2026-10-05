@@ -118,6 +118,26 @@ export async function extendDemoWindow(
   return post<ExtendDemoWindowResult>("/api/ops/schools/demo-window", input);
 }
 
+export type ProvisionSchoolRosterResult =
+  | {
+      ok: true;
+      created: number;
+      linked: number;
+      emailed: number;
+      offline: number;
+      errors: string[];
+    }
+  | ProvisioningUnavailable;
+
+/** Ask the school ERP to open roster logins after a school becomes active. */
+export async function provisionSchoolRoster(
+  tenantId: string,
+): Promise<ProvisionSchoolRosterResult> {
+  return post<ProvisionSchoolRosterResult>("/api/ops/schools/provision-roster", {
+    tenantId,
+  });
+}
+
 /** Generic, user-safe failure text; technical detail stays on the server. */
 const GENERIC_FAILURE =
   "No pudimos completar la operación. Intente de nuevo en unos minutos.";

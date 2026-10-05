@@ -46,7 +46,7 @@ Two clients exist — keep them separate.
 
 ### Platform-scope reads (why service-role, but carefully)
 
-`weeon-tenants` and `weeon-mobile-apps` read one school each through tenant-scoped RLS.
+`weeon-tenants` and `weeon-mobile` read one school each through tenant-scoped RLS.
 `weeon-management` must see **all** schools, so it cannot use tenant RLS. It uses
 the **server-only service-role client** (`lib/supabase/platform.ts`).
 

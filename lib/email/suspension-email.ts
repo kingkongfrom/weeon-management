@@ -30,18 +30,18 @@ export function buildSchoolSuspensionEmail(input: {
     ? "Pago pendiente — acceso de Weeon School"
     : "Acceso en pausa — Weeon School";
 
-  const paymentIntro = `<p style="margin:0;color:#57606a;font-size:15px;line-height:1.5;">
+  const paymentIntro = `<p style="margin:0;color:#3a4360;font-size:15px;line-height:1.6;">
       La suscripción de su institución tiene un <strong>pago pendiente</strong>.
       ${readOnlyLine}
     </p>
-    <p style="margin:14px 0 0;color:#57606a;font-size:15px;line-height:1.5;">
+    <p style="margin:14px 0 0;color:#3a4360;font-size:15px;line-height:1.6;">
       Realice el pago para restablecer el acceso completo al panel.
     </p>`;
 
-  const manualIntro = `<p style="margin:0;color:#57606a;font-size:15px;line-height:1.5;">
+  const manualIntro = `<p style="margin:0;color:#3a4360;font-size:15px;line-height:1.6;">
       El acceso de su institución al panel quedó <strong>en pausa</strong> por parte del equipo de Weeon.
     </p>
-    <p style="margin:14px 0 0;color:#57606a;font-size:15px;line-height:1.5;">
+    <p style="margin:14px 0 0;color:#3a4360;font-size:15px;line-height:1.6;">
       Comuníquese con soporte para revisar el estado de su cuenta y restablecer el acceso.
     </p>`;
 
@@ -54,7 +54,7 @@ export function buildSchoolSuspensionEmail(input: {
     text: brandedEmailText(
       delinquency
         ? [
-            "Estimados administradores de la institución:",
+            "Hola.",
             "",
             "La suscripción de su institución tiene un pago pendiente.",
             readOnlyLinePlain(input.readOnlyAt),
@@ -64,7 +64,7 @@ export function buildSchoolSuspensionEmail(input: {
             footer,
           ]
         : [
-            "Estimados administradores de la institución:",
+            "Hola.",
             "",
             "El acceso de su institución al panel quedó en pausa por parte del equipo de Weeon.",
             "",
@@ -74,7 +74,9 @@ export function buildSchoolSuspensionEmail(input: {
           ],
     ),
     html: brandedEmailHtml({
-      title: subject,
+      lang: "es",
+      title: delinquency ? "Pago pendiente" : "Acceso en pausa",
+      greeting: "Hola.",
       intro: delinquency ? paymentIntro : manualIntro,
       buttonLabel: delinquency ? "Ir a facturación" : "Contactar a soporte",
       buttonUrl: delinquency
@@ -82,7 +84,7 @@ export function buildSchoolSuspensionEmail(input: {
           ? `${process.env.WEEON_APP_ORIGIN.replace(/\/$/, "")}/dashboard/billing`
           : "https://app.weeon.school/dashboard/billing"
         : `mailto:${SUPPORT_EMAIL}`,
-      footer: escapeHtml(footer),
+      footer,
     }),
   };
 }

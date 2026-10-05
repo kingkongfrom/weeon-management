@@ -56,9 +56,10 @@ Only the owner can invite. Domain must be `@weeon.school`.
    possible. Shared Auth means the same email may already exist as a school
    user — that is **not** enough; they still need an ops invite + accept.
 4. A single-use token is stored in `data/ops-staff.json`.
-5. **Resend** sends a Weeon-branded invite (`lib/email/invite-email.ts`) from
-   `RESEND_FROM` with the Weeon Ops wordmark — a PNG raster of the real `Logo`
-   component (`npm run render:email-logo`; requires Playwright Chromium once).
+5. **Resend** sends a Weeon School invite (`lib/email/invite-email.ts`) from
+   `RESEND_FROM`. The letter uses the same navy header and company wordmark as
+   the school mail (`public/email/logo-wordmark.png`). It does not say Ops in
+   the logo.
 6. Link: `{origin}/accept-invite?token=…` (7 days). Origin from
    `WEEON_OPS_ORIGIN` / request Host (`lib/auth/ops-origin.ts`).
 7. `/accept-invite` sets the password via the service-role Auth admin API,

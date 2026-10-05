@@ -3,7 +3,7 @@
 *Business rules that explain `tenants.status`, `tenants.plan`, trial dates,
 billing seats, and how the ops console should read them. Source of truth for
 behavior lives in the sibling repos (`weeon-tenants` / `weeon-marketing` /
-`weeon-mobile-apps` plans and `docs`).*
+`weeon-mobile` plans and `docs`).*
 
 ## One line
 

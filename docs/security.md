@@ -4,7 +4,7 @@
 
 ## Core fact: RLS is tenant-scoped; we are the platform exception
 
-`weeon-tenants` and `weeon-mobile-apps` read one school through RLS. **`weeon-management`
+`weeon-tenants` and `weeon-mobile` read one school through RLS. **`weeon-management`
 reads across all tenants**, so it cannot use tenant-scoped RLS and instead uses
 the **service-role key server-only**. That is powerful and dangerous — treat this
 repo as an **ops credential surface**.

@@ -14,7 +14,7 @@ run efficiently.
 It is **one of five repositories** that make up the product — see
 `docs/repositories.md` and the workspace map `../AGENTS.md`. We read the same
 shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS).
-`weeon-teachers` is the teacher web scaffold; do not build it here.
+`weeon-teachers` is the live teacher web app; do not build it here.
 
 ## Must-read docs (in order)
 
@@ -46,7 +46,7 @@ columns or tables.
 1. **You are in `weeon-management` — the internal ops console.** Do **not**
    build school-ERP admin UI here (that belongs in `weeon-tenants`), public
    marketing pages (that belongs in `weeon-marketing`), mobile screens
-   (that belongs in `weeon-mobile-apps`), or teacher-web reports
+   (that belongs in `weeon-mobile`), or teacher-web reports
    (that belongs in `weeon-teachers`). See `docs/repositories.md`.
    **Weeon Ops staff ≠ tenant school admins.** Security → Administrators is
    the ops directory (`docs/auth.md`), never `public.profiles`.
@@ -55,7 +55,7 @@ columns or tables.
    path or the anon client, and **never** expose the service-role key or gated
    data to the browser.
 3. **The shared schema is owned by `weeon-tenants`.** Any schema/RLS change must
-   be **additive** and made there, and must not break `weeon-mobile-apps` mobile.
+   be **additive** and made there, and must not break `weeon-mobile` mobile.
    Do not create conflicting columns/tables in this repo.
 4. **RLS is tenant-scoped.** A single school is one tenant; schools never mix.
    Uniqueness is `(tenant_id, …)`. `tenants.saber_code` is the one

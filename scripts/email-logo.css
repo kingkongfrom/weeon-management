@@ -94,6 +94,14 @@ body {
   font-weight: 700;
 }
 
+#capture .font-medium {
+  font-weight: 500;
+}
+
+#capture .text-white {
+  color: #ffffff;
+}
+
 #capture .pointer-events-none {
   pointer-events: none;
 }

@@ -3,7 +3,8 @@
 Weeon Management sends **real email** through [Resend](https://resend.com). The
 UI mirrors tenant/teacher **Comunicación → Mensajes** (folder sidebar, sent list,
 reading pane). Compose at `/dashboard/email/nuevo`; sent log at `/dashboard/email`.
-Delivery uses the same branded Weeon School HTML as invites (`lib/email/send.ts`).
+Delivery uses the same Weeon School letter as invites and the school app:
+navy header and `public/email/logo-wordmark.png` (`lib/email/letter.ts`).
 
 ## Requirements
 

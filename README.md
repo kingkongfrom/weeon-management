@@ -17,9 +17,9 @@ stats, and the health/subscription signals the team needs to run efficiently.
 | Repo | URL | Role / surface | Stack |
 | ---- | --- | -------------- | ----- |
 | [`weeon-management`](https://github.com/kingkongfrom/weeon-management) | **This repo** | Internal ops console — tenants, users per tenant, tenant stats, subscription health (`ops.weeon.school`) | Next.js |
-| [`weeon-marketing`](https://github.com/kingkongfrom/weeon-marketing) | Public marketing site & trial funnel (`weeon.school`) | Next.js |
+| [`weeon-marketing`](https://github.com/kingkongfrom/weeon-marketing) | Public site and live-demo booking (`weeon.school`) | Next.js |
 | [`weeon-tenants`](https://github.com/kingkongfrom/weeon-tenants) | School web admin / ERP for **one tenant** (`app.weeon.school`) | Next.js |
-| [`weeon-mobile-apps`](https://github.com/kingkongfrom/weeon-mobile-apps) | Mobile apps for teachers, students, parents (Android + iOS) | Flutter |
+| [`weeon-mobile`](https://github.com/kingkongfrom/weeon-mobile) | Mobile apps for teachers, students, parents (Android + iOS) | Expo |
 | [`weeon-teachers`](https://github.com/kingkongfrom/weeon-teachers) | Teacher web — reports / desktop | Next.js |
 
 Full repo boundaries and what each app owns: [`docs/repositories.md`](docs/repositories.md).

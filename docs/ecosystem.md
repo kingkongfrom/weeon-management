@@ -10,8 +10,8 @@ Read sibling sources when a change crosses a boundary; do not copy their UI.
 | --- | --- | --- |
 | `weeon-tenants` | `docs/repositories.md`, `docs/overview.md` | Lists this repo as live ops |
 | `weeon-marketing` | `docs/repositories.md`, `docs/trial-request-flow.md` | Lists five repos including ops |
-| `weeon-mobile-apps` | Flutter app | Same Supabase schema as admin |
-| `weeon-teachers` | Teacher web scaffold | Same schema when wired; not ops |
+| `weeon-mobile` | `AGENTS.md`, `docs/` | Expo app. Same Supabase schema as admin |
+| `weeon-teachers` | `AGENTS.md`, `docs/` | Teacher web, live. Not ops |
 
 If a sibling still says “three repos” or “platform admin is planned”, prefer
 **this** `docs/` plus the Kingkongfrom workspace `../docs/`.
@@ -21,7 +21,7 @@ If a sibling still says “three repos” or “platform admin is planned”, pr
 ```
  Prospect                School admin              Teachers / students / parents
      │                         │                              │
- weeon-marketing          weeon-tenants              weeon-mobile-apps + weeon-teachers
+ weeon-marketing          weeon-tenants              weeon-mobile + weeon-teachers
  weeon.school             app.weeon.school         mobile + teacher web
  trial + verify           one-tenant ERP           roster Auth + RLS
      │                         │                              │
@@ -57,7 +57,7 @@ school-admin contacts, backups, audit.
 | --- | --- | --- |
 | Weeon staff (Eduardo, invited ops) | `ops.weeon.school` | `docs/auth.md` in **this** repo. Not `profiles`. |
 | School administrator | `app.weeon.school` | `profiles.role = 'admin'` + `tenant_id`. See `weeon-tenants/docs/auth.md` and `account-security-ops.md`. |
-| Teacher / student / parent | weeon-mobile-apps mobile | Roster `profiles` + `roster_accounts`. |
+| Teacher / student / parent | weeon-mobile mobile | Roster `profiles` + `roster_accounts`. |
 
 Shared Auth project: one email is one `auth.users` row. Eduardo can be a
 **demo-tenant school admin** (testing `weeon-tenants`) and the **ops owner**
@@ -80,7 +80,7 @@ This repo:
 - **Reads** tenants, profiles (counts + school admins), backups, trial
   requests, restore/admin logs — service-role only (`lib/supabase/platform.ts`).
 - **Does not** invent tables here. Additive schema still lands in
-  `weeon-tenants` and must stay safe for Flutter.
+  `weeon-tenants` and must stay safe for `weeon-mobile`.
 - **Writes** ops-staff invites/resets in `data/ops-staff.json` + Auth admin
   APIs. Branded mail via Resend (same pattern as admin, different origin and
   templates).

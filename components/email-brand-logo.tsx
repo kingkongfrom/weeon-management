@@ -60,7 +60,7 @@ export function EmailBrandLogo({ className = "", ...props }: HTMLAttributes<HTML
           />
         </svg>
       </span>
-      <span className="ml-1.5 font-bold tracking-tight text-[#1b2433]">School</span>
+      <span className="ml-1.5 font-medium tracking-tight text-white">School</span>
     </span>
   );
 }
