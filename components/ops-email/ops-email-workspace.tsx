@@ -18,7 +18,6 @@ import {
   Search,
   Send,
   Settings,
-  Signature,
   Star,
   Trash2,
 } from "lucide-react";
@@ -31,7 +30,6 @@ import { OpsEmailReadingPane } from "@/components/ops-email/ops-email-reading-pa
 import { OpsUnreadCountBadge } from "@/components/ops-email/ops-unread-count-badge";
 import { OpsEmailAutoReplyDialog } from "@/components/ops-email/ops-email-auto-reply-dialog";
 import { OpsEmailNewFolderDialog } from "@/components/ops-email/ops-email-new-folder-dialog";
-import { OpsEmailSignatureDialog } from "@/components/ops-email/ops-email-signature-dialog";
 import type { OpsEmailLabel } from "@/lib/platform/email-labels";
 import type { OpsMailboxSettings } from "@/lib/platform/ops-mailbox-settings";
 import { markOpsInboundReadAction } from "@/lib/dashboard/ops-inbound-email-actions";
@@ -47,6 +45,7 @@ import {
 } from "@/lib/ops-email/mailbox-message";
 
 const OPS_EMAIL = "/dashboard/email";
+const OPS_EMAIL_SETTINGS = "/dashboard/email/configuracion";
 const OPS_COMPOSE = "/dashboard/email/nuevo";
 
 function formatListTime(iso: string): string {
@@ -108,7 +107,6 @@ export function OpsEmailWorkspace({
   const [refreshing, setRefreshing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newFolderOpen, setNewFolderOpen] = useState(false);
-  const [signatureOpen, setSignatureOpen] = useState(false);
   const [autoReplyOpen, setAutoReplyOpen] = useState(false);
   const [localMailboxSettings, setLocalMailboxSettings] = useState(mailboxSettings);
   const [localLabels, setLocalLabels] = useState(labels);
@@ -417,18 +415,6 @@ export function OpsEmailWorkspace({
 
           <button
             type="button"
-            onClick={() => setSignatureOpen(true)}
-            className={cn(
-              ACTION_NAV_LINK,
-              "w-full text-foreground/70 hover:bg-surface-muted/60 hover:text-foreground",
-            )}
-          >
-            <Signature className="h-4 w-4" />
-            <span className="flex-1 text-left">{t.opsEmail.signatureTitle}</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setSettingsExpanded((current) => !current)}
             className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-foreground/70 hover:bg-surface-muted/60"
           >
@@ -443,6 +429,13 @@ export function OpsEmailWorkspace({
 
           {settingsExpanded ? (
             <div className="ml-2 flex flex-col gap-0.5 border-l border-border pl-2">
+              <Link
+                href={OPS_EMAIL_SETTINGS}
+                className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-foreground/70 transition-colors hover:bg-surface-muted/60 hover:text-foreground"
+              >
+                <PenSquare className="h-4 w-4" />
+                <span className="flex-1 text-left">{t.opsEmail.mailboxSignatureLink}</span>
+              </Link>
               <button
                 type="button"
                 onClick={() => setAutoReplyOpen(true)}
@@ -540,14 +533,6 @@ export function OpsEmailWorkspace({
         open={newFolderOpen}
         onClose={() => setNewFolderOpen(false)}
         onCreated={() => router.refresh()}
-      />
-      <OpsEmailSignatureDialog
-        open={signatureOpen}
-        settings={localMailboxSettings}
-        onClose={() => setSignatureOpen(false)}
-        onSaved={(signatureText) =>
-          setLocalMailboxSettings((current) => ({ ...current, signatureText }))
-        }
       />
       <OpsEmailAutoReplyDialog
         open={autoReplyOpen}

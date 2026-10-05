@@ -7,6 +7,7 @@ import { createOpsEmailLabel } from "@/lib/platform/email-labels";
 import { saveOpsMailboxSettings } from "@/lib/platform/ops-mailbox-settings";
 
 const OPS_EMAIL_PATH = "/dashboard/email";
+const OPS_EMAIL_SETTINGS_PATH = "/dashboard/email/configuracion";
 
 async function requireOpsActor() {
   const { user, sessionUser } = await getPlatformSession();
@@ -28,6 +29,7 @@ export async function saveOpsSignatureAction(
   });
   if (!result.ok) return result;
   revalidatePath(OPS_EMAIL_PATH);
+  revalidatePath(OPS_EMAIL_SETTINGS_PATH);
   return { ok: true };
 }
 
