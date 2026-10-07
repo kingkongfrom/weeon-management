@@ -104,7 +104,9 @@ Ops manages one school from this page. Layout, top to bottom:
     a footer band of the same card, not a separate box.
   - **Overview** — one `SectionCard` with three `DetailGroup` blocks
     (Subscription & lifecycle, Academic setup, Identity).
-  - **Activity** — `OpsAuditCard`, the `tenant_ops_audit` trail.
+  - **Activity** — `OpsAuditCard`, the `tenant_ops_audit` trail. Tab labels
+    do not show count badges (those read like unread notifications); the card
+    subtitle states how many audit rows are loaded.
 
 Shared building blocks: `components/dashboard/section-card.tsx`
 (`SectionCard`/`DetailList`/`DetailRow`), `segmented-tabs.tsx`, and the

@@ -134,9 +134,9 @@ async function SchoolDetailContent({
           initial="modules"
           tabs={[
             { id: "modules", label: "Modules", icon: <Boxes size={14} /> },
-            { id: "people", label: "People", icon: <Users size={14} />, badge: admins.length },
+            { id: "people", label: "People", icon: <Users size={14} /> },
             { id: "overview", label: "Overview", icon: <CreditCard size={14} /> },
-            { id: "activity", label: "Activity", icon: <History size={14} />, badge: audit.length || undefined },
+            { id: "activity", label: "Activity", icon: <History size={14} /> },
           ]}
           panels={{
             modules: <ModuleListCard tenantId={tenant.id} modules={modules} />,

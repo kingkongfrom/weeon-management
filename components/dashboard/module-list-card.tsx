@@ -18,6 +18,7 @@ const MODULE_ICON: Record<string, string> = {
   gallery: "❏",
   administration: "⚙",
   parent_payments: "$",
+  factura_electronica: "FE",
 };
 
 /**

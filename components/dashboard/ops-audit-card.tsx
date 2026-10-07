@@ -81,7 +81,11 @@ export function OpsAuditCard({ entries }: { entries: TenantOpsAuditEntry[] }) {
   return (
     <SectionCard
       title="Ops activity"
-      description="Every change Ops made to this school."
+      description={
+        entries.length > 0
+          ? `${entries.length} recorded ${entries.length === 1 ? "action" : "actions"} on this school.`
+          : "Every change Ops made to this school."
+      }
       icon={<History size={16} />}
       tone="brand"
     >
