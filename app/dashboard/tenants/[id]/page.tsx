@@ -2,44 +2,25 @@ import type { Metadata } from "next";
 import { Suspense, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Boxes,
-  ChevronLeft,
-  CreditCard,
-  Fingerprint,
-  GraduationCap,
-  History,
-  ShieldAlert,
-  TriangleAlert,
-  Users,
-} from "lucide-react";
+import { ChevronLeft, ShieldAlert, TriangleAlert } from "lucide-react";
 import { TenantDetailSkeleton } from "@/components/dashboard/skeleton";
 import { AdministratorsCard } from "@/components/dashboard/administrators-card";
-import { DemoWindowCard } from "@/components/dashboard/demo-window-card";
-import { SchoolStatusControl } from "@/components/dashboard/school-status-control";
+import { TenantOverviewPanel } from "@/components/dashboard/tenant-overview-panel";
 import { ModuleListCard } from "@/components/dashboard/module-list-card";
 import { OpsAuditCard } from "@/components/dashboard/ops-audit-card";
+import { SchoolActivityPanel } from "@/components/dashboard/school-activity-panel";
+import { TenantAdminLoginCard } from "@/components/dashboard/tenant-admin-login-card";
 import {
-  Fact,
-  FactPanel,
-  SectionCard,
-} from "@/components/dashboard/section-card";
-import { SegmentedWorkspace } from "@/components/dashboard/segmented-tabs";
+  parseTenantDetailSection,
+  TenantDetailNav,
+  type TenantDetailSection,
+} from "@/components/dashboard/tenant-detail-nav";
 import { TenantAvatar } from "@/components/dashboard/tenant-avatar";
-import { CopyableValue } from "@/components/ui/CopyableValue";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { TenantBackupStatus } from "@/lib/dashboard/backup-alerts";
 import {
-  formatTenantDate,
-  formatTenantTimestamp,
   formatDemoEndsHint,
   formatTrialEndsHint,
-  resolveAcademicYearLabel,
-  resolveBillingSeats,
-  resolveMemberSince,
-  resolvePrimarySchoolCycles,
-  resolveSchoolCalendarStructure,
-  resolveSecondarySchoolCycles,
   resolveTenantLogoUrl,
   trialDaysRemaining,
   type Tenant,
@@ -54,6 +35,10 @@ import {
 } from "@/lib/platform/metrics";
 import { listTenantModules } from "@/lib/platform/tenant-modules";
 import { listTenantOpsAudit } from "@/lib/platform/ops-audit";
+import { listSchoolActivity } from "@/lib/platform/school-activity";
+import { listTenantAdminLoginSignals } from "@/lib/platform/tenant-admin-auth";
+import { dashboardHubCardClass } from "@/lib/dashboard/hub-tones";
+import { cn } from "@/lib/cn";
 import { createPlatformClient } from "@/lib/supabase/platform";
 
 async function getTenant(id: string) {
@@ -79,8 +64,10 @@ export async function generateMetadata({
 
 async function SchoolDetailContent({
   params,
+  section,
 }: {
   params: Promise<{ id: string }>;
+  section: TenantDetailSection;
 }) {
   const { id } = await params;
   const tenant = await getTenant(id);
@@ -89,18 +76,18 @@ async function SchoolDetailContent({
     notFound();
   }
 
-  const [admins, backup, roster, modules, audit] = await Promise.all([
-    listTenantAdmins(id),
-    getTenantBackupStatus(id, tenant.name),
-    getTenantRosterCounts(id),
-    listTenantModules(id),
-    listTenantOpsAudit(id),
-  ]);
+  const [admins, backup, roster, modules, audit, schoolActivity, adminLogins] =
+    await Promise.all([
+      listTenantAdmins(id),
+      getTenantBackupStatus(id, tenant.name),
+      getTenantRosterCounts(id),
+      listTenantModules(id),
+      listTenantOpsAudit(id),
+      listSchoolActivity(id, { limit: 500, range: "all" }),
+      listTenantAdminLoginSignals(id),
+    ]);
 
   const isTrial = tenant.status === "trial";
-  const isDemo =
-    tenant.status === "demo" || tenant.status === "demo_expired";
-  const billingSeats = resolveBillingSeats(tenant);
   const trialDays = trialDaysRemaining(tenant.trial_ends_at);
   const trialUrgent = isTrial && trialDays !== null && trialDays <= 3;
   const demoHint = formatDemoEndsHint(tenant.demo_ends_at);
@@ -129,133 +116,26 @@ async function SchoolDetailContent({
         trialHint={formatTrialEndsHint(tenant.trial_ends_at)}
       />
 
-      <div className="dash-enter mt-6" style={{ "--enter-delay": "80ms" } as CSSProperties}>
-        <SegmentedWorkspace
-          initial="modules"
-          tabs={[
-            { id: "modules", label: "Modules", icon: <Boxes size={14} /> },
-            { id: "people", label: "People", icon: <Users size={14} /> },
-            { id: "overview", label: "Overview", icon: <CreditCard size={14} /> },
-            { id: "activity", label: "Activity", icon: <History size={14} /> },
-          ]}
-          panels={{
-            modules: <ModuleListCard tenantId={tenant.id} modules={modules} />,
-            people: <AdministratorsCard admins={admins} tenantId={tenant.id} />,
-            overview: (
-              <div className="grid gap-4 lg:grid-cols-2">
-                <FactPanel
-                  title="Subscription & lifecycle"
-                  icon={<CreditCard size={15} />}
-                  tone="brand"
-                >
-                  {isDemo ? (
-                    <Fact
-                      label="Demo ends"
-                      value={formatTenantDate(tenant.demo_ends_at)}
-                      hint={demoHint}
-                    />
-                  ) : null}
-                  {isTrial ? (
-                    <Fact
-                      label="Trial ends"
-                      value={formatTenantDate(tenant.trial_ends_at)}
-                      hint={formatTrialEndsHint(tenant.trial_ends_at)}
-                    />
-                  ) : null}
-                  <Fact
-                    label="Member since"
-                    value={resolveMemberSince(tenant)}
-                    hint={isTrial ? "Not counted during trial" : undefined}
-                  />
-                  {!isTrial ? (
-                    <Fact
-                      label="Paid until"
-                      value={formatTenantTimestamp(tenant.paid_until)}
-                    />
-                  ) : null}
-                  <Fact
-                    label="Billing seats"
-                    value={String(billingSeats)}
-                    hint={billingSeats === 0 ? "Set on payment" : undefined}
-                  />
-                  <Fact label="Plan" value={tenant.plan ?? "—"} />
-                </FactPanel>
-
-                <FactPanel
-                  title="Academic setup"
-                  icon={<GraduationCap size={15} />}
-                  tone="accent"
-                >
-                  <Fact
-                    label="School calendar"
-                    value={resolveSchoolCalendarStructure(tenant.settings)}
-                  />
-                  <Fact
-                    label="Academic year"
-                    value={resolveAcademicYearLabel(tenant.settings)}
-                  />
-                  <Fact
-                    label="Primary school"
-                    value={resolvePrimarySchoolCycles(tenant.settings)}
-                  />
-                  <Fact
-                    label="Secondary school"
-                    value={resolveSecondarySchoolCycles(tenant.settings)}
-                  />
-                </FactPanel>
-
-                <FactPanel
-                  title="Identity"
-                  icon={<Fingerprint size={15} />}
-                  tone="brand"
-                  className="lg:col-span-2"
-                >
-                  <Fact
-                    label="Código SABER"
-                    value={
-                      tenant.saber_code ? (
-                        <CopyableValue value={tenant.saber_code} label="Código SABER" />
-                      ) : (
-                        "—"
-                      )
-                    }
-                  />
-                  <Fact
-                    label="Tenant ID"
-                    value={<CopyableValue value={tenant.id} label="tenant ID" mono />}
-                  />
-                  <Fact
-                    label="Created"
-                    value={formatTenantDate(tenant.created_at)}
-                  />
-                </FactPanel>
-
-                <DemoWindowCard
-                  tenantId={tenant.id}
-                  status={tenant.status}
-                  demoEndsAt={tenant.demo_ends_at}
-                  demoHint={demoHint}
-                />
-
-                <SectionCard
-                  title="Danger zone"
-                  description="Irreversible or service-affecting actions for this school."
-                  icon={<TriangleAlert size={16} />}
-                  tone="error"
-                  className="lg:col-span-2"
-                >
-                  <SchoolStatusControl
-                    tenantId={tenant.id}
-                    status={tenant.status}
-                    suspendReason={tenant.suspend_reason ?? null}
-                    readOnlyOn={formatReadOnlyOn(tenant.suspended_grace_ends_at)}
-                  />
-                </SectionCard>
-              </div>
-            ),
-            activity: <OpsAuditCard entries={audit} />,
-          }}
-        />
+      <div className="dash-enter mt-6 flex flex-col gap-5" style={{ "--enter-delay": "80ms" } as CSSProperties}>
+        <TenantDetailNav tenantId={tenant.id} active={section} />
+        <div key={section} className="min-h-[16rem]">
+          {section === "modules" ? (
+            <ModuleListCard tenantId={tenant.id} modules={modules} />
+          ) : null}
+          {section === "people" ? (
+            <AdministratorsCard admins={admins} tenantId={tenant.id} />
+          ) : null}
+          {section === "overview" ? (
+            <TenantOverviewPanel tenant={tenant} demoHint={demoHint} />
+          ) : null}
+          {section === "activity" ? (
+            <div className="flex flex-col gap-4">
+              <TenantAdminLoginCard admins={adminLogins} />
+              <SchoolActivityPanel entries={schoolActivity} />
+              <OpsAuditCard entries={audit} />
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -263,21 +143,31 @@ async function SchoolDetailContent({
 
 export default function SchoolDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ section?: string }>;
 }) {
   return (
     <Suspense fallback={<TenantDetailSkeleton />}>
-      <SchoolDetailContent params={params} />
+      <SchoolDetailPageInner params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
-/**
- * Hero band: a soft gradient surface that carries the school identity, status
- * and quick facts — the visual anchor of the page, distinct from the cards
- * below it.
- */
+async function SchoolDetailPageInner({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section: sectionParam } = await searchParams;
+  const section = parseTenantDetailSection(sectionParam);
+  return <SchoolDetailContent params={params} section={section} />;
+}
+
+/** School identity, status, and quick facts — same mild card chrome as ERP / teacher web. */
 function HeroHeader({
   tenant,
   backup,
@@ -294,12 +184,8 @@ function HeroHeader({
   const healthy = !backup.isStale && backup.latestBackupAt !== null;
   const { name, status, subdomain, plan, suspend_reason } = tenant;
   return (
-    <header className="relative overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-sm">
-      <div
-        className="brand-gradient absolute inset-x-0 top-0 h-1.5"
-        aria-hidden
-      />
-      <div className="flex flex-col gap-4 px-5 pt-6 pb-5 sm:flex-row sm:items-center sm:gap-5 sm:px-6">
+    <header className={cn(dashboardHubCardClass("blue"))}>
+      <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-5 sm:px-6">
         <TenantAvatar
           name={name}
           logoUrl={resolveTenantLogoUrl(tenant)}
@@ -414,14 +300,3 @@ function countValue(value: number | undefined): string {
   return value === undefined ? "—" : String(value);
 }
 
-/** Date a delinquency hold turns read-only, for the suspend control copy. */
-function formatReadOnlyOn(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}

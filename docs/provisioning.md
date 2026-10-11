@@ -41,6 +41,16 @@ routes with a shared secret; the service-role key never leaves either server.
    *“¿Primera vez? Cree su contraseña”*, and sets a password. Completion flips
    `account_status` to `active` and lands them on `/dashboard`.
 
+## Privacy / PRODHAB (LGL-1)
+
+After **`active`**, Ops should send the school the **responsable** handout (Pack B
+in [`docs/prodhab-pack.md`](../../docs/prodhab-pack.md)): the
+institution is controller of student/guardian data; Weeon is **encargado**;
+registration before PRODHAB may be required under Ley 8968 art. 21. When Weeon’s
+encargado expediente exists, include that reference from
+[`docs/prodhab-filing-log.md`](prodhab-filing-log.md). Breaches:
+[`security-incidents.md`](security-incidents.md).
+
 ## Country-agnostic school codes (LATAM groundwork)
 
 Institution codes differ per country (CR: Código SABER, CL: RBD, MX: CCT, …), so

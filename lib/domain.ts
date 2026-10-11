@@ -162,17 +162,20 @@ export function resolveMemberSince(
   return formatTenantTimestamp(tenant.paid_at);
 }
 
+const TENANT_DISPLAY_TIME_ZONE = "America/Costa_Rica";
+
 export function formatTenantTimestamp(iso?: string | null): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TENANT_DISPLAY_TIME_ZONE,
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  });
+  }).format(date);
 }
 
 /** Calendar date for tenant-facing labels (no time). */
@@ -180,11 +183,12 @@ export function formatTenantDate(iso?: string | null): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TENANT_DISPLAY_TIME_ZONE,
     month: "long",
     day: "numeric",
     year: "numeric",
-  });
+  }).format(date);
 }
 
 /** School year label from `settings.academicYear` (e.g. 2026-2027). */

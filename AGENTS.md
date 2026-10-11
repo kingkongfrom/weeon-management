@@ -33,7 +33,11 @@ shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS)
 | `weeon-tenants/docs/finance-module.md` | Finance scope (cross-repo product spec) |
 | `weeon-tenants/docs/payments-rails.md` | SaaS vs parent payment providers |
 | `docs/audit-log.md` | Platform-internal audit tables (`tenant_backups`, `tenant_restore_log`, `tenant_admin_log`, …) |
+| `docs/ui.md` | **Ops form controls** — use `components/ui/select`, not native `<select>`; CR timestamps |
 | `docs/security.md` | Secret handling & platform-scope authorization (read before wiring credentials) |
+| `docs/security-incidents.md` | Personal-data breach runbook (PRODHAB 5-day timeline) |
+| `docs/prodhab-filing-log.md` | Record PRODHAB expediente after filing |
+| `../docs/lgl-1-status.md` | LGL-1 — our side complete vs blocked on cédula jurídica |
 | `README.md` | Status, run/verify commands, project structure |
 
 Cross-reference when a task mentions schema or RLS: always confirm against the

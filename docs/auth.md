@@ -95,22 +95,22 @@ Ops manages one school from this page. Layout, top to bottom:
 - **Hero band** — gradient rule, avatar, name, status badge, subdomain + plan
   pills, inline Student/Teacher/Admin counts, and a backup-health pill. No
   separate stat-card row (counts live here instead of in their own boxes).
-- **Segmented workspace** (`SegmentedWorkspace`) — one surface with four panes,
-  each rendering a single card:
+- **Section tabs** (`TenantDetailNav`, `?section=`) — Modules, People, Overview,
+  Activity (underline nav with brand active rule; bookmarkable URLs). Default
+  section when the param is missing: `modules`.
   - **Modules** — `ModuleListCard`: add-ons list (paid, switchable) with a
     locked "Included in every plan" core band in its footer.
   - **People** — `AdministratorsCard` (add via provisioning API; remove with a
     last-admin guard). The suspend/reactivate control (`SchoolStatusControl`) is
     a footer band of the same card, not a separate box.
-  - **Overview** — one `SectionCard` with three `DetailGroup` blocks
-    (Subscription & lifecycle, Academic setup, Identity).
-  - **Activity** — `OpsAuditCard`, the `tenant_ops_audit` trail. Tab labels
-    do not show count badges (those read like unread notifications); the card
-    subtitle states how many audit rows are loaded.
+  - **Overview** — `TenantOverviewPanel` (commercial, academic, IDs, danger zone).
+  - **Activity** — `TenantAdminLoginCard`, `SchoolActivityPanel` (ERP audit),
+    and `OpsAuditCard` (`tenant_ops_audit`). Tab labels do not show count
+    badges; card subtitles state row counts where relevant.
 
 Shared building blocks: `components/dashboard/section-card.tsx`
-(`SectionCard`/`DetailList`/`DetailRow`), `segmented-tabs.tsx`, and the
-`icon-tone.ts` token maps.
+(`SectionCard`/`DetailList`/`DetailRow`), `tenant-detail-nav.tsx`, and the
+`icon-tone.ts` token maps. `segmented-tabs.tsx` remains for legacy surfaces only.
 
 `SchoolStatusControl` suspends (`suspended`) or reactivates (`active`) the
 school (`setTenantStatusAction`). Only the manual status subset is accepted.

@@ -208,8 +208,7 @@ export function TenantDetailSkeleton() {
     >
       <Skeleton className="mb-4 h-4 w-32" />
 
-      <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface">
-        <div className="h-1.5 w-full bg-surface-muted" />
+      <div className="rounded-2xl border border-border bg-surface shadow-sm ring-1 ring-[#9ec5eb]/70 dark:ring-[#2a5080]/80">
         <div className="flex items-center gap-5 px-6 py-6">
           <Skeleton className="h-16 w-16 shrink-0 rounded-2xl" />
           <div className="min-w-0 flex-1">
@@ -225,8 +224,16 @@ export function TenantDetailSkeleton() {
       </div>
 
       <div className="mt-6">
-        <Skeleton className="h-10 w-full max-w-md rounded-xl" />
-        <div className="mt-4 overflow-hidden rounded-2xl border border-border/80 bg-surface">
+        <div
+          className="flex gap-6 border-b border-border/80 pb-3"
+          aria-hidden
+        >
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="mt-5 overflow-hidden rounded-2xl border border-border/80 bg-surface">
           <div className="flex items-center gap-3 px-5 py-4">
             <Skeleton className="h-10 w-10 rounded-xl" />
             <div className="flex-1">

@@ -2,20 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, KeyRound, LayoutDashboard, Mail, Rocket, ShieldCheck } from "lucide-react";
+import { Activity, Building2, KeyRound, LayoutDashboard, Mail, Rocket, ShieldCheck } from "lucide-react";
 import { isNavItemActive } from "@/lib/dashboard/nav";
 import { useT } from "@/lib/i18n/client";
+import type { ObservabilityNavState } from "@/lib/observability/observability-nav";
 
 const MOBILE_ITEMS = [
   { id: "analytics" as const, href: "/dashboard", icon: LayoutDashboard, labelKey: "analytics" as const },
   { id: "onboarding" as const, href: "/dashboard/onboarding", icon: Rocket, labelKey: "onboarding" as const },
   { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, labelKey: "tenants" as const },
   { id: "email" as const, href: "/dashboard/email", icon: Mail, labelKey: "email" as const },
+  { id: "observability" as const, href: "/dashboard/observability", icon: Activity, labelKey: "observability" as const },
   { id: "access" as const, href: "/dashboard/access", icon: KeyRound, labelKey: "accessShort" as const },
   { id: "security" as const, href: "/dashboard/security", icon: ShieldCheck, labelKey: "security" as const },
 ];
 
-export function MobileNav() {
+export function MobileNav({
+  observabilityNav,
+}: {
+  observabilityNav?: ObservabilityNavState;
+}) {
   const pathname = usePathname();
   const t = useT();
   const navHrefs = MOBILE_ITEMS.map((item) => item.href);
@@ -40,12 +46,18 @@ export function MobileNav() {
                 aria-current={active ? "page" : undefined}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                     active
                       ? "bg-brand-100 text-brand-600 dark:bg-brand-900/50 dark:text-brand-300"
                       : "text-foreground/50"
                   }`}
                 >
+                  {item.id === "observability" && observabilityNav?.showAlert ? (
+                    <span
+                      className="absolute right-1 top-1 h-2 w-2 rounded-full bg-error ring-2 ring-surface"
+                      aria-hidden
+                    />
+                  ) : null}
                   <item.icon size={20} />
                 </span>
                 {item.id === "access" ? t.nav.accessShort : t.nav[item.labelKey]}

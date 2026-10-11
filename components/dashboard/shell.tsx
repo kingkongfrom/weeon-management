@@ -12,17 +12,20 @@ import {
   useSidebarCollapsed,
   writeSidebarCollapsed,
 } from "@/lib/dashboard/sidebar-state";
+import type { ObservabilityNavState } from "@/lib/observability/observability-nav";
 
 type DashboardShellProps = {
   children: ReactNode;
   accountSlot: ReactNode;
   initialSidebarCollapsed?: boolean;
+  observabilityNav?: ObservabilityNavState;
 };
 
 export function DashboardShell({
   children,
   accountSlot,
   initialSidebarCollapsed = false,
+  observabilityNav,
 }: DashboardShellProps) {
   const collapsed = useSidebarCollapsed(initialSidebarCollapsed);
   const t = useT();
@@ -53,7 +56,7 @@ export function DashboardShell({
           </Link>
         </div>
         <SidebarToggle collapsed={collapsed} />
-        <Sidebar collapsed={collapsed} />
+        <Sidebar collapsed={collapsed} observabilityNav={observabilityNav} />
       </aside>
 
       <div className="dashboard-content">
@@ -67,7 +70,7 @@ export function DashboardShell({
           {children}
         </main>
 
-        <MobileNav />
+        <MobileNav observabilityNav={observabilityNav} />
       </div>
     </div>
   );

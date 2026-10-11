@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
   ChevronRight,
   Search,
   SearchX,
-  Users,
   X,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -259,20 +258,19 @@ function TenantRow({
           </div>
         </div>
 
-        <div className="hidden min-w-0 flex-col items-end gap-0.5 md:flex md:w-40">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/70">
-            <CalendarDays size={13} className="text-foreground/40" aria-hidden />
-            {calendar}
-          </span>
-          <span className="text-[11px] font-medium text-foreground/45">
-            {academicYear}
-          </span>
-        </div>
-
-        <div className="hidden shrink-0 items-center gap-3 lg:flex">
-          <RosterStat label="Students" value={students} />
-          <RosterStat label="Teachers" value={teachers} />
-          <RosterStat label="Seats" value={seats} />
+        <div className="hidden items-end gap-4 md:flex lg:gap-5">
+          <RowMetric
+            icon={<CalendarDays size={12} className="shrink-0 text-foreground/35" />}
+            primary={calendar}
+            secondary={academicYear}
+            secondaryCaps={false}
+            className="min-w-[8.75rem] max-w-[9.5rem]"
+          />
+          <div className="hidden items-end gap-4 lg:flex lg:gap-5">
+            <RowMetric primary={formatCount(students)} secondary="Students" />
+            <RowMetric primary={formatCount(teachers)} secondary="Teachers" />
+            <RowMetric primary={formatCount(seats)} secondary="Seats" />
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
@@ -288,36 +286,44 @@ function TenantRow({
   );
 }
 
-function RosterStat({
-  label,
-  value,
+function formatCount(value: number | undefined): string {
+  return value === undefined ? "—" : String(value);
+}
+
+/** Two-line metric column — shared rhythm for calendar + roster on school rows. */
+function RowMetric({
+  primary,
+  secondary,
+  icon,
+  secondaryCaps = true,
+  className,
 }: {
-  label: string;
-  value: number | undefined;
+  primary: string;
+  secondary: string;
+  icon?: ReactNode;
+  secondaryCaps?: boolean;
+  className?: string;
 }) {
-  if (value === undefined) {
-    return (
-      <span className="flex w-14 flex-col items-end">
-        <span className="text-sm font-semibold tabular-nums text-foreground/35">
-          —
-        </span>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-foreground/40">
-          {label}
-        </span>
-      </span>
-    );
-  }
+  const muted = primary === "—";
   return (
-    <span className="flex w-14 flex-col items-end">
-      <span className="inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-foreground">
-        {label === "Students" ? (
-          <Users size={12} className="text-foreground/30" aria-hidden />
-        ) : null}
-        {value}
+    <div
+      className={`flex flex-col items-end gap-px ${className ?? "w-[3.25rem]"}`}
+    >
+      <span
+        className={`inline-flex h-5 max-w-full items-center justify-end gap-1 text-sm font-semibold leading-none tabular-nums ${
+          muted ? "text-foreground/35" : "text-foreground"
+        }`}
+      >
+        {icon ?? null}
+        <span className="truncate">{primary}</span>
       </span>
-      <span className="text-[10px] font-medium uppercase tracking-wide text-foreground/40">
-        {label}
+      <span
+        className={`max-w-full truncate text-[10px] font-medium leading-none tracking-wide text-foreground/40 ${
+          secondaryCaps ? "uppercase" : ""
+        }`}
+      >
+        {secondary}
       </span>
-    </span>
+    </div>
   );
 }

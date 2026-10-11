@@ -27,7 +27,49 @@ const es = {
     access: "Control de acceso",
     accessShort: "Acceso",
     email: "Correo",
+    observability: "Salud",
     security: "Seguridad",
+  },
+  observability: {
+    pageTitle: "Salud de la plataforma",
+    pageDescription:
+      "Errores sin resolver en cada despliegue de Weeon (vía Sentry). Revisa aquí antes de escalar con un colegio.",
+    notConfigured: "Sentry API no configurada.",
+    openSentry: "Abrir Sentry",
+    openIssue: "Ver en Sentry",
+    allClear: "Sin errores abiertos",
+    notLinkedBadge: "Sin proyecto Sentry",
+    apiErrorBadge: "API",
+    projectNotLinked: (slug: string) =>
+      `Aún no hay proyecto «${slug}» en Sentry. Créalo en weeon-school o apunta otro slug con SENTRY_PROJECT_SLUG_* en Vercel.`,
+    issuesCount: (n: number) => `${n} sin resolver`,
+    hasMore: "Hay más incidencias en Sentry (lista recortada).",
+    noIssuesBody: "Nada pendiente en las últimas muestras.",
+    lastSeen: "Última vez:",
+    events: (n: number) => (n === 1 ? "1 evento" : `${n} eventos`),
+    summaryAllClear: "Plataforma estable — no hay incidencias abiertas en la muestra.",
+    summaryIssues: (n: number) =>
+      n === 1 ? "1 incidencia abierta en la muestra." : `${n} incidencias abiertas en la muestra.`,
+    updatedAt: (when: string) => `Actualizado ${when}`,
+    uptimeTitle: "Disponibilidad",
+    uptimeDescription: "Comprobación HTTP desde Ops (no sustituye un monitor 24/7).",
+    uptimeUp: (ms: number) => `${ms} ms`,
+    uptimeDown: "Caído",
+    uptimeSummaryUp: "Todos los orígenes respondieron.",
+    uptimeSummaryDown: (n: number) =>
+      n === 1 ? "1 origen no respondió bien." : `${n} orígenes no respondieron bien.`,
+    navAlertTitle: (issues: number, down: number) => {
+      const parts: string[] = [];
+      if (issues > 0) parts.push(`${issues} incidencias Sentry`);
+      if (down > 0) parts.push(`${down} origen(es) caído(s)`);
+      return parts.join(" · ");
+    },
+    surfaces: {
+      app: { title: "ERP escolar", description: "app.weeon.school" },
+      marketing: { title: "Sitio público", description: "weeon.school" },
+      teachers: { title: "Web docentes", description: "teachers.weeon.school" },
+      ops: { title: "Weeon Ops", description: "ops.weeon.school" },
+    },
   },
   header: {
     ariaBrand: "Weeon Ops",
@@ -193,7 +235,49 @@ const en: Messages = {
     access: "Access control",
     accessShort: "Access",
     email: "Email",
+    observability: "Health",
     security: "Security",
+  },
+  observability: {
+    pageTitle: "Platform health",
+    pageDescription:
+      "Unresolved errors across each Weeon deploy target (via Sentry). Check here before escalating with a school.",
+    notConfigured: "Sentry API is not configured.",
+    openSentry: "Open Sentry",
+    openIssue: "Open in Sentry",
+    allClear: "No open errors",
+    notLinkedBadge: "No Sentry project",
+    apiErrorBadge: "API",
+    projectNotLinked: (slug: string) =>
+      `No “${slug}” project in Sentry yet. Create it under weeon-school, or set SENTRY_PROJECT_SLUG_* on Vercel.`,
+    issuesCount: (n: number) => `${n} unresolved`,
+    hasMore: "More issues in Sentry (list truncated).",
+    noIssuesBody: "Nothing open in the latest sample.",
+    lastSeen: "Last seen:",
+    events: (n: number) => (n === 1 ? "1 event" : `${n} events`),
+    summaryAllClear: "Platform looks stable — no open issues in the sample.",
+    summaryIssues: (n: number) =>
+      n === 1 ? "1 open issue in the sample." : `${n} open issues in the sample.`,
+    updatedAt: (when: string) => `Updated ${when}`,
+    uptimeTitle: "Uptime",
+    uptimeDescription: "HTTP checks from Ops (not a replacement for 24/7 monitoring).",
+    uptimeUp: (ms: number) => `${ms} ms`,
+    uptimeDown: "Down",
+    uptimeSummaryUp: "All origins responded.",
+    uptimeSummaryDown: (n: number) =>
+      n === 1 ? "1 origin did not respond OK." : `${n} origins did not respond OK.`,
+    navAlertTitle: (issues: number, down: number) => {
+      const parts: string[] = [];
+      if (issues > 0) parts.push(`${issues} Sentry issue(s)`);
+      if (down > 0) parts.push(`${down} origin(s) down`);
+      return parts.join(" · ");
+    },
+    surfaces: {
+      app: { title: "School ERP", description: "app.weeon.school" },
+      marketing: { title: "Marketing site", description: "weeon.school" },
+      teachers: { title: "Teacher web", description: "teachers.weeon.school" },
+      ops: { title: "Weeon Ops", description: "ops.weeon.school" },
+    },
   },
   header: {
     ariaBrand: "Weeon Ops",

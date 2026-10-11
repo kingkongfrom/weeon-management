@@ -9,6 +9,7 @@ import {
 import type { ReactNode } from "react";
 import { SectionCard } from "@/components/dashboard/section-card";
 import type { TenantOpsAuditEntry } from "@/lib/platform/ops-audit";
+import { formatOpsDateTime, OPS_TIMEZONE_LABEL } from "@/lib/datetime/costa-rica";
 
 type ActionMeta = { label: string; icon: ReactNode; tone: string };
 
@@ -80,11 +81,11 @@ function targetSummary(entry: TenantOpsAuditEntry): string | null {
 export function OpsAuditCard({ entries }: { entries: TenantOpsAuditEntry[] }) {
   return (
     <SectionCard
-      title="Ops activity"
+      title="Weeon Ops activity"
       description={
         entries.length > 0
-          ? `${entries.length} recorded ${entries.length === 1 ? "action" : "actions"} on this school.`
-          : "Every change Ops made to this school."
+          ? `${entries.length} recorded ${entries.length === 1 ? "action" : "actions"} by Weeon staff on this school.`
+          : "Changes Weeon staff made to modules, status, or school admins — not school ERP roster edits."
       }
       icon={<History size={16} />}
       tone="brand"
@@ -125,8 +126,9 @@ export function OpsAuditCard({ entries }: { entries: TenantOpsAuditEntry[] }) {
                 <time
                   className="shrink-0 text-[11px] font-medium tabular-nums text-foreground/45"
                   dateTime={entry.createdAt}
+                  title={OPS_TIMEZONE_LABEL}
                 >
-                  {new Date(entry.createdAt).toLocaleString()}
+                  {formatOpsDateTime(entry.createdAt)}
                 </time>
               </li>
             );

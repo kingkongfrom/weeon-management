@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/dashboard/skeleton";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { getRequestSidebarCollapsed } from "@/lib/dashboard/request-sidebar";
+import { getObservabilityNavState } from "@/lib/observability/observability-nav";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -26,15 +27,17 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  const [sidebarCollapsed, locale] = await Promise.all([
+  const [sidebarCollapsed, locale, observabilityNav] = await Promise.all([
     getRequestSidebarCollapsed(),
     getLocale(),
+    getObservabilityNavState(),
   ]);
 
   return (
     <LocaleProvider locale={locale}>
       <DashboardShell
         initialSidebarCollapsed={sidebarCollapsed}
+        observabilityNav={observabilityNav}
         accountSlot={
           <Suspense fallback={<AccountMenuSkeleton />}>
             <AuthedAccountMenu />

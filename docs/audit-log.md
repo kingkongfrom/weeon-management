@@ -79,6 +79,44 @@ returns to `active`.
 
 Written via `lib/platform/ops-audit.ts` (`writeTenantOpsAudit`), read via
 `listTenantOpsAudit` and surfaced on the School page as **Ops activity**
+(what **Weeon staff** changed).
+
+### `activity_events` (school ERP audit)
+
+Append-only rows written when **school administrators** act inside
+`app.weeon.school` (teachers, students, groups, new auth profiles). Ops reads
+them cross-tenant via service-role (`listSchoolActivity` → **School activity**
+on the same Activity tab).
+
+| Column | Meaning |
+| --- | --- |
+| `tenant_id` | school |
+| `actor_id` | `profiles.id` of the acting **school admin** |
+| `actor_name`, `actor_email` | Immutable snapshot at write time (compliance) |
+| `event_type` | e.g. `teacher.created`, `student.updated`, `group.created`, `admin.added`, `auth.login` |
+| `summary` | Human-readable line — roster uses **added/updated/removed**, not “joined” |
+| `created_at` | when |
+
+Roster triggers: `20261011210000_school_activity_roster_audit.sql`. Actor
+hardening: `20261011220000_activity_actor_compliance.sql` (no row without
+actor; service-role ERP writes log explicitly from the admin session in
+`recordPrivilegedSchoolActivity`). Purge of non-compliant rows:
+`20261011240000_purge_noncompliant_activity_events.sql`. Ops list queries
+exclude rows without `actor_id` + `actor_name`.
+
+> **Not the same table:** **Weeon Ops activity** (`tenant_ops_audit`) is staff
+> module/status changes with `actor_email`. Bootstrap purge:
+> `20261011250000_purge_tenant_ops_audit_bootstrap.sql` (one-time delete of old
+> rows; new actions still append via `writeTenantOpsAudit`).
+
+School ERP fee actions (when implemented) use types such as `fee.mark_paid` /
+`fee.mark_paid_batch` — filter **Payments & fees** on the Activity tab.
+
+> **Liability read:** School activity = what the **customer** did. Ops activity =
+> what **Weeon** did. Both belong on the school detail **Activity** tab.
+
+Written via `lib/platform/ops-audit.ts` (`writeTenantOpsAudit`), read via
+`listTenantOpsAudit` and surfaced on the School page as **Ops activity**
 (`components/dashboard/ops-audit-card.tsx`). Audit writes are best-effort and
 never block the underlying action.
 

@@ -23,3 +23,9 @@ The config starts `next dev` on port 3400 unless `E2E_BASE_URL` is set.
 
 The create-school journey **writes** to the platform database through the
 service-role client. Run it only against a **non-production** stack.
+
+## Vercel preview
+
+Set `E2E_BASE_URL` to the Ops **Preview** deployment URL. Keep
+`E2E_OPS_CREATE_SCHOOL` unset unless you accept platform writes on the linked DB.
+Runbook: [`docs/e2e-preview-stack.md`](../../../docs/e2e-preview-stack.md).
