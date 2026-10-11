@@ -20,7 +20,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
-      // Coverage thresholds are enabled in QA-8 (docs/testing.md §15).
+      // QA-8: floor set where the suite is (baseline 11 Oct: lines 0.54 · branches
+      // 64.6 · funcs 60.7); ratchet up, scoping high bars to auth-policy/safe-path.
+      thresholds: { lines: 0.4, functions: 55, branches: 58 },
     },
   },
 });
