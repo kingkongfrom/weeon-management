@@ -35,3 +35,26 @@ jobs:
       - name: Build
         if: env.NEXT_PUBLIC_SUPABASE_URL != ''
         run: npm run build
+
+  # Playwright journeys (docs/testing.md §7). Sign-in smoke always runs; the
+  # authenticated/unauthenticated journeys skip unless E2E_* are set. The
+  # create-school mutation additionally needs E2E_OPS_CREATE_SCHOOL=1.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      E2E_OPS_EMAIL: ${{ secrets.E2E_OPS_EMAIL }}
+      E2E_OPS_PASSWORD: ${{ secrets.E2E_OPS_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: E2E journeys
+        run: npm run test:e2e

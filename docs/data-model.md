@@ -111,7 +111,7 @@ with the catalog `public.tenant_module_catalog`. Both live in `weeon-tenants`
 `20260927120000_tenant_module_gating.sql`).
 
 - **Tier `core`** — the plan minimum (Calificaciones, Aula virtual, Asistencia,
-  Agenda y horarios, Comunicación, Momentos, Administración). Seeded `enabled =
+  Agenda y horarios, Comunicación, Galería, Administración). Seeded `enabled =
   true` for every tenant and **never disabled from Ops**; the Ops School page
   renders them as locked rows.
 - **Tier `addon`** — optional paid modules (currently only `parent_payments`).
