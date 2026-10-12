@@ -18,4 +18,5 @@ export const opsEmailTone = {
   unreadFilterActive:
     "border-[#0f766e] bg-[#c9f0ec]/70 text-[#0f766e] dark:border-[#14b8a6] dark:bg-[#0f2f2c]/70 dark:text-[#14b8a6]",
   toggleOn: "bg-[#0f766e]",
+  avatar: "bg-[#0f766e] text-white shadow-sm dark:bg-[#14b8a6]",
 } as const;

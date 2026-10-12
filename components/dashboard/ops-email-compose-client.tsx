@@ -1,0 +1,35 @@
+"use client";
+
+import { OpsEmailCompose, type OpsFromOption } from "@/components/ops-email/ops-email-compose";
+import type { OpsComposeInitial } from "@/lib/ops-email/reply-compose";
+
+/** Same shell as school ERP `MessagesComposeClient`. */
+export function OpsEmailComposeClient({
+  initial = null,
+  replyAllSeed = null,
+  expandReplyAll = false,
+  fromOptions = [],
+  defaultFromKey = "",
+}: {
+  initial?: OpsComposeInitial | null;
+  replyAllSeed?: OpsComposeInitial | null;
+  expandReplyAll?: boolean;
+  fromOptions?: OpsFromOption[];
+  defaultFromKey?: string;
+}) {
+  return (
+    <div className="min-h-[calc(100vh-8rem)] bg-surface-muted/35 px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="rounded-2xl bg-surface px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-11">
+          <OpsEmailCompose
+            initial={initial}
+            replyAllSeed={replyAllSeed}
+            expandReplyAll={expandReplyAll}
+            fromOptions={fromOptions}
+            defaultFromKey={defaultFromKey}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

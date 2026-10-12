@@ -27,6 +27,7 @@ import { useT } from "@/lib/i18n/client";
 import { opsEmailTone } from "@/lib/ops-email/messages-tone";
 import type { OpsEmailFolder } from "@/lib/ops-email/folders";
 import { OpsEmailReadingPane } from "@/components/ops-email/ops-email-reading-pane";
+import { Tooltip } from "@/components/ui/tooltip";
 import { OpsUnreadCountBadge } from "@/components/ops-email/ops-unread-count-badge";
 import { OpsEmailAutoReplyDialog } from "@/components/ops-email/ops-email-auto-reply-dialog";
 import { OpsEmailNewFolderDialog } from "@/components/ops-email/ops-email-new-folder-dialog";
@@ -43,10 +44,30 @@ import {
   outboundToMailbox,
   type OpsMailboxMessage,
 } from "@/lib/ops-email/mailbox-message";
+import {
+  loadFavoriteKeys,
+  loadTrashKeys,
+  mailboxMessageKey,
+  persistFavoriteKeys,
+  persistTrashKeys,
+} from "@/lib/ops-email/mailbox-local-state";
 
 const OPS_EMAIL = "/dashboard/email";
 const OPS_EMAIL_SETTINGS = "/dashboard/email/configuracion";
 const OPS_COMPOSE = "/dashboard/email/nuevo";
+
+/** List vs reading split beside folder sidebar (35% / 65%). */
+const MAIL_LIST_PANE =
+  "min-w-[14rem] w-[35%] max-w-[35%] shrink-0 basis-[35%] overflow-hidden";
+const MAIL_READ_PANE =
+  "flex min-h-0 min-w-[16rem] w-[65%] max-w-[65%] shrink-0 basis-[65%] flex-col overflow-hidden";
+
+function opsComposeHref(row: OpsMailboxMessage): string {
+  if (row.kind === "inbound") {
+    return `${OPS_COMPOSE}?reply=${encodeURIComponent(row.id)}`;
+  }
+  return `${OPS_COMPOSE}?replySent=${encodeURIComponent(row.id)}`;
+}
 
 function formatListTime(iso: string): string {
   const date = new Date(iso);
@@ -84,6 +105,7 @@ type OpsEmailWorkspaceProps = {
   mailboxSettings: OpsMailboxSettings;
   listWarning: string | null;
   labelsWarning: string | null;
+  viewerEmail?: string;
 };
 
 export function OpsEmailWorkspace({
@@ -96,6 +118,7 @@ export function OpsEmailWorkspace({
   mailboxSettings,
   listWarning,
   labelsWarning,
+  viewerEmail = "",
 }: OpsEmailWorkspaceProps) {
   const t = useT();
   const router = useRouter();
@@ -110,6 +133,13 @@ export function OpsEmailWorkspace({
   const [autoReplyOpen, setAutoReplyOpen] = useState(false);
   const [localMailboxSettings, setLocalMailboxSettings] = useState(mailboxSettings);
   const [localLabels, setLocalLabels] = useState(labels);
+  const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(() => new Set());
+  const [trashKeys, setTrashKeys] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    setFavoriteKeys(loadFavoriteKeys());
+    setTrashKeys(loadTrashKeys());
+  }, []);
 
   useEffect(() => {
     setLocalMailboxSettings(mailboxSettings);
@@ -121,11 +151,33 @@ export function OpsEmailWorkspace({
 
   const failedCount = rows.filter((row) => row.status === "failed").length;
 
+  const allMessages: OpsMailboxMessage[] = useMemo(() => {
+    const inbound = inboundRows.map(inboundToMailbox);
+    const outbound = rows.map(outboundToMailbox);
+    return [...inbound, ...outbound].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }, [inboundRows, rows]);
+
   const listMessages: OpsMailboxMessage[] = useMemo(() => {
-    if (folder === "inbox") return inboundRows.map(inboundToMailbox);
-    if (folder === "sent") return rows.map(outboundToMailbox);
+    if (folder === "inbox") {
+      return inboundRows
+        .map(inboundToMailbox)
+        .filter((row) => !trashKeys.has(mailboxMessageKey(row)));
+    }
+    if (folder === "sent") {
+      return rows
+        .map(outboundToMailbox)
+        .filter((row) => !trashKeys.has(mailboxMessageKey(row)));
+    }
+    if (folder === "favorite") {
+      return allMessages.filter((row) => favoriteKeys.has(mailboxMessageKey(row)));
+    }
+    if (folder === "trash") {
+      return allMessages.filter((row) => trashKeys.has(mailboxMessageKey(row)));
+    }
     return [];
-  }, [folder, inboundRows, rows]);
+  }, [folder, inboundRows, rows, allMessages, favoriteKeys, trashKeys]);
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -158,6 +210,36 @@ export function OpsEmailWorkspace({
 
   const openRow =
     filtered.find((row) => row.id === selectedId) ?? filtered[0] ?? null;
+
+  const openRowKey = openRow ? mailboxMessageKey(openRow) : null;
+
+  function toggleFavoriteForOpen() {
+    if (!openRowKey) return;
+    setFavoriteKeys((current) => {
+      const next = new Set(current);
+      if (next.has(openRowKey)) next.delete(openRowKey);
+      else next.add(openRowKey);
+      persistFavoriteKeys(next);
+      return next;
+    });
+  }
+
+  function moveOpenToTrash() {
+    if (!openRowKey) return;
+    setTrashKeys((current) => {
+      const next = new Set(current);
+      next.add(openRowKey);
+      persistTrashKeys(next);
+      return next;
+    });
+    setFavoriteKeys((current) => {
+      if (!current.has(openRowKey)) return current;
+      const next = new Set(current);
+      next.delete(openRowKey);
+      persistFavoriteKeys(next);
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (!openRow || openRow.kind !== "inbound" || openRow.readAt) return;
@@ -257,8 +339,9 @@ export function OpsEmailWorkspace({
             {t.opsEmail.composeMessage}
           </Link>
         </div>
-        <div className="flex w-[22rem] shrink-0 items-center max-lg:hidden">
-          <div className="relative w-[80%] shrink-0">
+        <div className="flex min-w-0 flex-1 items-center max-lg:hidden">
+          <div className={cn("flex items-center gap-2", MAIL_LIST_PANE)}>
+          <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35" />
             <input
               value={query}
@@ -285,28 +368,32 @@ export function OpsEmailWorkspace({
                   ? t.opsEmail.unreadOnly
                   : t.opsEmail.unreadOnly}
             </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60"
-              aria-label="Print"
-            >
-              <Printer className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              disabled={refreshing}
-              onClick={() => {
-                setRefreshing(true);
-                router.refresh();
-                window.setTimeout(() => setRefreshing(false), 800);
-              }}
-              title={t.opsEmail.refreshList}
-              aria-label={t.opsEmail.refreshList}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60 disabled:opacity-60"
-            >
-              <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-            </button>
+            <Tooltip content={t.opsEmail.printList} placement="bottom">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60"
+                aria-label={t.opsEmail.printList}
+              >
+                <Printer className="h-4 w-4" />
+              </button>
+            </Tooltip>
+            <Tooltip content={t.opsEmail.refreshList} placement="bottom">
+              <button
+                type="button"
+                disabled={refreshing}
+                onClick={() => {
+                  setRefreshing(true);
+                  router.refresh();
+                  window.setTimeout(() => setRefreshing(false), 800);
+                }}
+                aria-label={t.opsEmail.refreshList}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60 disabled:opacity-60"
+              >
+                <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+              </button>
+            </Tooltip>
+          </div>
           </div>
         </div>
       </div>
@@ -451,7 +538,9 @@ export function OpsEmailWorkspace({
           ) : null}
         </aside>
 
-        <section className="flex w-[22rem] shrink-0 flex-col overflow-y-auto border-r border-border">
+        <section
+          className={cn("flex flex-col overflow-y-auto border-r border-border", MAIL_LIST_PANE)}
+        >
           {folder === "sent" && failedCount > 0 && !failedOnly ? (
             <div className="border-b border-border px-4 py-3">
               <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", opsEmailTone.accentMuted)}>
@@ -479,6 +568,7 @@ export function OpsEmailWorkspace({
                       role="button"
                       tabIndex={0}
                       onClick={() => setSelectedId(row.id)}
+                      onDoubleClick={() => router.push(opsComposeHref(row))}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           event.preventDefault();
@@ -526,7 +616,16 @@ export function OpsEmailWorkspace({
           )}
         </section>
 
-        <OpsEmailReadingPane message={openRow} />
+        <div className={MAIL_READ_PANE}>
+          <OpsEmailReadingPane
+            message={openRow}
+            folder={folder}
+            viewerEmail={viewerEmail}
+            isFavorite={openRowKey ? favoriteKeys.has(openRowKey) : false}
+            onToggleFavorite={toggleFavoriteForOpen}
+            onMoveToTrash={moveOpenToTrash}
+          />
+        </div>
       </div>
 
       <OpsEmailNewFolderDialog

@@ -1,15 +1,22 @@
 import { emptyDoc, type RichTextDoc } from "@/lib/comms/model";
+import { ensureForwardSubject } from "@/lib/ops-email/compose-display-utils";
+import {
+  inboundToHistory,
+  outboundToHistory,
+  type OpsThreadHistoryMessage,
+} from "@/lib/ops-email/thread-history";
 import type { InboundEmailRow } from "@/lib/platform/inbound-email";
 import type { OutboundEmailRow } from "@/lib/platform/outbound-email";
 
 export type OpsComposeInitial = {
   to: string[];
+  cc: string[];
   subject: string;
   body: RichTextDoc;
   allowReplies: boolean;
-  /** When set, compose skips restoring a local draft. */
   inboundId?: string;
   outboundId?: string;
+  sourceHistory: OpsThreadHistoryMessage[];
 };
 
 /** Extract bare address from `Name <user@host>` or plain email. */
@@ -26,47 +33,23 @@ export function replySubjectLine(subject: string): string {
   return `Re: ${trimmed}`;
 }
 
-function quotePlainText(text: string, maxLen = 8000): string {
-  const normalized = text.replace(/\r\n/g, "\n").trim();
-  if (normalized.length <= maxLen) return normalized;
-  return `${normalized.slice(0, maxLen)}…`;
+function uniqueEmails(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of values) {
+    const email = parseMailboxAddress(raw);
+    if (!email.includes("@") || seen.has(email)) continue;
+    seen.add(email);
+    out.push(email);
+  }
+  return out;
 }
 
-export function buildReplyBodyDoc(input: {
-  fromDisplay: string;
-  sentAtLabel: string;
-  bodyText: string;
-}): RichTextDoc {
-  const quoted = quotePlainText(input.bodyText || "");
-  const base = emptyDoc();
-
+function baseFromInbound(row: InboundEmailRow): Omit<OpsComposeInitial, "to" | "cc" | "subject" | "body"> {
   return {
-    type: "doc",
-    content: [
-      ...(base.content ?? []),
-      { type: "paragraph" },
-      {
-        type: "blockquote",
-        content: [
-          {
-            type: "paragraph",
-            content: [
-              {
-                type: "text",
-                marks: [{ type: "bold" }],
-                text: `${input.fromDisplay} · ${input.sentAtLabel}`,
-              },
-            ],
-          },
-          ...(quoted
-            ? quoted.split("\n").map((line) => ({
-                type: "paragraph" as const,
-                content: line ? [{ type: "text" as const, text: line }] : [],
-              }))
-            : [{ type: "paragraph" as const }]),
-        ],
-      },
-    ],
+    allowReplies: true,
+    inboundId: row.id,
+    sourceHistory: [inboundToHistory(row)],
   };
 }
 
@@ -74,51 +57,50 @@ export function inboundReplyComposeInitial(row: InboundEmailRow): OpsComposeInit
   const to = parseMailboxAddress(row.fromEmail);
   if (!to.includes("@")) return null;
 
-  const sentAtLabel = new Date(row.createdAt).toLocaleString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
   return {
-    inboundId: row.id,
+    ...baseFromInbound(row),
     to: [to],
+    cc: [],
     subject: replySubjectLine(row.subject),
-    allowReplies: true,
-    body: buildReplyBodyDoc({
-      fromDisplay: row.fromEmail.trim(),
-      sentAtLabel,
-      bodyText: row.bodyText,
-    }),
+    body: emptyDoc(),
   };
 }
 
-/** Follow-up to a recipient from a sent Ops message (Enviados). */
+export function inboundReplyAllComposeInitial(row: InboundEmailRow): OpsComposeInitial | null {
+  const to = parseMailboxAddress(row.fromEmail);
+  if (!to.includes("@")) return null;
+  const cc = uniqueEmails(row.ccEmails);
+
+  return {
+    ...baseFromInbound(row),
+    to: [to],
+    cc,
+    subject: replySubjectLine(row.subject),
+    body: emptyDoc(),
+  };
+}
+
+export function inboundForwardComposeInitial(row: InboundEmailRow): OpsComposeInitial | null {
+  return {
+    ...baseFromInbound(row),
+    to: [],
+    cc: [],
+    subject: ensureForwardSubject(row.subject),
+    body: emptyDoc(),
+  };
+}
+
 export function outboundReplyComposeInitial(row: OutboundEmailRow): OpsComposeInitial | null {
   const to = parseMailboxAddress(row.toEmail);
   if (!to.includes("@")) return null;
 
-  const sentAtLabel = new Date(row.createdAt).toLocaleString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const fromDisplay = row.actorEmail.trim() || "Weeon Ops";
-
   return {
     outboundId: row.id,
     to: [to],
+    cc: [],
     subject: replySubjectLine(row.subject),
     allowReplies: true,
-    body: buildReplyBodyDoc({
-      fromDisplay: `${fromDisplay} → ${row.toEmail.trim()}`,
-      sentAtLabel,
-      bodyText: row.bodyText,
-    }),
+    body: emptyDoc(),
+    sourceHistory: [outboundToHistory(row)],
   };
 }

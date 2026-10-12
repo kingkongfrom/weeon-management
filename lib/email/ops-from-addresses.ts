@@ -12,6 +12,10 @@ export type OpsFromAddressOption = {
   label: string;
 };
 
+function stripWeeonFromSuffix(name: string): string {
+  return name.replace(/\s+via\s+weeon\s*$/i, "").trim();
+}
+
 function parseFromEntry(raw: string): OpsFromAddressOption | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
@@ -29,7 +33,7 @@ function parseFromEntry(raw: string): OpsFromAddressOption | null {
   email = email.toLowerCase();
   if (!email.includes("@")) return null;
 
-  const name = displayName || email;
+  const name = stripWeeonFromSuffix(displayName || email);
   const resendFrom = `${name} <${email}>`;
 
   return {
@@ -37,7 +41,7 @@ function parseFromEntry(raw: string): OpsFromAddressOption | null {
     email,
     displayName: name,
     resendFrom,
-    label: `${name} · ${email}`,
+    label: `${name} <${email}>`,
   };
 }
 

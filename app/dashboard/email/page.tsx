@@ -28,8 +28,9 @@ async function EmailContent({
   const labelId = parseOpsEmailLabelId(labelParam);
   const folder = labelId ? "sent" : parseOpsEmailFolder(folderParam);
 
-  const { user } = await getPlatformSession();
+  const { user, sessionUser } = await getPlatformSession();
   const userId = user?.id ?? "";
+  const viewerEmail = sessionUser?.email?.trim() ?? user?.email?.trim() ?? "";
 
   const [list, inboundList, labelsResult, mailboxSettings] = await Promise.all([
     listOutboundEmails(40, labelId),
@@ -61,6 +62,7 @@ async function EmailContent({
       }
       listWarning={listWarnings || null}
       labelsWarning={labelsResult.ok ? null : labelsResult.error}
+      viewerEmail={viewerEmail}
     />
   );
 }

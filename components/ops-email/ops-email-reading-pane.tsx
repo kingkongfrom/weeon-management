@@ -1,37 +1,64 @@
 "use client";
 
-import Link from "next/link";
-import { Reply } from "lucide-react";
-import { useT } from "@/lib/i18n/client";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { OpsEmailDeliveryFooter } from "@/components/ops-email/ops-email-delivery-footer";
+import { OpsEmailMessageHistory } from "@/components/ops-email/ops-email-message-history";
+import { OpsEmailThreadToolbar } from "@/components/ops-email/ops-email-thread-toolbar";
+import { inboundToHistory, outboundToHistory } from "@/lib/ops-email/thread-history";
+import type { OpsEmailFolder } from "@/lib/ops-email/folders";
 import type { OpsMailboxMessage } from "@/lib/ops-email/mailbox-message";
-import { opsEmailTone } from "@/lib/ops-email/messages-tone";
-import { cn } from "@/lib/cn";
+import { Tooltip } from "@/components/ui/tooltip";
+import { useT } from "@/lib/i18n/client";
 
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+const OPS_COMPOSE = "/dashboard/email/nuevo";
 
-function avatarColor(name: string): string {
-  const colors = ["bg-[#0f766e]", "bg-[#2563b0]", "bg-[#7c3aed]", "bg-[#d97706]", "bg-[#e11d48]"];
-  let hash = 0;
-  for (const char of name) hash += char.charCodeAt(0);
-  return colors[hash % colors.length] ?? colors[0];
-}
+const readPaneHeaderClass =
+  "sticky top-0 z-10 flex items-start gap-2 border-b border-border bg-surface/95 px-4 pt-4 pb-3 backdrop-blur-sm sm:px-5 sm:pt-5 sm:pb-3.5";
 
-export function OpsEmailReadingPane({ message }: { message: OpsMailboxMessage | null }) {
+export function OpsEmailReadingPane({
+  message,
+  folder,
+  viewerEmail = "",
+  isFavorite = false,
+  onToggleFavorite,
+  onMoveToTrash,
+  loading = false,
+}: {
+  message: OpsMailboxMessage | null;
+  folder: OpsEmailFolder;
+  viewerEmail?: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  onMoveToTrash?: () => void;
+  loading?: boolean;
+}) {
   const t = useT();
+  const router = useRouter();
+  const openHint = t.opsEmail.openMessage;
 
-  if (!message) {
+  function openCompose() {
+    if (!message) return;
+    if (message.kind === "inbound") {
+      router.push(`${OPS_COMPOSE}?reply=${encodeURIComponent(message.id)}`);
+      return;
+    }
+    router.push(`${OPS_COMPOSE}?replySent=${encodeURIComponent(message.id)}`);
+  }
+
+  function openReplyAll() {
+    if (!message || message.kind !== "inbound") return;
+    router.push(`${OPS_COMPOSE}?reply=${encodeURIComponent(message.id)}&mode=replyAll`);
+  }
+
+  function openForward() {
+    if (!message || message.kind !== "inbound") return;
+    router.push(`${OPS_COMPOSE}?forward=${encodeURIComponent(message.id)}`);
+  }
+
+  if (!message && !loading) {
     return (
-      <div className="flex min-w-[24rem] flex-1 items-center justify-center px-8 text-center">
+      <div className="flex min-w-0 flex-1 items-center justify-center px-4 text-center">
         <div>
           <p className="text-sm font-semibold text-foreground">{t.opsEmail.emptyMessages}</p>
           <p className="mt-1 text-xs font-medium text-foreground/50">{t.opsEmail.emptyMessagesBody}</p>
@@ -40,111 +67,80 @@ export function OpsEmailReadingPane({ message }: { message: OpsMailboxMessage | 
     );
   }
 
-  if (message.kind === "inbound") {
-    const fromLabel = message.fromEmail;
-    const toLine = message.toEmails.join(", ");
-
-    const replyHref = `/dashboard/email/nuevo?reply=${encodeURIComponent(message.id)}`;
-
+  if (loading || !message) {
     return (
-      <article className="min-w-[24rem] flex-1 overflow-y-auto px-6 py-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <h2 className="min-w-0 flex-1 text-xl font-semibold text-foreground">{message.subject}</h2>
-          <Link
-            href={replyHref}
-            className={cn(
-              "inline-flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold",
-              opsEmailTone.primaryButton,
-            )}
-          >
-            <Reply className="h-4 w-4" />
-            {t.opsEmail.replyAction}
-          </Link>
-        </div>
-
-        <div className="mt-5 flex items-start gap-3">
-          <span
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${avatarColor(fromLabel)}`}
-          >
-            {fromLabel.slice(0, 1).toUpperCase()}
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-sm font-semibold text-foreground">{fromLabel}</p>
-              <p className="text-xs text-foreground/45">{formatDate(message.createdAt)}</p>
-            </div>
-            <p className="mt-0.5 text-xs text-foreground/55">
-              <span className="font-semibold">{t.opsEmail.toLabel}:</span> {toLine}
-            </p>
-            <p className="mt-1 truncate font-mono text-[10px] text-foreground/35">
-              Resend {message.resendEmailId}
-            </p>
-          </div>
-        </div>
-
-        {message.bodyHtml ? (
-          <div
-            className="rte-content mt-6 text-sm leading-relaxed text-foreground/90"
-            dangerouslySetInnerHTML={{ __html: message.bodyHtml }}
-          />
-        ) : (
-          <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-            {message.bodyText}
-          </div>
-        )}
-      </article>
+      <div className="flex min-w-0 flex-1 items-center justify-center text-foreground/40">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
     );
   }
 
-  const fromLabel = message.actorEmail || "Weeon Ops";
-  const replyHref = `/dashboard/email/nuevo?replySent=${encodeURIComponent(message.id)}`;
+  const history =
+    message.kind === "inbound" ? [inboundToHistory(message)] : [outboundToHistory(message)];
+
+  const viewer = viewerEmail.trim().toLowerCase();
+  const isLatestMine =
+    message.kind === "outbound" &&
+    viewer.length > 0 &&
+    message.actorEmail.trim().toLowerCase() === viewer;
+
+  const deliveryFooter =
+    message.kind === "outbound" ? (
+      <OpsEmailDeliveryFooter
+        recipientLabel={message.toEmail}
+        delivered={message.status === "sent"}
+        failed={message.status === "failed"}
+        errorMessage={message.errorMessage}
+      />
+    ) : null;
 
   return (
-    <article className="min-w-[24rem] flex-1 overflow-y-auto px-6 py-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="min-w-0 flex-1 text-xl font-semibold text-foreground">{message.subject}</h2>
-        <Link
-          href={replyHref}
-          className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold",
-            opsEmailTone.primaryButton,
-          )}
-        >
-          <Reply className="h-4 w-4" />
-          {t.opsEmail.replyAction}
-        </Link>
-      </div>
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <header className={readPaneHeaderClass}>
+        <h2 className="min-w-0 flex-1 text-base font-semibold leading-snug text-foreground sm:text-lg">
+          {message.subject}
+        </h2>
+        <OpsEmailThreadToolbar
+          message={message}
+          folder={folder}
+          isFavorite={isFavorite}
+          onToggleFavorite={() => onToggleFavorite?.()}
+          onMoveToTrash={() => onMoveToTrash?.()}
+          onOpenCompose={openCompose}
+          onOpenReplyAll={openReplyAll}
+          onOpenForward={openForward}
+        />
+      </header>
 
-      <div className="mt-5 flex items-start gap-3">
-        <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${avatarColor(fromLabel)}`}
+      <Tooltip
+        content={openHint}
+        placement="bottom"
+        className="flex min-h-0 min-w-0 flex-1 flex-col"
+      >
+        <article
+          className="flex-1 cursor-pointer overflow-y-auto px-4 py-5 sm:px-5 hover:bg-surface-muted/20"
+          onClick={(event) => {
+            const target = event.target as HTMLElement;
+            if (target.closest("button, a, input, [role='menu']")) return;
+            openCompose();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openCompose();
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
-          {fromLabel.slice(0, 1).toUpperCase()}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-sm font-semibold text-foreground">{fromLabel}</p>
-            <p className="text-xs text-foreground/45">{formatDate(message.createdAt)}</p>
-          </div>
-          <p className="mt-0.5 text-xs text-foreground/55">
-            <span className="font-semibold">{t.opsEmail.toLabel}:</span> {message.toEmail}
-          </p>
-          {message.status === "failed" ? (
-            <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
-              Delivery failed{message.errorMessage ? `: ${message.errorMessage}` : "."}
-            </p>
-          ) : null}
-          {message.resendId ? (
-            <p className="mt-1 truncate font-mono text-[10px] text-foreground/35">
-              Resend {message.resendId}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-        {message.bodyText}
-      </div>
-    </article>
+          <OpsEmailMessageHistory
+            messages={history}
+            subject={message.subject}
+            isLatestMine={isLatestMine}
+            deliveryFooter={deliveryFooter}
+          />
+        </article>
+      </Tooltip>
+    </div>
   );
 }

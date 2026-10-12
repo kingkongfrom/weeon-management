@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { OpsEmailCompose } from "@/components/ops-email/ops-email-compose";
+import { OpsEmailComposeClient } from "@/components/dashboard/ops-email-compose-client";
 import { getPlatformSession } from "@/lib/auth/session";
 import { listOpsFromAddressOptions } from "@/lib/email/ops-from-addresses";
 import { getInboundEmailById } from "@/lib/platform/inbound-email";
 import { getOutboundEmailById } from "@/lib/platform/outbound-email";
 import {
+  inboundForwardComposeInitial,
+  inboundReplyAllComposeInitial,
   inboundReplyComposeInitial,
   outboundReplyComposeInitial,
 } from "@/lib/ops-email/reply-compose";
@@ -18,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function OpsEmailComposePage({
   searchParams,
 }: {
-  searchParams: Promise<{ reply?: string; replySent?: string }>;
+  searchParams: Promise<{ reply?: string; replySent?: string; forward?: string; mode?: string }>;
 }) {
   const { sessionUser } = await getPlatformSession();
   const actorEmail = sessionUser?.email?.trim() ?? "";
@@ -28,13 +30,21 @@ export default async function OpsEmailComposePage({
   }));
   const defaultFromKey = fromOptions[0]?.key ?? "";
 
-  const { reply: replyId, replySent: replySentId } = await searchParams;
+  const { reply: replyId, replySent: replySentId, forward: forwardId, mode } = await searchParams;
   let replyInitial = null;
+  let replyAllSeed = null;
+  const expandReplyAll = mode === "replyAll";
 
-  if (replyId) {
+  if (forwardId) {
+    const loaded = await getInboundEmailById(forwardId);
+    if (loaded.ok) {
+      replyInitial = inboundForwardComposeInitial(loaded.row);
+    }
+  } else if (replyId) {
     const loaded = await getInboundEmailById(replyId);
     if (loaded.ok) {
       replyInitial = inboundReplyComposeInitial(loaded.row);
+      replyAllSeed = inboundReplyAllComposeInitial(loaded.row);
     }
   } else if (replySentId) {
     const loaded = await getOutboundEmailById(replySentId);
@@ -44,8 +54,10 @@ export default async function OpsEmailComposePage({
   }
 
   return (
-    <OpsEmailCompose
+    <OpsEmailComposeClient
       initial={replyInitial}
+      replyAllSeed={replyAllSeed}
+      expandReplyAll={expandReplyAll}
       fromOptions={fromOptions}
       defaultFromKey={defaultFromKey}
     />
