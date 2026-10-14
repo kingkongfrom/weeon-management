@@ -45,12 +45,11 @@ import {
   type OpsMailboxMessage,
 } from "@/lib/ops-email/mailbox-message";
 import {
-  loadFavoriteKeys,
-  loadTrashKeys,
-  mailboxMessageKey,
-  persistFavoriteKeys,
-  persistTrashKeys,
-} from "@/lib/ops-email/mailbox-local-state";
+  listOpsComposeDrafts,
+  opsComposeDraftPreview,
+  OPS_DRAFTS_EVENT,
+  type OpsComposeDraft,
+} from "@/lib/ops-email/compose-drafts";
 
 const OPS_EMAIL = "/dashboard/email";
 const OPS_EMAIL_SETTINGS = "/dashboard/email/configuracion";
@@ -123,6 +122,7 @@ export function OpsEmailWorkspace({
   const t = useT();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [composeDrafts, setComposeDrafts] = useState<OpsComposeDraft[]>([]);
   const [failedOnly, setFailedOnly] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
@@ -148,6 +148,17 @@ export function OpsEmailWorkspace({
   useEffect(() => {
     setLocalLabels(labels);
   }, [labels]);
+
+  useEffect(() => {
+    const refresh = () => setComposeDrafts(listOpsComposeDrafts());
+    refresh();
+    window.addEventListener(OPS_DRAFTS_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(OPS_DRAFTS_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
 
   const failedCount = rows.filter((row) => row.status === "failed").length;
 
@@ -304,6 +315,14 @@ export function OpsEmailWorkspace({
   }
 
   const empty = emptyCopy();
+  const draftQuery = query.trim().toLowerCase();
+  const visibleDrafts = composeDrafts.filter((draft) => {
+    if (!draftQuery) return true;
+    const haystack = [draft.subject, draft.to.join(" "), draft.cc.join(" "), opsComposeDraftPreview(draft)]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(draftQuery);
+  });
 
   return (
     <div className="relative flex w-full flex-col gap-3">
@@ -549,7 +568,56 @@ export function OpsEmailWorkspace({
             </div>
           ) : null}
 
-          {filtered.length === 0 ? (
+          {folder === "draft" ? (
+            visibleDrafts.length === 0 ? (
+              <div className="px-6 py-16 text-center">
+                <p className="text-sm font-semibold text-foreground">{empty.title}</p>
+                <p className="mx-auto mt-1 max-w-sm text-xs font-medium text-foreground/50">
+                  {empty.body}
+                </p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {visibleDrafts.map((draft) => {
+                  const title = draft.to[0] || draft.subject.trim() || t.opsEmail.draftNoSubject;
+                  const subject = draft.subject.trim() || t.opsEmail.draftNoSubject;
+                  return (
+                    <li key={draft.id}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`${OPS_COMPOSE}?draft=${draft.id}`)}
+                        className="flex w-full cursor-pointer items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-muted/35"
+                      >
+                        <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-transparent" />
+                        <span
+                          className={cn(
+                            "mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
+                            avatarColor(title),
+                          )}
+                        >
+                          {title.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="truncate text-sm font-semibold text-foreground/85">
+                            {title}
+                          </span>
+                          <span className="mt-0.5 block truncate text-sm font-medium text-foreground/80">
+                            {subject}
+                          </span>
+                          <span className="mt-0.5 block truncate text-xs text-foreground/45">
+                            {preview(opsComposeDraftPreview(draft))}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-xs text-foreground/45">
+                          {formatListTime(draft.updatedAt)}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )
+          ) : filtered.length === 0 ? (
             <div className="px-6 py-16 text-center">
               <p className="text-sm font-semibold text-foreground">{empty.title}</p>
               <p className="mx-auto mt-1 max-w-sm text-xs font-medium text-foreground/50">

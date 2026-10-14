@@ -189,7 +189,7 @@ const es = {
     dropboxImportFailed: "No se pudo importar desde Dropbox.",
     attachmentTooLarge: "El archivo supera el límite de 20 MB.",
     attachmentTypeNotAllowed: "Tipo de archivo no permitido.",
-    draftSaved: "Borrador guardado en este navegador.",
+    draftSaved: "Borrador guardado.",
     invalidEmail: "Ingrese un correo válido.",
     needRecipient: "Agregue al menos un destinatario.",
     rte: {
@@ -417,7 +417,7 @@ const en: Messages = {
     dropboxImportFailed: "Couldn't import from Dropbox.",
     attachmentTooLarge: "The file exceeds the 20 MB limit.",
     attachmentTypeNotAllowed: "File type not allowed.",
-    draftSaved: "Draft saved in this browser.",
+    draftSaved: "Draft saved.",
     invalidEmail: "Enter a valid email address.",
     needRecipient: "Add at least one recipient.",
     rte: {

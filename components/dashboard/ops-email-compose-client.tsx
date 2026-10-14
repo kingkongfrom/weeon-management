@@ -10,12 +10,14 @@ export function OpsEmailComposeClient({
   expandReplyAll = false,
   fromOptions = [],
   defaultFromKey = "",
+  draftId = null,
 }: {
   initial?: OpsComposeInitial | null;
   replyAllSeed?: OpsComposeInitial | null;
   expandReplyAll?: boolean;
   fromOptions?: OpsFromOption[];
   defaultFromKey?: string;
+  draftId?: string | null;
 }) {
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-surface-muted/35 px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
@@ -27,6 +29,7 @@ export function OpsEmailComposeClient({
             expandReplyAll={expandReplyAll}
             fromOptions={fromOptions}
             defaultFromKey={defaultFromKey}
+            draftId={draftId}
           />
         </div>
       </div>

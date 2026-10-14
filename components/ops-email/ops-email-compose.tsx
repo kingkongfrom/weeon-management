@@ -20,21 +20,16 @@ import { sendOpsRichEmailAction } from "@/lib/dashboard/ops-rich-email-actions";
 import { cn } from "@/lib/cn";
 import { useT } from "@/lib/i18n/client";
 import { ensureForwardSubject } from "@/lib/ops-email/compose-display-utils";
+import {
+  loadOpsComposeDraft,
+  removeOpsComposeDraft,
+  upsertOpsComposeDraft,
+} from "@/lib/ops-email/compose-drafts";
 import type { OpsComposeInitial } from "@/lib/ops-email/reply-compose";
 import { opsEmailTone } from "@/lib/ops-email/messages-tone";
 
 const OPS_EMAIL = "/dashboard/email";
-const DRAFT_KEY = "weeon-ops-email-compose-draft";
 const MAX_ATTACHMENTS = 10;
-
-type DraftSnapshot = {
-  to: string[];
-  cc: string[];
-  subject: string;
-  body: RichTextDoc;
-  allowReplies: boolean;
-  fromKey: string;
-};
 
 export type { OpsFromOption };
 
@@ -44,12 +39,14 @@ export function OpsEmailCompose({
   expandReplyAll = false,
   fromOptions = [],
   defaultFromKey = "",
+  draftId = null,
 }: {
   initial?: OpsComposeInitial | null;
   replyAllSeed?: OpsComposeInitial | null;
   expandReplyAll?: boolean;
   fromOptions?: OpsFromOption[];
   defaultFromKey?: string;
+  draftId?: string | null;
 }) {
   const t = useT();
   const router = useRouter();
@@ -85,6 +82,9 @@ export function OpsEmailCompose({
   const [replyExpanded, setReplyExpanded] = useState(
     !hasThreadReadPhase || expandReplyAll,
   );
+  const draftIdRef = useRef<string | null>(draftId);
+  const skipDraftRef = useRef(false);
+  const sentRef = useRef(false);
 
   function expandReply(mode: "reply" | "reply-all") {
     const seed = mode === "reply-all" ? threadSeedRef.current.replyAll : threadSeedRef.current.reply;
@@ -109,46 +109,76 @@ export function OpsEmailCompose({
   }
 
   useEffect(() => {
-    if (initial?.inboundId || initial?.outboundId || hasThreadReadPhase) return;
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (!raw) return;
-      const draft = JSON.parse(raw) as DraftSnapshot;
-      setToEmails(draft.to ?? []);
-      setCcEmails(draft.cc ?? []);
-      setSubject(draft.subject ?? "");
-      setBody(draft.body ?? emptyDoc());
-      setAllowReplies(draft.allowReplies ?? false);
-      if (draft.fromKey && fromOptions.some((row) => row.key === draft.fromKey)) {
-        setFromKey(draft.fromKey);
-      }
-    } catch {
-      /* ignore */
+    if (!draftId || initial?.inboundId || initial?.outboundId || hasThreadReadPhase) return;
+    const stored = loadOpsComposeDraft(draftId);
+    if (!stored) return;
+    setToEmails(stored.to);
+    setCcEmails(stored.cc);
+    setCcRowVisible(stored.cc.length > 0);
+    setSubject(stored.subject);
+    setBody(stored.body);
+    setAllowReplies(stored.allowReplies);
+    if (stored.fromKey && fromOptions.some((row) => row.key === stored.fromKey)) {
+      setFromKey(stored.fromKey);
     }
-  }, [
-    initial?.inboundId,
-    initial?.outboundId,
-    hasThreadReadPhase,
-    fromOptions,
-  ]);
+  }, [draftId, initial?.inboundId, initial?.outboundId, hasThreadReadPhase]);
+
+  const snapRef = useRef({
+    to: toEmails,
+    cc: ccEmails,
+    subject,
+    body,
+    allowReplies,
+    fromKey,
+  });
+  snapRef.current = {
+    to: toEmails,
+    cc: ccEmails,
+    subject,
+    body,
+    allowReplies,
+    fromKey,
+  };
+
+  const persistRef = useRef<() => void>(() => {});
+  persistRef.current = () => {
+    if (skipDraftRef.current || sentRef.current) return;
+    const snap = snapRef.current;
+    const id = draftIdRef.current ?? crypto.randomUUID();
+    const saved = upsertOpsComposeDraft({
+      id,
+      to: snap.to,
+      cc: snap.cc,
+      subject: snap.subject,
+      body: snap.body,
+      allowReplies: snap.allowReplies,
+      fromKey: snap.fromKey,
+    });
+    draftIdRef.current = saved;
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => persistRef.current(), 700);
+    return () => window.clearTimeout(timer);
+  }, [toEmails, ccEmails, subject, body, allowReplies, fromKey]);
+
+  useEffect(
+    () => () => {
+      persistRef.current();
+    },
+    [],
+  );
 
   function saveDraftLocal() {
-    const snap: DraftSnapshot = {
-      to: toEmails,
-      cc: ccEmails,
-      subject,
-      body,
-      allowReplies,
-      fromKey,
-    };
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
+    persistRef.current();
     setNotice(t.opsEmail.draftSaved);
     window.setTimeout(() => setNotice(null), 2500);
   }
 
   function discardDraft() {
-    localStorage.removeItem(DRAFT_KEY);
-    router.push(OPS_EMAIL);
+    skipDraftRef.current = true;
+    if (draftIdRef.current) removeOpsComposeDraft(draftIdRef.current);
+    router.push(`${OPS_EMAIL}?folder=drafts`);
   }
 
   function addFiles(incoming: FileList | File[]) {
@@ -208,8 +238,9 @@ export function OpsEmailCompose({
       setError(result.error);
       return;
     }
-    localStorage.removeItem(DRAFT_KEY);
-    router.push(OPS_EMAIL);
+    sentRef.current = true;
+    if (draftIdRef.current) removeOpsComposeDraft(draftIdRef.current);
+    router.push(`${OPS_EMAIL}?folder=sent`);
     router.refresh();
   }
 

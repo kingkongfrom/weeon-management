@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function OpsEmailComposePage({
   searchParams,
 }: {
-  searchParams: Promise<{ reply?: string; replySent?: string; forward?: string; mode?: string }>;
+  searchParams: Promise<{ reply?: string; replySent?: string; forward?: string; mode?: string; draft?: string }>;
 }) {
   const { sessionUser } = await getPlatformSession();
   const actorEmail = sessionUser?.email?.trim() ?? "";
@@ -30,7 +30,8 @@ export default async function OpsEmailComposePage({
   }));
   const defaultFromKey = fromOptions[0]?.key ?? "";
 
-  const { reply: replyId, replySent: replySentId, forward: forwardId, mode } = await searchParams;
+  const { reply: replyId, replySent: replySentId, forward: forwardId, mode, draft } =
+    await searchParams;
   let replyInitial = null;
   let replyAllSeed = null;
   const expandReplyAll = mode === "replyAll";
@@ -60,6 +61,7 @@ export default async function OpsEmailComposePage({
       expandReplyAll={expandReplyAll}
       fromOptions={fromOptions}
       defaultFromKey={defaultFromKey}
+      draftId={draft && /^[0-9a-f-]{36}$/i.test(draft) ? draft : null}
     />
   );
 }
