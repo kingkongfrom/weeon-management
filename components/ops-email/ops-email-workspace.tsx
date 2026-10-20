@@ -45,6 +45,13 @@ import {
   type OpsMailboxMessage,
 } from "@/lib/ops-email/mailbox-message";
 import {
+  loadFavoriteKeys,
+  loadTrashKeys,
+  mailboxMessageKey,
+  persistFavoriteKeys,
+  persistTrashKeys,
+} from "@/lib/ops-email/mailbox-local-state";
+import {
   listOpsComposeDrafts,
   opsComposeDraftPreview,
   OPS_DRAFTS_EVENT,
