@@ -27,7 +27,7 @@ shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS)
 | `docs/data-model.md` | **Live shared schema** — `tenants`, `profiles`, roster tables; compute users-per-tenant & stats correctly |
 | `docs/metrics.md` | The specific metrics the console exposes and how to source them |
 | `../docs/onboarding-commercial.md` | **Guided demo onboarding requirements** (canonical, workspace) |
-| `docs/provisioning.md` | **Ops create school + admin** after sales demo |
+| `docs/provisioning.md` | **Ops create school + admin** after sales demo; **"When Onboarding breaks"** troubleshooting for provisioning env/secret failures |
 | `docs/lifecycle.md` | Tenant lifecycle & subscription signals (demo/active/past_due/suspended, seats) |
 | `docs/addon-parent-payments.md` | **Cobros en línea** add-on toggle; ONVO school onboarding (not GreenPay secrets in Ops) |
 | `weeon-tenants/docs/finance-module.md` | Finance scope (cross-repo product spec) |

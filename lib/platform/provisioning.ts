@@ -142,6 +142,14 @@ export async function provisionSchoolRoster(
 const GENERIC_FAILURE =
   "No pudimos completar la operación. Intente de nuevo en unos minutos.";
 
+/**
+ * Deployment fault (missing/invalid env). Kept distinct from GENERIC_FAILURE so
+ * Ops staff see "contact engineering" instead of retrying a school code that was
+ * never looked up. See docs/provisioning.md.
+ */
+const NOT_CONFIGURED =
+  "La incorporación no está configurada en este entorno. Avisar al equipo técnico.";
+
 async function post<T>(path: string, body: unknown): Promise<T> {
   const origin = provisioningOrigin();
   const secret = provisioningSecret();
@@ -149,7 +157,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     console.error(
       "[provisioning] not configured: set WEEON_APP_ORIGIN and OPS_PROVISIONING_SECRET",
     );
-    return { ok: false, error: GENERIC_FAILURE } as T;
+    return { ok: false, error: NOT_CONFIGURED } as T;
   }
 
   try {
@@ -171,6 +179,11 @@ async function post<T>(path: string, body: unknown): Promise<T> {
         `[provisioning] ${path} failed (${res.status}):`,
         payload?.error ?? "no error body",
       );
+      // 401/403 means the shared secret does not match weeon-tenants, which is a
+      // deployment fault, not a bad school code.
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: NOT_CONFIGURED } as T;
+      }
       // The ERP returns safe, user-facing Spanish messages for validation and
       // business-rule failures (bad code, already claimed, etc.).
       return { ok: false, error: payload?.error ?? GENERIC_FAILURE } as T;

@@ -120,3 +120,38 @@ On the **video call**, align and record (Ops notes / CRM):
   and only holders of `OPS_PROVISIONING_SECRET` can call the ERP API.
 - **No raw/internal errors in the UI**: provisioning failures log server-side;
   the wizard only ever shows safe Spanish messages.
+
+## When Onboarding breaks
+
+Onboarding fails at **step 1** with *“No pudimos completar la operación”* when
+the Ops → ERP call never lands. Work outward from `post()` in
+`lib/platform/provisioning.ts`; the browser never sees the real cause.
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| *“La incorporación no está configurada en este entorno…”* | `WEEON_APP_ORIGIN` or `OPS_PROVISIONING_SECRET` missing in **this** environment | Set both on the Ops project (Vercel → Settings → Environment Variables), then **redeploy** — Vercel bakes env at build time |
+| Same message, env is set | Secret does not match `weeon-tenants` → ERP returns `401` | Re-copy the secret so both repos hold the identical value; redeploy both |
+| Lookup works but no catalog rows are shown | `data/private-schools.json` missing from the deployed ERP function | Ensure `outputFileTracingIncludes` covers it in `weeon-tenants/next.config.ts` |
+| Local only: every route times out or 404s | Stale `.next` cache, or Turbopack picking a workspace root above the repo | Delete `weeon-tenants/.next`; keep `turbopack.root` pinned in `next.config.ts` |
+| Local only: cannot connect | The ERP is not running | `WEEON_APP_ORIGIN` must point at the running ERP (`http://localhost:3001`) and both servers must be up |
+
+Deployment checklist — **both sides must be configured**, a secret in one repo
+alone still yields `401`:
+
+1. `weeon-tenants` (Vercel): `OPS_PROVISIONING_SECRET`.
+2. `weeon-management` (Vercel): `WEEON_APP_ORIGIN=https://app.weeon.school` +
+   the **same** `OPS_PROVISIONING_SECRET`.
+3. Redeploy Ops after any env change.
+
+**Verify without the UI** — a `200` with catalog JSON proves the secret pair and
+the origin are correct:
+
+```powershell
+curl -s -o NUL -w "%{http_code}" -X POST https://app.weeon.school/api/ops/schools/preview `
+  -H "content-type: application/json" -H "authorization: Bearer $env:OPS_PROVISIONING_SECRET" `
+  -d '{"country":"CR","schoolCode":"200167-00"}'
+```
+
+For manual QA, unclaimed CR codes from the catalog include `200167-00`,
+`200226-00`, `200413-00`, `205299-00`, `200271-00`; `888888-00` is absent from the
+catalog and should return the "no encontramos" message (not the generic error).
