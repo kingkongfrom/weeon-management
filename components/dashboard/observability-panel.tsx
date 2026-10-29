@@ -28,9 +28,14 @@ function levelTone(level: string): string {
  * number here before a teacher reports it.
  */
 function NavTimingSection({ snapshot }: { snapshot: NavTimingSnapshot }) {
-  const label = (phase: string) => (phase === "active" ? "Feedback" : "Contenido");
+  const label = (phase: string) =>
+    phase === "active" ? "Feedback" : phase === "navigate" ? "Navegación" : "Contenido";
   const budget = (phase: string) =>
-    phase === "active" ? NAV_BUDGET_MS.active : NAV_BUDGET_MS.content;
+    phase === "active"
+      ? NAV_BUDGET_MS.active
+      : phase === "navigate"
+        ? NAV_BUDGET_MS.navigate
+        : NAV_BUDGET_MS.content;
 
   return (
     <section className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
@@ -40,7 +45,7 @@ function NavTimingSection({ snapshot }: { snapshot: NavTimingSnapshot }) {
             Latencia de la app docente
           </h2>
           <p className="mt-1 text-sm text-foreground/55">
-            Cambios de materia y de pestaña en <code>teachers.weeon.school</code>, medidos en el
+            Cambios de materia, de pestaña y de pantalla en <code>teachers.weeon.school</code>, medidos en el
             navegador y agregados por hora. Últimos {snapshot.windowDays} días.
           </p>
         </div>
@@ -81,7 +86,11 @@ function NavTimingSection({ snapshot }: { snapshot: NavTimingSnapshot }) {
                         {series.route}
                       </td>
                       <td className="px-3 py-2 font-semibold text-foreground">
-                        {series.kind === "subject" ? "Materia" : "Pestaña"}
+                        {series.kind === "subject"
+                          ? "Materia"
+                          : series.kind === "route"
+                            ? "Ruta"
+                            : "Pestaña"}
                       </td>
                       <td className="px-3 py-2 text-foreground/70">{label(phase.phase)}</td>
                       <td className="px-3 py-2 text-right tabular-nums text-foreground/70">

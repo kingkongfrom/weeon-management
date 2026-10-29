@@ -58,4 +58,16 @@ describe("summarizeNavTimings", () => {
     const series = summarizeNavTimings([row(), row({ surface: "mobile" })]);
     expect(series.map((item) => item.surface).sort()).toEqual(["mobile", "teachers"]);
   });
+  it("keeps whole-route navigations instead of dropping them", () => {
+    // Route timing is a different kind of measurement ("Navegación"), so a
+    // filter that only accepted active/content silently discarded every row.
+    const series = summarizeNavTimings([
+      row({ kind: "route", phase: "navigate", samples: 5, sum_ms: 1500, max_ms: 420, p50_ms: 280, p90_ms: 400 }),
+    ]);
+
+    expect(series).toHaveLength(1);
+    expect(series[0]?.kind).toBe("route");
+    expect(series[0]?.phases[0]?.phase).toBe("navigate");
+    expect(series[0]?.samples).toBe(5);
+  });
 });

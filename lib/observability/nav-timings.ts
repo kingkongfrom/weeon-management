@@ -16,7 +16,8 @@ import { createPlatformClient } from "@/lib/supabase/platform";
  * here is the service-role one.
  */
 export type NavTimingPhase = {
-  phase: "active" | "content";
+  /** Wall time for a whole route change, vs. the two aula-virtual phases. */
+  phase: "active" | "content" | "navigate";
   /** Weighted mean across the window (sum of durations / samples). */
   avgMs: number;
   p50Ms: number;
@@ -61,9 +62,12 @@ type Row = {
  * Budgets the panel colours against. A subject switch should feel instant; the
  * numbers come from weeon-teachers/docs/aula-virtual.md § Performance.
  */
-export const NAV_BUDGET_MS: Record<"active" | "content", number> = {
+export const NAV_BUDGET_MS: Record<"active" | "content" | "navigate", number> = {
   active: 50,
   content: 100,
+  // A whole screen, not one interaction: the ceiling for a full navigation
+  // on school Wi-Fi once it still reads as instant.
+  navigate: 300,
 };
 
 function round(value: number): number {
@@ -121,7 +125,13 @@ export function summarizeNavTimings(rows: Row[]): NavTimingSeries[] {
   const bySeries = new Map<string, NavTimingSeries>();
 
   for (const bucket of perKey.values()) {
-    if (bucket.phase !== "active" && bucket.phase !== "content") continue;
+    if (
+      bucket.phase !== "active" &&
+      bucket.phase !== "content" &&
+      bucket.phase !== "navigate"
+    ) {
+      continue;
+    }
     const seriesKey = `${bucket.surface}|${bucket.route}|${bucket.kind}`;
     const series =
       bySeries.get(seriesKey) ??
