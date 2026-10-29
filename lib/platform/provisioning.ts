@@ -304,3 +304,17 @@ export async function revokeOnboardingUploadLink(
 ): Promise<{ ok: true } | ProvisioningUnavailable> {
   return call("DELETE", "/api/ops/onboarding/upload-links", { linkId });
 }
+
+/**
+ * Sends the link with Weeon's own branded email instead of the operator's mail
+ * client, so the message comes from us and the copy is the approved one.
+ */
+export async function sendOnboardingUploadLink(input: {
+  to: string;
+  schoolName: string;
+  uploadUrl: string;
+  expiresAt: string;
+  note?: string | null;
+}): Promise<{ ok: true; sent: true } | ProvisioningUnavailable> {
+  return post("/api/ops/onboarding/send-link", input);
+}

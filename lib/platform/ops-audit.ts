@@ -16,6 +16,7 @@ export type TenantOpsAction =
   | "status.active"
   | "demo.extended"
   | "data.link_created"
+  | "data.link_sent"
   | "data.link_revoked";
 
 export type OpsAuditActor = {

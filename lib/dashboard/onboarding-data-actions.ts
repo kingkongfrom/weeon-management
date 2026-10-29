@@ -6,6 +6,7 @@ import {
   createOnboardingUploadLink,
   listOnboardingUploads,
   revokeOnboardingUploadLink,
+  sendOnboardingUploadLink,
   type OnboardingUploadView,
 } from "@/lib/platform/provisioning";
 
@@ -71,8 +72,7 @@ export async function createUploadLinkAction(input: {
   };
 }
 
-export async function revokeUploadLinkAction(input: {
-  tenantId: string;
+export async function revokeUploadLinkAction(input: {  tenantId: string;
   linkId: string;
 }): Promise<{ status: "ok" } | { status: "error"; error: string }> {
   const { user, sessionUser } = await getPlatformSession();
@@ -90,6 +90,48 @@ export async function revokeUploadLinkAction(input: {
     target: input.linkId,
     beforeValue: null,
     afterValue: null,
+  });
+
+  return { status: "ok" };
+}
+
+/**
+ * Emails the freshly minted link from the server with Weeon's letter.
+ *
+ * Replaces the old `mailto:` handoff, which opened the operator's own mail
+ * client: the school should receive the approved message from us, and the link
+ * should not sit in a personal outbox.
+ */
+export async function sendUploadLinkAction(input: {
+  tenantId: string;
+  linkId: string;
+  to: string;
+  schoolName: string;
+  uploadUrl: string;
+  expiresAt: string;
+  note?: string | null;
+}): Promise<{ status: "ok" } | { status: "error"; error: string }> {
+  const { user, sessionUser } = await getPlatformSession();
+  if (!user) {
+    return { status: "error", error: "Su sesión expiró. Vuelva a iniciar sesión." };
+  }
+
+  const result = await sendOnboardingUploadLink({
+    to: input.to,
+    schoolName: input.schoolName,
+    uploadUrl: input.uploadUrl,
+    expiresAt: input.expiresAt,
+    note: input.note ?? null,
+  });
+  if (!result.ok) return { status: "error", error: result.error };
+
+  await writeTenantOpsAudit({
+    tenantId: input.tenantId,
+    actor: { userId: user.id, email: sessionUser?.email ?? null },
+    action: "data.link_sent",
+    target: input.linkId,
+    beforeValue: null,
+    afterValue: { emailedTo: input.to.trim().toLowerCase() },
   });
 
   return { status: "ok" };

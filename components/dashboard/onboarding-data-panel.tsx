@@ -16,6 +16,7 @@ import {
   createUploadLinkAction,
   loadOnboardingUploads,
   revokeUploadLinkAction,
+  sendUploadLinkAction,
 } from "@/lib/dashboard/onboarding-data-actions";
 import type { OnboardingUploadView } from "@/lib/platform/provisioning";
 import { actionButtonPrimaryClass, actionButtonSecondaryClass } from "@/lib/ui/action-button";
@@ -61,11 +62,6 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Message Ops forwards to the school, so nobody has to improvise it. */
-function schoolMessage(url: string, schoolName: string) {
-  return `Hola, le compartimos el enlace para enviar los datos de ${schoolName} a Weeon. Ahí puede subir el archivo con estudiantes, encargados y docentes de su sistema actual. El enlace es personal y vence en 7 días: ${url}`;
-}
-
 export function OnboardingDataPanel({
   tenantId,
   tenantName,
@@ -82,6 +78,13 @@ export function OnboardingDataPanel({
   const [label, setLabel] = useState("");
   const [newUrl, setNewUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailNotice, setEmailNotice] = useState<string | null>(null);
+  const [newLink, setNewLink] = useState<{
+    id: string;
+    expiresAt: string;
+  } | null>(null);
 
   // A demo tenant is a prospect who has not decided yet: asking for their real
   // roster at that stage is pressure, not onboarding. The request opens once
@@ -116,9 +119,32 @@ export function OnboardingDataPanel({
       return;
     }
     setNewUrl(result.url);
+    setNewLink({ id: result.linkId, expiresAt: result.expiresAt });
+    setEmailTo("");
+    setEmailNotice(null);
     setLabel("");
     setCopied(false);
     void refresh();
+  }
+
+  async function sendEmail() {
+    if (!newUrl || !newLink) return;
+    setSendingEmail(true);
+    setEmailNotice(null);
+    const result = await sendUploadLinkAction({
+      tenantId,
+      linkId: newLink.id,
+      to: emailTo.trim(),
+      schoolName: tenantName,
+      uploadUrl: newUrl,
+      expiresAt: newLink.expiresAt,
+    });
+    setSendingEmail(false);
+    if (result.status === "error") {
+      setError(result.error);
+      return;
+    }
+    setEmailNotice(`Enviado a ${emailTo.trim()}.`);
   }
 
   async function revoke(linkId: string) {
@@ -219,13 +245,6 @@ export function OnboardingDataPanel({
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copiado" : "Copiar enlace"}
             </button>
-            <a
-              href={`mailto:?subject=${encodeURIComponent(`Datos de ${tenantName} para Weeon`)}&body=${encodeURIComponent(schoolMessage(newUrl, tenantName))}`}
-              className={actionButtonSecondaryClass()}
-            >
-              <Mail className="h-4 w-4" />
-              Enviar por correo
-            </a>
             <button
               type="button"
               onClick={() => setNewUrl(null)}
@@ -234,6 +253,40 @@ export function OnboardingDataPanel({
               Listo
             </button>
           </div>
+
+          {/* Sent by our own mail stack, not the operator's mail client. */}
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-brand-500/20 pt-3">
+            <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/55">
+                Enviar al correo del colegio
+              </span>
+              <input
+                type="email"
+                value={emailTo}
+                onChange={(event) => setEmailTo(event.target.value)}
+                placeholder="direccion@colegio.ac.cr"
+                className="h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-foreground outline-none focus:border-brand-500 focus:ring-[3px] focus:ring-brand-500/15"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void sendEmail()}
+              disabled={sendingEmail || !emailTo.trim()}
+              className={actionButtonPrimaryClass()}
+            >
+              {sendingEmail ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="h-4 w-4" />
+              )}
+              Enviar por correo
+            </button>
+          </div>
+          {emailNotice ? (
+            <p className="mt-2 text-[12px] font-medium text-emerald-700 dark:text-emerald-400">
+              {emailNotice}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
