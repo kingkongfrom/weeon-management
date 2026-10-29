@@ -371,8 +371,6 @@ export function ObservabilityPanel({
         )}
       </section>
 
-      <NavTimingSection snapshot={navTimings} />
-
       {snapshot.reason ? (
         <p className="rounded-xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm font-medium text-warning">
           {snapshot.reason}
@@ -404,6 +402,17 @@ export function ObservabilityPanel({
             locale={locale}
           />
         ))}
+      </div>
+
+      {/* Self-hosted, own feature: teacher-web interaction latency measured in
+          the browser. It sat between the uptime probes and the Sentry summary,
+          which made it read as part of Sentry — it has no Sentry data at all.
+          A rule and its own block keep the two sources visually separate. */}
+      <div className="mt-2 border-t border-border pt-6">
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/35">
+          Telemetría propia del producto — no viene de Sentry
+        </p>
+        <NavTimingSection snapshot={navTimings} />
       </div>
     </div>
   );
