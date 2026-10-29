@@ -27,7 +27,6 @@ import { useT } from "@/lib/i18n/client";
 import { opsEmailTone } from "@/lib/ops-email/messages-tone";
 import type { OpsEmailFolder } from "@/lib/ops-email/folders";
 import { OpsEmailReadingPane } from "@/components/ops-email/ops-email-reading-pane";
-import { Tooltip } from "@/components/ui/tooltip";
 import { OpsUnreadCountBadge } from "@/components/ops-email/ops-unread-count-badge";
 import { OpsEmailAutoReplyDialog } from "@/components/ops-email/ops-email-auto-reply-dialog";
 import { OpsEmailNewFolderDialog } from "@/components/ops-email/ops-email-new-folder-dialog";
@@ -61,12 +60,6 @@ import {
 const OPS_EMAIL = "/dashboard/email";
 const OPS_EMAIL_SETTINGS = "/dashboard/email/configuracion";
 const OPS_COMPOSE = "/dashboard/email/nuevo";
-
-/** List vs reading split beside folder sidebar (35% / 65%). */
-const MAIL_LIST_PANE =
-  "min-w-[14rem] w-[35%] max-w-[35%] shrink-0 basis-[35%] overflow-hidden";
-const MAIL_READ_PANE =
-  "flex min-h-0 min-w-[16rem] w-[65%] max-w-[65%] shrink-0 basis-[65%] flex-col overflow-hidden";
 
 function opsComposeHref(row: OpsMailboxMessage): string {
   if (row.kind === "inbound") {
@@ -132,6 +125,9 @@ export function OpsEmailWorkspace({
   const [composeDrafts, setComposeDrafts] = useState<OpsComposeDraft[]>([]);
   const [failedOnly, setFailedOnly] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileFoldersOpen, setMobileFoldersOpen] = useState(false);
+  /** Phone: the reading pane replaces the list; back returns to the list. */
+  const [readingOpen, setReadingOpen] = useState(false);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -264,6 +260,29 @@ export function OpsEmailWorkspace({
     void markOpsInboundReadAction(openRow.id);
   }, [openRow]);
 
+  useEffect(() => {
+    if (!mobileFoldersOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileFoldersOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mobileFoldersOpen]);
+
+  function openMessage(id: string) {
+    setSelectedId(id);
+    setReadingOpen(true);
+  }
+
+  function selectFolder() {
+    setMobileFoldersOpen(false);
+  }
+
   const folders: Array<{
     id: OpsEmailFolder | "drafts";
     label: string;
@@ -344,103 +363,104 @@ export function OpsEmailWorkspace({
         </p>
       ) : null}
 
-      <div className="flex items-center">
-        <div className="flex w-56 shrink-0 items-center gap-2 px-2">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((current) => !current)}
-            className={cn(
-              "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:hidden",
-              opsEmailTone.primaryButton,
-            )}
-            aria-label={t.shell.expandMenu}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <Link
-            href={OPS_COMPOSE}
-            className="inline-flex h-10 w-full items-center gap-2.5 rounded-xl bg-[#0891B2] px-3 text-sm font-semibold text-white hover:bg-[#0e7490]"
-          >
-            <PenSquare className="h-4 w-4" />
-            {t.opsEmail.composeMessage}
-          </Link>
-        </div>
-        <div className="flex min-w-0 flex-1 items-center max-lg:hidden">
-          <div className={cn("flex items-center gap-2", MAIL_LIST_PANE)}>
-          <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t.opsEmail.searchMessages}
-              className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-brand-400"
-            />
-          </div>
-          <div className="ml-2 flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setFailedOnly((current) => !current)}
-              aria-pressed={failedOnly}
-              disabled={folder !== "sent" && folder !== "inbox"}
-              className={cn(
-                "inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-sm font-semibold disabled:opacity-40",
-                failedOnly ? opsEmailTone.unreadFilterActive : "border-border text-foreground/70",
-              )}
-            >
-              <Mail className="h-4 w-4" />
-              {folder === "sent"
-                ? t.opsEmail.failedOnly
-                : folder === "inbox"
-                  ? t.opsEmail.unreadOnly
-                  : t.opsEmail.unreadOnly}
-            </button>
-            <Tooltip content={t.opsEmail.printList} placement="bottom">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60"
-                aria-label={t.opsEmail.printList}
-              >
-                <Printer className="h-4 w-4" />
-              </button>
-            </Tooltip>
-            <Tooltip content={t.opsEmail.refreshList} placement="bottom">
-              <button
-                type="button"
-                disabled={refreshing}
-                onClick={() => {
-                  setRefreshing(true);
-                  router.refresh();
-                  window.setTimeout(() => setRefreshing(false), 800);
-                }}
-                aria-label={t.opsEmail.refreshList}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground/60 disabled:opacity-60"
-              >
-                <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-              </button>
-            </Tooltip>
-          </div>
-          </div>
-        </div>
-      </div>
+      {/* Toolbar: one row on every size — folders, compose, search, filter. */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setMobileFoldersOpen(true)}
+          className={cn(
+            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border text-foreground/65 lg:hidden",
+          )}
+          aria-label={t.opsEmail.navFolders}
+          aria-haspopup="dialog"
+          aria-expanded={mobileFoldersOpen}
+        >
+          <Menu className="h-5 w-5" aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((current) => !current)}
+          className={cn(
+            "hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:inline-flex",
+            opsEmailTone.primaryButton,
+          )}
+          aria-label={t.shell.expandMenu}
+        >
+          <Menu className="h-5 w-5" aria-hidden />
+        </button>
 
-      <div className="flex items-center gap-2 lg:hidden">
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35" />
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35"
+            aria-hidden
+          />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            type="search"
+            enterKeyHint="search"
+            autoComplete="off"
             placeholder={t.opsEmail.searchMessages}
-            className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-brand-400"
+            aria-label={t.opsEmail.searchMessages}
+            className="h-11 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-base outline-none focus:border-brand-400 sm:h-10 lg:text-sm"
           />
         </div>
+
+        <button
+          type="button"
+          onClick={() => setFailedOnly((current) => !current)}
+          aria-pressed={failedOnly}
+          disabled={folder !== "sent" && folder !== "inbox"}
+          aria-label={folder === "sent" ? t.opsEmail.failedOnly : t.opsEmail.unreadOnly}
+          className={cn(
+            "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold disabled:opacity-40 sm:h-10 sm:px-3 sm:text-sm",
+            failedOnly ? opsEmailTone.unreadFilterActive : "border-border text-foreground/70",
+          )}
+        >
+          <Mail className="h-4 w-4" aria-hidden />
+          <span className="hidden sm:inline">
+            {folder === "sent" ? t.opsEmail.failedOnly : t.opsEmail.unreadOnly}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          disabled={refreshing}
+          onClick={() => {
+            setRefreshing(true);
+            router.refresh();
+            window.setTimeout(() => setRefreshing(false), 800);
+          }}
+          aria-label={t.opsEmail.refreshList}
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border text-foreground/60 disabled:opacity-60 sm:h-10 sm:w-10"
+        >
+          <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} aria-hidden />
+        </button>
+
+        <Link
+          href={OPS_COMPOSE}
+          aria-label={t.opsEmail.composeMessage}
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[#0891B2] px-3 text-sm font-semibold text-white hover:bg-[#0e7490] sm:h-10"
+        >
+          <PenSquare className="h-4 w-4" aria-hidden />
+          <span className="hidden md:inline">{t.opsEmail.composeMessage}</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => window.print()}
+          aria-label={t.opsEmail.printList}
+          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-foreground/60 xl:inline-flex"
+        >
+          <Printer className="h-4 w-4" aria-hidden />
+        </button>
       </div>
 
-      <div className="flex h-[calc(100dvh-8rem)] min-h-[28rem] w-full overflow-x-auto rounded-2xl border border-border bg-surface">
+      <div className="flex h-[calc(100dvh-10.5rem)] min-h-[28rem] w-full overflow-hidden rounded-2xl border border-border bg-surface lg:h-[calc(100dvh-8rem)]">
         <aside
           className={cn(
-            "flex w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border px-2 py-3",
-            !sidebarOpen && "hidden lg:flex",
+            "flex w-56 shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain border-r border-border px-2 py-3 [-webkit-overflow-scrolling:touch]",
+            !sidebarOpen && "hidden",
           )}
         >
           <p className="mb-2 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">
@@ -454,6 +474,7 @@ export function OpsEmailWorkspace({
               <Link
                 key={item.id}
                 href={item.href}
+                onClick={selectFolder}
                 className={cn(
                   ACTION_NAV_LINK,
                   active
@@ -494,6 +515,7 @@ export function OpsEmailWorkspace({
                   <Link
                     key={label.id}
                     href={`${OPS_EMAIL}?label=${label.id}`}
+                    onClick={selectFolder}
                     className={cn(
                       "inline-flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold transition-colors",
                       active ? opsEmailTone.activeLabelNav : "text-foreground/70 hover:bg-surface-muted/60",
@@ -544,6 +566,7 @@ export function OpsEmailWorkspace({
             <div className="ml-2 flex flex-col gap-0.5 border-l border-border pl-2">
               <Link
                 href={OPS_EMAIL_SETTINGS}
+                onClick={selectFolder}
                 className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-foreground/70 transition-colors hover:bg-surface-muted/60 hover:text-foreground"
               >
                 <PenSquare className="h-4 w-4" />
@@ -565,7 +588,11 @@ export function OpsEmailWorkspace({
         </aside>
 
         <section
-          className={cn("flex flex-col overflow-y-auto border-r border-border", MAIL_LIST_PANE)}
+          className={cn(
+            "flex min-w-0 flex-col overflow-y-auto overscroll-contain border-r border-border [-webkit-overflow-scrolling:touch]",
+            "w-full flex-1 basis-full lg:w-[35%] lg:max-w-[35%] lg:flex-none lg:basis-[35%]",
+            readingOpen && "hidden lg:flex",
+          )}
         >
           {folder === "sent" && failedCount > 0 && !failedOnly ? (
             <div className="border-b border-border px-4 py-3">
@@ -642,7 +669,7 @@ export function OpsEmailWorkspace({
                     <div
                       role="button"
                       tabIndex={0}
-                      onClick={() => setSelectedId(row.id)}
+                      onClick={() => openMessage(row.id)}
                       onDoubleClick={() => router.push(opsComposeHref(row))}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
@@ -651,7 +678,7 @@ export function OpsEmailWorkspace({
                         }
                       }}
                       className={cn(
-                        "flex w-full cursor-pointer items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-muted/35",
+                        "flex min-h-[4.25rem] w-full cursor-pointer items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-surface-muted/35 active:bg-surface-muted/50 sm:px-4 sm:py-3.5",
                         active && opsEmailTone.selectedRow,
                       )}
                     >
@@ -691,7 +718,12 @@ export function OpsEmailWorkspace({
           )}
         </section>
 
-        <div className={MAIL_READ_PANE}>
+        <div
+          className={cn(
+            "min-w-0 flex-1 flex-col overflow-hidden lg:flex lg:w-[65%] lg:max-w-[65%] lg:flex-none lg:basis-[65%]",
+            readingOpen ? "flex" : "hidden",
+          )}
+        >
           <OpsEmailReadingPane
             message={openRow}
             folder={folder}
@@ -699,9 +731,129 @@ export function OpsEmailWorkspace({
             isFavorite={openRowKey ? favoriteKeys.has(openRowKey) : false}
             onToggleFavorite={toggleFavoriteForOpen}
             onMoveToTrash={moveOpenToTrash}
+            onBack={() => setReadingOpen(false)}
           />
         </div>
       </div>
+
+      {/* Phone: folders and settings, same destinations as the desktop rail. */}
+      {mobileFoldersOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t.opsEmail.messagesTitle}>
+          <button
+            type="button"
+            aria-label={t.opsEmail.backToList}
+            onClick={() => setMobileFoldersOpen(false)}
+            className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-2xl border-t border-border bg-surface shadow-elevated"
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
+              <p className="text-base font-bold text-foreground">{t.opsEmail.messagesTitle}</p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setNewFolderOpen(true)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-[#0891B2]"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  {t.opsEmail.newFolder}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileFoldersOpen(false)}
+                  aria-label={t.opsEmail.backToList}
+                  className="grid h-9 w-9 place-items-center rounded-lg text-foreground/50 active:bg-surface-muted"
+                >
+                  <ChevronDown className="h-5 w-5" aria-hidden />
+                </button>
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 [-webkit-overflow-scrolling:touch]">
+              <ul>
+                {folders.map((item) => {
+                  const Icon = item.icon;
+                  const folderKey = item.id === "drafts" ? "draft" : item.id;
+                  const active = !labelId && folder === folderKey;
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        href={item.href}
+                        onClick={selectFolder}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex min-h-12 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold ${
+                          active
+                            ? "bg-[#0891B2]/10 text-[#0e7490] dark:text-[#67e8f9]"
+                            : "text-foreground/80 active:bg-surface-muted"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 shrink-0 text-foreground/50" aria-hidden />
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        {item.id === "inbox" || item.id === "sent" ? (
+                          <OpsUnreadCountBadge count={item.inboxBadge ?? 0} />
+                        ) : null}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <p className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
+                {t.opsEmail.foldersSection}
+              </p>
+              <ul>
+                {localLabels.map((label) => (
+                  <li key={label.id}>
+                    <Link
+                      href={`${OPS_EMAIL}?label=${label.id}`}
+                      onClick={selectFolder}
+                      className="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-semibold text-foreground/80 active:bg-surface-muted"
+                    >
+                      <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: label.color }} />
+                      <span className="min-w-0 flex-1 truncate">{label.name}</span>
+                      <span className="text-xs font-medium text-foreground/40">{label.threadCount}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-widest text-foreground/40">
+                {t.opsEmail.settingsSection}
+              </p>
+              <ul>
+                <li>
+                  <Link
+                    href={OPS_EMAIL_SETTINGS}
+                    onClick={selectFolder}
+                    className="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-semibold text-foreground/80 active:bg-surface-muted"
+                  >
+                    <PenSquare className="h-5 w-5 text-foreground/50" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{t.opsEmail.mailboxSignatureLink}</span>
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileFoldersOpen(false);
+                      setAutoReplyOpen(true);
+                    }}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[15px] font-semibold text-foreground/80 active:bg-surface-muted"
+                  >
+                    <CalendarClock className="h-5 w-5 text-foreground/50" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{t.opsEmail.autoReplyTitle}</span>
+                    {localMailboxSettings.autoReplyEnabled ? (
+                      <span className={cn("h-2 w-2 rounded-full", opsEmailTone.unreadDot)} aria-hidden />
+                    ) : null}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <OpsEmailNewFolderDialog
         open={newFolderOpen}

@@ -33,6 +33,7 @@ shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS)
 | `weeon-tenants/docs/finance-module.md` | Finance scope (cross-repo product spec) |
 | `weeon-tenants/docs/payments-rails.md` | SaaS vs parent payment providers |
 | `docs/audit-log.md` | Platform-internal audit tables (`tenant_backups`, `tenant_restore_log`, `tenant_admin_log`, …) |
+| `docs/calendar.md` | **Ops landing page** — date/weather band + Cal.com week strip (read-only bookings) |
 | `docs/ui.md` | **Ops form controls** — use `components/ui/select`, not native `<select>`; CR timestamps |
 | `docs/security.md` | Secret handling & platform-scope authorization (read before wiring credentials) |
 | `docs/security-incidents.md` | Personal-data breach runbook (PRODHAB 5-day timeline) |

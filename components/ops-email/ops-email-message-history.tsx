@@ -14,7 +14,7 @@ import { opsEmailTone } from "@/lib/ops-email/messages-tone";
 
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[5.5rem_1fr] gap-x-3 text-sm leading-snug sm:grid-cols-[6.5rem_1fr]">
+    <div className="grid grid-cols-[4.25rem_1fr] gap-x-3 text-sm leading-snug sm:grid-cols-[6.5rem_1fr]">
       <span className="font-semibold text-foreground/50">{label}</span>
       <span className="min-w-0 break-words font-medium text-foreground/90">{value}</span>
     </div>
@@ -50,7 +50,7 @@ export function OpsEmailMessageHistory({
 
   return (
     <div className="pb-4">
-      <div className="space-y-10">
+      <div className="space-y-6 sm:space-y-10">
         {ordered.map((message, index) => {
           const isLatest = index === 0;
           const isMine = isLatest && isLatestMine;
@@ -59,28 +59,28 @@ export function OpsEmailMessageHistory({
             index === ordered.length - 1 ? t.opsEmail.threadSectionInitial : t.opsEmail.threadSectionReply;
 
           return (
-            <article key={message.id} className={cn(!isLatest && "border-t border-border/60 pt-8")}>
+            <article key={message.id} className={cn(!isLatest && "border-t border-border/60 pt-5 sm:pt-8")}>
               {!isLatest ? (
-                <p className="mb-4 text-sm font-medium text-foreground/45">{sectionLabel}:</p>
+                <p className="mb-3 text-sm font-medium text-foreground/45 sm:mb-4">{sectionLabel}:</p>
               ) : null}
-              <header className="flex items-start gap-3">
+              <header className="flex items-start gap-2.5 sm:gap-3">
                 <span
                   className={cn(
-                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold sm:h-11 sm:w-11",
                     opsEmailTone.avatar,
                   )}
                   aria-hidden
                 >
                   {initialsFromName(isMine ? t.opsEmail.you : parseFromLabel(message.fromLabel).name)}
                 </span>
-                <div className="min-w-0 flex-1 space-y-3">
+                <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-3">
                   <MetaRow label={t.opsEmail.historyFrom} value={authorName} />
                   <MetaRow label={t.opsEmail.toLabel} value={message.toLabel} />
                   <MetaRow label={t.opsEmail.historySent} value={formatComposeLongSent(message.sentAt)} />
                   <MetaRow label={t.opsEmail.subject} value={message.subject || subjectLine} />
                 </div>
               </header>
-              <div className="mt-4 border-l-[3px] border-foreground/12 pl-5">
+              <div className="mt-3 border-l-[3px] border-foreground/12 pl-3 sm:mt-4 sm:pl-5">
                 <OpsMessageBodyView message={message} />
               </div>
             </article>

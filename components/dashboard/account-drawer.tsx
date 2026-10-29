@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { LogoMark } from "@/components/logo";
 import { SignOutButton } from "@/components/dashboard/sign-out-button";
+import { ChangePasswordDialog } from "@/components/dashboard/change-password-dialog";
 import { UserAvatar } from "@/components/dashboard/user-avatar";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import {
@@ -69,6 +70,7 @@ export function AccountDrawer({
   const t = useT();
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [savingAvatar, setSavingAvatar] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const displayName = sessionUser?.name?.trim() || t.drawer.nameFallback;
   const roleLabel = sessionUser?.role?.trim() || t.drawer.roleFallback;
@@ -170,20 +172,20 @@ export function AccountDrawer({
                     avatarUrl ? t.drawer.changePhoto : t.drawer.uploadPhoto
                   }
                   title={avatarUrl ? t.drawer.changePhoto : t.drawer.uploadPhoto}
-                  className="group relative shrink-0 rounded-2xl outline-none ring-offset-2 ring-offset-surface transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                  className="group relative shrink-0 rounded-[1.35rem] outline-none ring-offset-2 ring-offset-surface transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
                 >
-                  <UserAvatar initials={initials} src={avatarUrl} size="md" />
+                  <UserAvatar initials={initials} src={avatarUrl} size="drawer" />
                   {savingAvatar ? (
                     <span
                       aria-hidden
-                      className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/45"
+                      className="absolute inset-0 flex items-center justify-center rounded-[1.35rem] bg-black/45"
                     >
                       <SpinnerIcon />
                     </span>
                   ) : (
                     <span
                       aria-hidden
-                      className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                      className="absolute inset-0 flex items-center justify-center rounded-[1.35rem] bg-black/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
                     >
                       <CameraIcon />
                     </span>
@@ -217,7 +219,9 @@ export function AccountDrawer({
               </div>
 
               <div className="mt-5 flex items-center gap-3 rounded-2xl bg-surface-muted px-4 py-3">
-                <LogoMark className="h-8 w-8 shrink-0" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                  <LogoMark className="h-9 w-9" />
+                </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">
                     {t.drawer.orgName}
@@ -262,16 +266,27 @@ export function AccountDrawer({
                   </span>
                   <StatusSwitch checked={isDark} onCheckedChange={toggleTheme} showLabel={false} />
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setPasswordOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                  <LockIcon />
+                  {t.drawer.changePassword}
+                </button>
               </div>
             </div>
 
-            <div className="border-t border-border px-5 py-4">
+            <div className="px-5 py-4">
               <p className="mb-3 text-center text-xs font-medium text-foreground/45">
                 {t.drawer.version("0.1.0")}
               </p>
               <SignOutButton variant="drawer" label={t.signOut.label} />
             </div>
           </motion.aside>
+
+          <ChangePasswordDialog open={passwordOpen} onClose={() => setPasswordOpen(false)} />
         </div>
       ) : null}
     </AnimatePresence>,
@@ -317,6 +332,15 @@ function GlobeIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-foreground/70">
+      <rect x="4" y="10" width="16" height="11" rx="2.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

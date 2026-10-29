@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Building2, KeyRound, LayoutDashboard, Mail, Rocket, ShieldCheck } from "lucide-react";
+import { Activity, CalendarClock, Building2, Home, KeyRound, LayoutDashboard, Mail, Rocket, ShieldCheck } from "lucide-react";
 import { isNavItemActive } from "@/lib/dashboard/nav";
 import { useT } from "@/lib/i18n/client";
 import type { ObservabilityNavState } from "@/lib/observability/observability-nav";
 
 const NAV_ITEMS = [
-  { id: "analytics" as const, href: "/dashboard", icon: LayoutDashboard, labelKey: "analytics" as const, section: "primary" as const },
+  { id: "dashboard" as const, href: "/dashboard", icon: Home, labelKey: "dashboard" as const, section: "primary" as const },
+  { id: "analytics" as const, href: "/dashboard/analytics", icon: LayoutDashboard, labelKey: "analytics" as const, section: "primary" as const },
+  { id: "meetings" as const, href: "/dashboard/meetings", icon: CalendarClock, labelKey: "meetings" as const, section: "primary" as const },
   { id: "onboarding" as const, href: "/dashboard/onboarding", icon: Rocket, labelKey: "onboarding" as const, section: "primary" as const },
   { id: "tenants" as const, href: "/dashboard/tenants", icon: Building2, labelKey: "tenants" as const, section: "primary" as const },
   { id: "email" as const, href: "/dashboard/email", icon: Mail, labelKey: "email" as const, section: "primary" as const },

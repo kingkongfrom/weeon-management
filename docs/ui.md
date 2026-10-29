@@ -96,6 +96,34 @@ animated segmented pill (`segmented-tabs.tsx` is legacy / other surfaces only).
 
 Shareable example: `/dashboard/tenants/{id}?section=activity`.
 
+## Mobile bottom nav
+
+Five destination rows at most — never one icon per route. The bar carries the
+four daily stops (**Inicio · Agenda · Colegios · Correo**) plus **Menú**, which
+opens a bottom sheet with every destination grouped *Principal · Operación ·
+Administración* (icon + full label, 48px rows). Health keeps its red dot on the
+Menú button; the current page inside the sheet shows an "Aquí" pill.
+
+Implementation: `components/dashboard/mobile-nav.tsx`. Labels use the
+`…Short` keys in `lib/i18n/messages.ts` so the bar never truncates ("Agenda",
+"Colegios", "Correo", "Menú").
+
+## Ops Correo on phones
+
+The mailbox keeps three panes on desktop (`lg+`) but behaves like the mobile
+apps below that: **list → reader → back**, never three squeezed columns.
+
+| Piece | Phone behaviour |
+| --- | --- |
+| Toolbar | one row: **folders** button (sheet), search (16px, native search keyboard), unread/failed filter (icon only), refresh, **Redactar** (icon + label from `md`) |
+| Folders | bottom sheet grouped Mensajes · Carpetas · Ajustes with unread badges — the same destinations as the desktop rail |
+| List | full width; each row ≥4.25rem, tap opens the reader (double-tap still opens reply on desktop) |
+| Reader | replaces the list with a sticky **← Volver a mensajes** bar; subject + reply/reply-all/forward/star/trash wrap in one row; meta rows 4.25rem labels |
+| Compose | edge-to-edge card on phones (`px-2`), unchanged desktop layout |
+
+Same iOS guards as the meetings page: `dvh` heights, `-webkit-overflow-scrolling`,
+`overscroll-contain`, body scroll locked while a sheet is open, Escape closes.
+
 ## Related docs
 
 - Workspace styling tokens: `../docs/engineering.md` § Styling & tokens

@@ -1,5 +1,9 @@
 import { Activity, AlertTriangle, CheckCircle2, ExternalLink } from "lucide-react";
 import type { Messages } from "@/lib/i18n/messages";
+import {
+  NAV_BUDGET_MS,
+  type NavTimingSnapshot,
+} from "@/lib/observability/nav-timings";
 import type {
   ObservabilitySnapshot,
   SentryIssueSummary,
@@ -15,6 +19,102 @@ function levelTone(level: string): string {
     return "bg-warning/10 text-warning";
   }
   return "bg-foreground/10 text-foreground/60";
+}
+
+/**
+ * Teacher-web perceived latency: subject-pill and tab interactions, measured on
+ * the client and aggregated per hour (`nav_timings`). Shows the two phases we
+ * budget for — feedback (`active`) and content painted — so a regression is a
+ * number here before a teacher reports it.
+ */
+function NavTimingSection({ snapshot }: { snapshot: NavTimingSnapshot }) {
+  const label = (phase: string) => (phase === "active" ? "Feedback" : "Contenido");
+  const budget = (phase: string) =>
+    phase === "active" ? NAV_BUDGET_MS.active : NAV_BUDGET_MS.content;
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-foreground/45">
+            Latencia de la app docente
+          </h2>
+          <p className="mt-1 text-sm text-foreground/55">
+            Cambios de materia y de pestaña en <code>teachers.weeon.school</code>, medidos en el
+            navegador y agregados por hora. Últimos {snapshot.windowDays} días.
+          </p>
+        </div>
+        <p className="text-xs font-semibold text-foreground/40">
+          {snapshot.totalSamples.toLocaleString("es-CR")} muestras
+        </p>
+      </div>
+
+      {snapshot.reason ? (
+        <p className="mt-4 rounded-xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm font-medium text-warning">
+          {snapshot.reason}
+        </p>
+      ) : snapshot.series.length === 0 ? (
+        <p className="mt-4 text-sm font-medium text-foreground/45">
+          Sin muestras todavía. La telemetría llega con el uso normal de la app docente.
+        </p>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[36rem] text-left text-sm">
+            <thead className="border-b border-border/70 text-xs font-semibold text-foreground/55">
+              <tr>
+                <th className="px-3 py-2">Pantalla</th>
+                <th className="px-3 py-2">Interacción</th>
+                <th className="px-3 py-2">Fase</th>
+                <th className="px-3 py-2 text-right">p50</th>
+                <th className="px-3 py-2 text-right">p90</th>
+                <th className="px-3 py-2 text-right">Máx</th>
+                <th className="px-3 py-2 text-right">Muestras</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {snapshot.series.slice(0, 12).map((series) =>
+                series.phases.map((phase) => {
+                  const over = phase.p90Ms > budget(phase.phase);
+                  return (
+                    <tr key={`${series.route}-${series.kind}-${phase.phase}`}>
+                      <td className="px-3 py-2 font-mono text-[11px] text-foreground/60">
+                        {series.route}
+                      </td>
+                      <td className="px-3 py-2 font-semibold text-foreground">
+                        {series.kind === "subject" ? "Materia" : "Pestaña"}
+                      </td>
+                      <td className="px-3 py-2 text-foreground/70">{label(phase.phase)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-foreground/70">
+                        {phase.p50Ms} ms
+                      </td>
+                      <td
+                        className={`px-3 py-2 text-right font-semibold tabular-nums ${
+                          over ? "text-error" : "text-success"
+                        }`}
+                        title={`Presupuesto: ${budget(phase.phase)} ms p90`}
+                      >
+                        {phase.p90Ms} ms
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-foreground/50">
+                        {phase.maxMs} ms
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-foreground/50">
+                        {phase.samples.toLocaleString("es-CR")}
+                      </td>
+                    </tr>
+                  );
+                }),
+              )}
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs text-foreground/45">
+            Presupuesto: feedback ≤ {NAV_BUDGET_MS.active} ms y contenido ≤ {NAV_BUDGET_MS.content}{" "}
+            ms en p90. Un p90 en rojo significa que la interacción ya se siente lenta.
+          </p>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function formatLastSeen(iso: string, locale: string): string {
@@ -183,10 +283,13 @@ function SurfaceCard({
 
 export function ObservabilityPanel({
   snapshot,
+  navTimings,
   t,
   locale,
 }: {
   snapshot: ObservabilitySnapshot;
+  /** Teacher-web navigation timings over the last week. */
+  navTimings: NavTimingSnapshot;
   t: Messages;
   locale: string;
 }) {
@@ -267,6 +370,8 @@ export function ObservabilityPanel({
           <p className="mt-3 text-sm font-medium text-success">{t.observability.uptimeSummaryUp}</p>
         )}
       </section>
+
+      <NavTimingSection snapshot={navTimings} />
 
       {snapshot.reason ? (
         <p className="rounded-xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm font-medium text-warning">

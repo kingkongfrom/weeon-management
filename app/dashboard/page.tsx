@@ -1,60 +1,80 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
-import { MarketingAnalyticsShell } from "@/components/analytics/marketing-analytics-shell";
-import { AnalyticsPageSkeleton } from "@/components/dashboard/skeleton";
-import {
-  loadMarketingAnalytics,
-  type MarketingAnalyticsRange,
-} from "@/lib/platform/marketing-analytics";
+import { DashboardDayBand } from "@/components/dashboard/dashboard-day-band";
+import { OpsWeekStrip } from "@/components/dashboard/ops-week-strip";
+import { Skeleton } from "@/components/dashboard/skeleton";
+import { meetingsByWeekday } from "@/lib/calendar/week-window";
+import { loadWeekStrip } from "@/lib/calendar/week-strip";
+import { WEEON_OPS_TIME_ZONE } from "@/lib/datetime/costa-rica";
+import { getLocale } from "@/lib/i18n/server";
+import { loadOpsWeather } from "@/lib/weather/load-ops-weather";
 
-export const metadata: Metadata = {
-  title: "Analytics",
-};
-
-function parseRange(value: string | undefined): MarketingAnalyticsRange {
-  if (value === "7" || value === "90") return Number(value) as MarketingAnalyticsRange;
-  return 30;
+/** Today in Costa Rica civil time, as `YYYY-MM-DD`. */
+function opsTodayISO(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: WEEON_OPS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const pick = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return `${pick("year")}-${pick("month")}-${pick("day")}`;
 }
 
-async function AnalyticsContent({
-  searchParams,
-}: {
-  searchParams: Promise<{ range?: string }>;
-}) {
-  const params = await searchParams;
-  const rangeDays = parseRange(params.range);
-  const snapshot = await loadMarketingAnalytics(rangeDays);
+async function DayContent() {
+  const todayISO = opsTodayISO();
+  // One `now` for the whole render: the join windows on the strip and the
+  // table must agree, and the client must hydrate to the same value.
+  const now = new Date().toISOString();
+  const [weather, strip, locale] = await Promise.all([
+    loadOpsWeather(),
+    loadWeekStrip(todayISO),
+    getLocale(),
+  ]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <header>
-        <h1 className="brand-page-title text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Marketing analytics
-        </h1>
-        <p className="mt-1 text-sm font-medium text-foreground/55">
-          Geographic traffic on{" "}
-          <span className="font-semibold text-foreground/70">weeon.school</span>.
-        </p>
-        {snapshot.reason ? (
-          <p className="mt-3 rounded-xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm font-medium text-warning">
-            {snapshot.reason}
-          </p>
-        ) : null}
-      </header>
+    <>
+      <DashboardDayBand weather={weather} locale={locale} todayISO={todayISO} />
+      <OpsWeekStrip
+        days={meetingsByWeekday(strip.meetings, todayISO)}
+        todayISO={todayISO}
+        locale={locale}
+        snapshot={strip}
+        now={now}
+      />
+    </>
+  );
+}
 
-      <MarketingAnalyticsShell snapshot={snapshot} rangeDays={rangeDays} />
+function DaySkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-hidden>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-3.5 w-24" />
+        <Skeleton className="h-16 w-40" />
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Skeleton key={index} className="h-28 rounded-xl" />
+        ))}
+      </div>
     </div>
   );
 }
 
-export default function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ range?: string }>;
-}) {
+/**
+ * Ops landing dashboard: date, clock and weather top-left, then the week's
+ * demo meetings (mirrored from Cal.com into `demo_meetings`). More cards land
+ * here as the panel grows. Anything added must read across tenants through the
+ * platform client only.
+ */
+export default function DashboardHomePage() {
   return (
-    <Suspense fallback={<AnalyticsPageSkeleton />}>
-      <AnalyticsContent searchParams={searchParams} />
-    </Suspense>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <Suspense fallback={<DaySkeleton />}>
+        <DayContent />
+      </Suspense>
+    </div>
   );
 }

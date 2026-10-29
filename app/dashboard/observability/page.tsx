@@ -4,6 +4,7 @@ import { ObservabilityPanel } from "@/components/dashboard/observability-panel";
 import { Skeleton } from "@/components/dashboard/skeleton";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { loadObservabilitySnapshot } from "@/lib/observability/sentry-platform";
+import { loadNavTimingSnapshot } from "@/lib/observability/nav-timings";
 
 export const metadata: Metadata = {
   title: "Observability",
@@ -30,13 +31,16 @@ function ObservabilitySkeleton() {
 }
 
 async function ObservabilityContent() {
-  const [snapshot, t, locale] = await Promise.all([
+  const [snapshot, navTimings, t, locale] = await Promise.all([
     loadObservabilitySnapshot(),
+    loadNavTimingSnapshot(),
     getT(),
     getLocale(),
   ]);
 
-  return <ObservabilityPanel snapshot={snapshot} t={t} locale={locale} />;
+  return (
+    <ObservabilityPanel snapshot={snapshot} navTimings={navTimings} t={t} locale={locale} />
+  );
 }
 
 export default function ObservabilityPage() {

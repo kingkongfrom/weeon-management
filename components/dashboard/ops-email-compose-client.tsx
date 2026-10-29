@@ -20,9 +20,9 @@ export function OpsEmailComposeClient({
   draftId?: string | null;
 }) {
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-surface-muted/35 px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
+    <div className="min-h-[calc(100dvh-9rem)] bg-surface-muted/35 px-2 py-2 sm:px-6 sm:py-10 lg:px-10">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="rounded-2xl bg-surface px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-11">
+        <div className="rounded-xl bg-surface px-2 py-2 sm:rounded-2xl sm:px-10 sm:py-10 lg:px-12 lg:py-11">
           <OpsEmailCompose
             initial={initial}
             replyAllSeed={replyAllSeed}

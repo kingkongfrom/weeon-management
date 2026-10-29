@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { OpsEmailDeliveryFooter } from "@/components/ops-email/ops-email-delivery-footer";
 import { OpsEmailMessageHistory } from "@/components/ops-email/ops-email-message-history";
 import { OpsEmailThreadToolbar } from "@/components/ops-email/ops-email-thread-toolbar";
@@ -14,7 +14,7 @@ import { useT } from "@/lib/i18n/client";
 const OPS_COMPOSE = "/dashboard/email/nuevo";
 
 const readPaneHeaderClass =
-  "sticky top-0 z-10 flex items-start gap-2 border-b border-border bg-surface/95 px-4 pt-4 pb-3 backdrop-blur-sm sm:px-5 sm:pt-5 sm:pb-3.5";
+  "sticky top-0 z-10 flex flex-wrap items-start gap-2 border-b border-border bg-surface/95 px-3 pt-3 pb-2.5 backdrop-blur-sm sm:px-5 sm:pt-5 sm:pb-3.5";
 
 export function OpsEmailReadingPane({
   message,
@@ -23,6 +23,7 @@ export function OpsEmailReadingPane({
   isFavorite = false,
   onToggleFavorite,
   onMoveToTrash,
+  onBack,
   loading = false,
 }: {
   message: OpsMailboxMessage | null;
@@ -31,6 +32,8 @@ export function OpsEmailReadingPane({
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   onMoveToTrash?: () => void;
+  /** Phone only: returns to the message list (the pane replaces it). */
+  onBack?: () => void;
   loading?: boolean;
 }) {
   const t = useT();
@@ -96,20 +99,34 @@ export function OpsEmailReadingPane({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      {/* Phone: the reader replaces the list, so it needs its own way back. */}
+      <div className="flex items-center gap-1 border-b border-border/60 px-2 py-1.5 lg:hidden">
+        <button
+          type="button"
+          onClick={() => onBack?.()}
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-700 active:bg-surface-muted dark:text-brand-300"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          {t.opsEmail.backToList}
+        </button>
+      </div>
+
       <header className={readPaneHeaderClass}>
-        <h2 className="min-w-0 flex-1 text-base font-semibold leading-snug text-foreground sm:text-lg">
-          {message.subject}
-        </h2>
-        <OpsEmailThreadToolbar
-          message={message}
-          folder={folder}
-          isFavorite={isFavorite}
-          onToggleFavorite={() => onToggleFavorite?.()}
-          onMoveToTrash={() => onMoveToTrash?.()}
-          onOpenCompose={openCompose}
-          onOpenReplyAll={openReplyAll}
-          onOpenForward={openForward}
-        />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <h2 className="min-w-0 text-base font-semibold leading-snug text-foreground sm:text-lg">
+            {message.subject}
+          </h2>
+          <OpsEmailThreadToolbar
+            message={message}
+            folder={folder}
+            isFavorite={isFavorite}
+            onToggleFavorite={() => onToggleFavorite?.()}
+            onMoveToTrash={() => onMoveToTrash?.()}
+            onOpenCompose={openCompose}
+            onOpenReplyAll={openReplyAll}
+            onOpenForward={openForward}
+          />
+        </div>
       </header>
 
       <Tooltip
@@ -118,7 +135,7 @@ export function OpsEmailReadingPane({
         className="flex min-h-0 min-w-0 flex-1 flex-col"
       >
         <article
-          className="flex-1 cursor-pointer overflow-y-auto px-4 py-5 sm:px-5 hover:bg-surface-muted/20"
+          className="flex-1 cursor-pointer overflow-y-auto overscroll-contain px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-5 sm:py-5 hover:bg-surface-muted/20"
           onClick={(event) => {
             const target = event.target as HTMLElement;
             if (target.closest("button, a, input, [role='menu']")) return;

@@ -79,7 +79,7 @@ export function OpsEmailThreadToolbar({
   }, [menuOpen]);
 
   return (
-    <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+    <div className="flex shrink-0 flex-wrap items-center gap-1.5">
       {busy ? (
         <span className="inline-flex h-10 w-10 items-center justify-center text-foreground/35">
           <Loader2 className="h-5 w-5 animate-spin" />
