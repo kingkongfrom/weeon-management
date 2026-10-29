@@ -24,6 +24,7 @@ import {
   SCHOOL_COUNTRIES,
 } from "@/lib/platform/school-countries";
 import { actionButtonPrimaryClass, actionButtonSecondaryClass } from "@/lib/ui/action-button";
+import { OnboardingDataPanel } from "@/components/dashboard/onboarding-data-panel";
 
 type PreviewData = Extract<PreviewState, { status: "ok" }>["data"];
 type CreatedData = Extract<CreateDemoTenantResult, { ok: true }>;
@@ -570,6 +571,12 @@ function SuccessPanel({ data }: { data: CreatedData }) {
         <Link href="/dashboard/onboarding" className={SECONDARY}>
           Crear otro
         </Link>
+      </div>
+
+      {/* The tenant exists now, so this is the moment to ask the school for its
+          roster. Importing it is still an Ops job; this only opens the door. */}
+      <div className="mt-6">
+        <OnboardingDataPanel tenantId={data.tenantId} schoolName={data.tenantName} />
       </div>
     </section>
   );

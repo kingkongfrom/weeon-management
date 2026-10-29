@@ -14,7 +14,9 @@ export type TenantOpsAction =
   | "status.reactivate"
   | "status.past_due"
   | "status.active"
-  | "demo.extended";
+  | "demo.extended"
+  | "data.link_created"
+  | "data.link_revoked";
 
 export type OpsAuditActor = {
   userId: string;

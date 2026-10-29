@@ -196,3 +196,111 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     return { ok: false, error: GENERIC_FAILURE } as T;
   }
 }
+
+/** Shared plumbing for the GET/DELETE calls the onboarding data flow needs. */
+async function call<T>(
+  method: "GET" | "DELETE",
+  path: string,
+  body?: unknown,
+): Promise<T> {
+  const origin = provisioningOrigin();
+  const secret = provisioningSecret();
+  if (!origin || !secret) {
+    console.error(
+      "[provisioning] not configured: set WEEON_APP_ORIGIN and OPS_PROVISIONING_SECRET",
+    );
+    return { ok: false, error: NOT_CONFIGURED } as T;
+  }
+
+  try {
+    const res = await fetch(`${origin}${path}`, {
+      method,
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${secret}`,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const payload = (await res.json().catch(() => null)) as
+        | { error?: string }
+        | null;
+      console.error(
+        `[provisioning] ${method} ${path} failed (${res.status}):`,
+        payload?.error ?? "no error body",
+      );
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: NOT_CONFIGURED } as T;
+      }
+      return { ok: false, error: payload?.error ?? GENERIC_FAILURE } as T;
+    }
+
+    const payload = (await res.json()) as Record<string, unknown>;
+    return { ok: true, ...payload } as T;
+  } catch (err) {
+    console.error(`[provisioning] ${method} ${path} request error:`, err);
+    return { ok: false, error: GENERIC_FAILURE } as T;
+  }
+}
+
+// ── Onboarding data (school → Weeon file handover) ───────────────────────────
+// Design: `weeon-tenants/docs/school-import.md` → "Build spec: the school-side
+// upload link".
+
+export type UploadLinkState = "open" | "used" | "expired" | "revoked" | "exhausted";
+
+export type OnboardingUploadLink = {
+  id: string;
+  tenantId: string;
+  schoolName: string;
+  label: string | null;
+  expiresAt: string;
+  usedAt: string | null;
+  revokedAt: string | null;
+  uploadCount: number;
+  maxUploads: number;
+  state: UploadLinkState;
+};
+
+export type OnboardingUploadFile = {
+  id: string;
+  linkId: string;
+  fileName: string;
+  byteSize: number;
+  sha256: string;
+  uploadedAt: string;
+};
+
+export type OnboardingUploadView = {
+  links: OnboardingUploadLink[];
+  files: OnboardingUploadFile[];
+};
+
+/** Links minted for one school, plus the files it has sent. */
+export async function listOnboardingUploads(
+  tenantId: string,
+): Promise<(OnboardingUploadView & { ok: true }) | ProvisioningUnavailable> {
+  return call<OnboardingUploadView & { ok: true }>(
+    "GET",
+    `/api/ops/onboarding/upload-links?tenantId=${encodeURIComponent(tenantId)}`,
+  );
+}
+
+/** Mints a link. The returned `url` is the only time the token exists in clear. */
+export async function createOnboardingUploadLink(input: {
+  tenantId: string;
+  label?: string | null;
+}): Promise<
+  | { ok: true; linkId: string; url: string; expiresAt: string }
+  | ProvisioningUnavailable
+> {
+  return post("/api/ops/onboarding/upload-links", input);
+}
+
+export async function revokeOnboardingUploadLink(
+  linkId: string,
+): Promise<{ ok: true } | ProvisioningUnavailable> {
+  return call("DELETE", "/api/ops/onboarding/upload-links", { linkId });
+}

@@ -133,7 +133,7 @@ the Ops → ERP call never lands. Work outward from `post()` in
 | Same message, env is set | Secret does not match `weeon-tenants` → ERP returns `401` | Re-copy the secret so both repos hold the identical value; redeploy both |
 | Lookup works but no catalog rows are shown | `data/private-schools.json` missing from the deployed ERP function | Ensure `outputFileTracingIncludes` covers it in `weeon-tenants/next.config.ts` |
 | Local only: every route times out or 404s | Stale `.next` cache, or Turbopack picking a workspace root above the repo | Delete `weeon-tenants/.next`; keep `turbopack.root` pinned in `next.config.ts` |
-| Local only: cannot connect | The ERP is not running | `WEEON_APP_ORIGIN` must point at the running ERP (`http://localhost:3001`) and both servers must be up |
+| Local only: cannot connect | The ERP is not running, or `WEEON_APP_ORIGIN` points at the wrong port | Check which port `weeon-tenants` actually listens on (`netstat -ano \| findstr LISTEN`, then match the PID to the repo) and point `WEEON_APP_ORIGIN` at it, e.g. `http://localhost:3003`. `localhost:3001` is Ops itself in a typical multi-repo workspace, so the call loops back and the wizard shows the generic failure. Restart the Ops dev server after editing `.env.local`. |
 
 Deployment checklist — **both sides must be configured**, a secret in one repo
 alone still yields `401`:
