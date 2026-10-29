@@ -28,6 +28,16 @@ export function sentryEnvironment(): string {
   );
 }
 
+/**
+ * Errors that are real, unavoidable, and never actionable.
+ *
+ * `UnrecognizedActionError` is thrown by Next's own router (error code E715)
+ * when a tab loaded before a deploy posts a Server Action whose id no longer
+ * exists in the new build. Every deploy causes it for every open tab, it fixes
+ * itself on reload, and the app cannot catch it because Next throws it inside
+ * the router's fetch loop. Reporting it only teaches the team to ignore Sentry.
+ */
+const IGNORED_CLIENT_ERRORS = [/UnrecognizedActionError/];
 export function baseSentryOptions(dsn: string | undefined): SentryInitOptions {
   const enabled = Boolean(dsn);
   const isProd = process.env.NODE_ENV === "production";
@@ -38,6 +48,7 @@ export function baseSentryOptions(dsn: string | undefined): SentryInitOptions {
     environment: sentryEnvironment(),
     release: trimEnv(process.env.SENTRY_RELEASE),
     tracesSampleRate: enabled ? (isProd ? 0.1 : 1) : 0,
+    ignoreErrors: IGNORED_CLIENT_ERRORS,
     initialScope: {
       tags: { "weeon.app": SENTRY_APP },
     },
