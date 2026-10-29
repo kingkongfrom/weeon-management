@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Boxes, CreditCard, History, Users } from "lucide-react";
+import { Boxes, CreditCard, Database, History, Users } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export const TENANT_DETAIL_SECTIONS = [
   "modules",
   "people",
   "overview",
+  "data",
   "activity",
 ] as const;
 
@@ -20,6 +21,7 @@ const TABS: {
   { id: "modules", label: "Modules", icon: <Boxes size={16} aria-hidden /> },
   { id: "people", label: "People", icon: <Users size={16} aria-hidden /> },
   { id: "overview", label: "Overview", icon: <CreditCard size={16} aria-hidden /> },
+  { id: "data", label: "Data", icon: <Database size={16} aria-hidden /> },
   { id: "activity", label: "Activity", icon: <History size={16} aria-hidden /> },
 ];
 

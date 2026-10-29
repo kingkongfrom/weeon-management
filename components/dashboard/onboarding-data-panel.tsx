@@ -68,10 +68,12 @@ function schoolMessage(url: string, schoolName: string) {
 
 export function OnboardingDataPanel({
   tenantId,
-  schoolName,
+  tenantName,
+  tenantStatus,
 }: {
   tenantId: string;
-  schoolName: string;
+  tenantName: string;
+  tenantStatus: string;
 }) {
   const [view, setView] = useState<OnboardingUploadView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,6 +82,11 @@ export function OnboardingDataPanel({
   const [label, setLabel] = useState("");
   const [newUrl, setNewUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // A demo tenant is a prospect who has not decided yet: asking for their real
+  // roster at that stage is pressure, not onboarding. The request opens once
+  // the school is `active` (see docs/onboarding-commercial.md).
+  const collecting = tenantStatus === "active";
 
   const refresh = useCallback(async () => {
     const result = await loadOnboardingUploads(tenantId);
@@ -151,14 +158,23 @@ export function OnboardingDataPanel({
               Datos del colegio
             </h2>
             <p className="mt-1 text-[13px] leading-relaxed text-foreground/60">
-              Envíe un enlace al colegio para que suba su archivo de estudiantes,
-              encargados y docentes. {files.length > 0 ? null : "Todavía no ha llegado nada."}
+              {collecting
+                ? "Envíe un enlace al colegio para que suba su archivo de estudiantes, encargados y docentes. La carga al sistema sigue siendo trabajo de Ops."
+                : "Disponible cuando el colegio esté activo. En demo no se piden datos reales: el prospecto todavía no ha decidido."}
             </p>
           </div>
         </div>
       </header>
 
+      {!collecting ? (
+        <p className="mt-4 rounded-xl border border-border bg-surface-muted px-4 py-3 text-[12.5px] leading-relaxed text-foreground/60">
+          Mientras el colegio esté en demo, cargue solo los datos mínimos para la
+          demostración. Al activarse podrá pedir el archivo real desde aquí.
+        </p>
+      ) : null}
+
       {/* Minting form */}
+      {collecting ? (
       <div className="mt-4 flex flex-wrap items-end gap-2">
         <label className="flex min-w-0 flex-1 flex-col gap-1.5">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/55">
@@ -182,6 +198,7 @@ export function OnboardingDataPanel({
           Crear enlace
         </button>
       </div>
+      ) : null}
 
       {/* The token exists in clear only here. */}
       {newUrl ? (
@@ -203,7 +220,7 @@ export function OnboardingDataPanel({
               {copied ? "Copiado" : "Copiar enlace"}
             </button>
             <a
-              href={`mailto:?subject=${encodeURIComponent(`Datos de ${schoolName} para Weeon`)}&body=${encodeURIComponent(schoolMessage(newUrl, schoolName))}`}
+              href={`mailto:?subject=${encodeURIComponent(`Datos de ${tenantName} para Weeon`)}&body=${encodeURIComponent(schoolMessage(newUrl, tenantName))}`}
               className={actionButtonSecondaryClass()}
             >
               <Mail className="h-4 w-4" />

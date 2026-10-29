@@ -9,6 +9,7 @@ import { TenantOverviewPanel } from "@/components/dashboard/tenant-overview-pane
 import { ModuleListCard } from "@/components/dashboard/module-list-card";
 import { OpsAuditCard } from "@/components/dashboard/ops-audit-card";
 import { SchoolActivityPanel } from "@/components/dashboard/school-activity-panel";
+import { OnboardingDataPanel } from "@/components/dashboard/onboarding-data-panel";
 import { TenantAdminLoginCard } from "@/components/dashboard/tenant-admin-login-card";
 import {
   parseTenantDetailSection,
@@ -127,6 +128,13 @@ async function SchoolDetailContent({
           ) : null}
           {section === "overview" ? (
             <TenantOverviewPanel tenant={tenant} demoHint={demoHint} />
+          ) : null}
+          {section === "data" ? (
+            <OnboardingDataPanel
+              tenantId={tenant.id}
+              tenantName={tenant.name}
+              tenantStatus={tenant.status}
+            />
           ) : null}
           {section === "activity" ? (
             <div className="flex flex-col gap-4">
