@@ -744,6 +744,17 @@ a.brand-gradient:hover,
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
+/* Mobile browsers (iOS Safari and WebKit skins such as Petal): native-feeling
+   scrollers don't draw a scrollbar, and inline momentum scrolling must be
+   declared or `overflow-x-auto` becomes a stuck element on older iOS. */
+.no-scrollbar {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 .dashboard-card {
     box-shadow: none;
 }
