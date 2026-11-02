@@ -33,6 +33,9 @@ yarn-error.log*
 .pnpm-debug.log*
 .next-dev*.log
 
+# dev-server output redirected to a file
+/*.out.log
+
 # --- env files ---------------------------------------------------------------
 # NEVER commit real secrets. Only .env.example is committed.
 .env*
