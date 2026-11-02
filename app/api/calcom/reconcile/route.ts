@@ -14,8 +14,10 @@ export const dynamic = "force-dynamic";
  *   GET  /api/calcom/reconcile   (Vercel cron, `Authorization: Bearer $CRON_SECRET`)
  *   POST /api/calcom/reconcile   (same auth; for a manual run)
  *
- * Schedule it every 15 minutes — the same effective freshness as the on-demand
- * cache the landing page used before.
+ * Schedule it once a day: Vercel Hobby only allows daily crons. The meetings
+ * pages self-heal (pull once when nothing is stored), so the daily run is the
+ * backstop for days nobody opens Ops. On Pro, tighten the schedule in
+ * vercel.json if you prefer a pure cron.
  */
 
 function authorised(request: Request): boolean {

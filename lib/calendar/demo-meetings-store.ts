@@ -10,6 +10,33 @@ import { toDemoMeetingRows, type DemoMeetingRow } from "@/lib/calendar/demo-meet
 
 export type UpsertResult = { stored: number; skipped: number; error?: string };
 
+/**
+ * Vercel Hobby only allows daily crons, so freshness comes from the reads:
+ * when a meeting load finds nothing stored (first deploy, a new window, a
+ * missed sync) it pulls Cal.com once, in the request, so Ops never shows an
+ * empty calendar. The daily cron is the backstop while nobody opens Ops.
+ * Failures are silent — whatever is stored stays readable.
+ */
+const selfHealInFlight = globalThis as typeof globalThis & {
+  __opsBookingsHealing?: Promise<void>;
+};
+
+/** Pull Cal.com at most once per window if the stored set came back empty. */
+async function selfHealBookings() {
+  if (selfHealInFlight.__opsBookingsHealing) return selfHealInFlight.__opsBookingsHealing;
+  const healing = (async () => {
+    try {
+      await syncUpcomingBookings();
+    } catch {
+      // Keep serving the empty (but readable) result.
+    } finally {
+      selfHealInFlight.__opsBookingsHealing = undefined;
+    }
+  })();
+  selfHealInFlight.__opsBookingsHealing = healing;
+  await healing;
+}
+
 /** Upsert one or more normalised rows through the SQL helper. */
 export async function upsertDemoMeetings(rows: DemoMeetingRow[]): Promise<UpsertResult> {
   if (rows.length === 0) return { stored: 0, skipped: 0 };
@@ -156,7 +183,14 @@ export async function loadDemoMeetings(options?: {
           : error.message,
       };
     }
-    return { meetings: ((data ?? []) as Row[]).map(toStored) };
+    const rows = (data ?? []) as Row[];
+    if (rows.length > 0) return { meetings: rows.map(toStored) };
+
+    // Nothing stored for this window: pull once from Cal.com, then re-read.
+    await selfHealBookings();
+    const retry = await query;
+    if (retry.error) return { meetings: [] };
+    return { meetings: ((retry.data ?? []) as Row[]).map(toStored) };
   } catch {
     return { meetings: [], reason: "No se pudo leer la base de datos de Ops." };
   }
@@ -164,15 +198,19 @@ export async function loadDemoMeetings(options?: {
 
 /** Upcoming meetings from today, for the landing strip. */
 export async function loadUpcomingDemoMeetings(todayISO: string): Promise<DemoMeetingsResult> {
-  try {
+  const read = () => {
     const client = createPlatformClient();
-    const { data, error } = await client
+    return client
       .from("demo_meetings")
       .select(SELECT)
       .gte("meeting_date", todayISO)
       .in("cal_status", ["accepted", "pending", "awaiting_host"])
       .order("starts_at", { ascending: true })
       .limit(50);
+  };
+
+  try {
+    const { data, error } = await read();
 
     if (error) {
       return {
@@ -182,7 +220,14 @@ export async function loadUpcomingDemoMeetings(todayISO: string): Promise<DemoMe
           : error.message,
       };
     }
-    return { meetings: ((data ?? []) as Row[]).map(toStored) };
+    const rows = (data ?? []) as Row[];
+    if (rows.length > 0) return { meetings: rows.map(toStored) };
+
+    // Empty strip: one Cal.com pull, then re-read (see selfHealBookings).
+    await selfHealBookings();
+    const retry = await read();
+    if (retry.error) return { meetings: [] };
+    return { meetings: ((retry.data ?? []) as Row[]).map(toStored) };
   } catch {
     return { meetings: [], reason: "No se pudo leer la base de datos de Ops." };
   }
