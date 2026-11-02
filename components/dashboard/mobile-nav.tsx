@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import {
   Activity,
   Building2,
@@ -207,18 +208,27 @@ export function MobileNav({
         </ul>
       </nav>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t.nav.menu}>
-          <button
-            type="button"
-            aria-label={t.nav.closeMenu}
-            onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-2xl border-t border-border bg-surface shadow-elevated"
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-          >
+      <AnimatePresence>
+        {open ? (
+          <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t.nav.menu}>
+            <motion.button
+              type="button"
+              aria-label={t.nav.closeMenu}
+              onClick={() => setOpen(false)}
+              className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.24, ease: "easeOut" }}
+            />
+            <motion.div
+              className="absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-2xl border-t border-border bg-surface shadow-elevated"
+              style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 380, damping: 36, mass: 0.9 }}
+            >
             <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
               <p className="text-base font-bold text-foreground">{t.nav.menu}</p>
               <button
@@ -278,9 +288,10 @@ export function MobileNav({
                 </div>
               ))}
             </div>
+            </motion.div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }
