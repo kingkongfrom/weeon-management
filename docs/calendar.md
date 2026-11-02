@@ -127,9 +127,15 @@ Cal.com → Settings → Developer → Webhooks:
 ### 2. Reconcile — `GET|POST /api/calcom/reconcile`
 
 Webhooks are lossy (endpoint down, deploy in flight). This job re-reads
-`GET /v2/bookings?status=upcoming` and upserts, scheduled by
-`vercel.json` every 15 minutes. Auth: `Authorization: Bearer $CRON_SECRET`
-(Vercel sends it automatically for crons).
+`GET /v2/bookings?status=upcoming` and upserts. Auth:
+`Authorization: Bearer $CRON_SECRET` (Vercel sends it automatically for crons).
+
+`vercel.json` schedules it **once a day**, because Vercel Hobby rejects any
+faster cron ("limited to daily cron jobs"). Freshness comes from the reads
+instead: the Meetings page and the landing strip pull Cal.com once whenever
+their window comes back empty (`selfHealBookings` in
+`lib/calendar/demo-meetings-store.ts`). On Pro, tighten the schedule in
+`vercel.json` if you want a pure 15-minute cron.
 
 ### 3. Storage — `public.demo_meetings` (weeon-tenants)
 
