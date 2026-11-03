@@ -87,7 +87,7 @@ export type AddSchoolAdministratorInput = {
 };
 
 export type AddSchoolAdministratorResult =
-  | { ok: true; userId: string; email: string }
+  | { ok: true; userId: string; email: string; emailSent: boolean; emailError: string | null }
   | ProvisioningUnavailable;
 
 export async function addSchoolAdministrator(

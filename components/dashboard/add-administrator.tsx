@@ -10,7 +10,7 @@ export function AddAdministrator({ tenantId }: { tenantId: string }) {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState<{ email: string; mailFailed: boolean } | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit() {
@@ -26,7 +26,7 @@ export function AddAdministrator({ tenantId }: { tenantId: string }) {
         setError(result.status === "error" ? result.error : "No se pudo agregar.");
         return;
       }
-      setDone(result.email);
+      setDone({ email: result.email, mailFailed: !result.emailSent });
       setFirstName("");
       setLastName("");
       setEmail("");
@@ -36,9 +36,16 @@ export function AddAdministrator({ tenantId }: { tenantId: string }) {
 
   if (done) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-success">
+      <span
+        className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+          done.mailFailed ? "text-warning" : "text-success"
+        }`}
+        title={done.mailFailed ? "El correo de bienvenida no salió. Comparta el enlace manualmente." : undefined}
+      >
         <Check size={13} />
-        Administrador agregado ({done})
+        {done.mailFailed
+          ? `Administrador creado (${done.email}) · correo no enviado`
+          : `Administrador agregado (${done.email}) · bienvenida enviada`}
       </span>
     );
   }

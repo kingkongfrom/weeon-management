@@ -78,7 +78,7 @@ export async function createDemoTenantAction(
 export type AddAdministratorState =
   | { status: "idle" }
   | { status: "error"; error: string }
-  | { status: "ok"; email: string };
+  | { status: "ok"; email: string; emailSent: boolean; emailError: string | null };
 
 /** Ops-only: add an administrator to an existing school. */
 export async function addAdministratorAction(input: {
@@ -113,5 +113,10 @@ export async function addAdministratorAction(input: {
     afterValue: { email: result.email },
   });
 
-  return { status: "ok", email: result.email };
+  return {
+    status: "ok",
+    email: result.email,
+    emailSent: result.emailSent,
+    emailError: result.emailError,
+  };
 }
