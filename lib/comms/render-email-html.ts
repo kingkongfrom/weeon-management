@@ -2,14 +2,8 @@ import "server-only";
 
 import type { RichTextDoc, RichTextMark, RichTextNode } from "@/lib/comms/model";
 import { docToPlainText } from "@/lib/comms/model";
+import { escapeHtml } from "@/lib/email/letter";
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 function alignAttr(attrs?: Record<string, unknown>): string {
   const align = attrs?.textAlign;
