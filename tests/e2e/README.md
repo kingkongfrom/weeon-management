@@ -29,3 +29,7 @@ service-role client. Run it only against a **non-production** stack.
 Set `E2E_BASE_URL` to the Ops **Preview** deployment URL. Keep
 `E2E_OPS_CREATE_SCHOOL` unset unless you accept platform writes on the linked DB.
 Runbook: [`docs/e2e-preview-stack.md`](../../../docs/e2e-preview-stack.md).
+
+## Deploy
+
+Previews are produced by `.github/workflows/deploy.yml`; the single deploy story (token, projects, commands) is workspace [docs/index.md](../../../docs/index.md) § 4.

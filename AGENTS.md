@@ -20,6 +20,7 @@ shared Supabase backend, but at the **platform scope** (never tenant-scoped RLS)
 
 | Doc | Read when |
 | --- | --------- |
+| **Deploy** (single canonical doc) | `docs/deploy.md` |
 | `docs/ecosystem.md` | **How this repo relates to marketing, admin, mobile, and the shared DB** — older docs may call this surface `weeon-platform-admin` (now `weeon-management`) |
 | `docs/repositories.md` | **The four repos and who owns what** — before touching architecture, never duplicate the marketing/school ERP/mobile here |
 | `docs/auth.md` | **Ops staff vs school admin** — Security administrators, branded invite, password reset. Never use `profiles` for Weeon Ops access |
